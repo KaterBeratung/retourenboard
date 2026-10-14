@@ -4,83 +4,97 @@
 
 **Ein Ort für alle Rückläufer.**
 
-Produkte verwalten, Retouren erfassen und im Team zusammenarbeiten – übersichtlich, modern und selbst gehostet.
+Produkte verwalten, Retouren erfassen und im Team zusammenarbeiten –
+modern, übersichtlich und selbst gehostet.
 
 </div>
 
 <p align="center">
-  <img src="readme_assets/overview-hero.png" alt="Übersicht von retourenboard" width="100%">
+  <img src="readme_assets/overview-desktop-de.png" alt="retourenboard Übersicht" width="100%">
 </p>
 
-## Warum retourenboard?
+## Überblick
 
-retourenboard. bündelt **Produkte**, **Retouren**, **Scan-Erfassung**, **Team-Kommunikation** und **Stammdaten** in einer gemeinsamen Oberfläche. Die Anwendung ist für den **Selbsthosting-Betrieb** gedacht und eignet sich für interne Retouren- und Prüfprozesse.
+**retourenboard.** ist eine Webanwendung für die strukturierte Verwaltung von **Produkten**, **Retouren**, **Scan-Erfassung** und **Teamkommunikation**.
+Die Oberfläche ist auf einen klaren Workflow ausgelegt: vom Eingang eines Rückläufers über Prüfung und Bearbeitung bis zum Abschluss.
 
-### Highlights
+### Das bietet retourenboard.
 
-- **Zentrale Übersicht** über offene, laufende und abgeschlossene Vorgänge
-- **Produkte & Retouren** in einer gemeinsamen, klaren Datenstruktur
-- **Scan-Erfassung** für schnelle Aufnahme von Geräten und Seriennummern
-- **Teamchat & Zusammenarbeit** direkt in der Anwendung
-- **Stammdaten & Regeln** für einheitliche Prozesse
+- **Zentrale Übersicht** mit Kennzahlen, offenen Aufgaben und aktuellen Vorgängen
+- **Retourenverwaltung** mit Status, Gründen, Zuständigkeiten und Detailansicht
+- **Produktbestand** mit Kategorien, Lieferanten, Preisen und Such-/Filterfunktionen
+- **Scan-Erfassung** für eine schnelle Aufnahme neuer Geräte und Seriennummern
+- **Teamchat** direkt in der Anwendung
+- **Stammdaten & Administration** für einheitliche Prozesse
 - **CSV-Import / CSV-Export** für Datenaustausch und Massenpflege
-- **Selbst hostbar** mit Docker Compose oder klassisch auf Linux
+- **Selbsthosting** per Docker Compose oder klassischer Linux-Installation
 
-> **Hinweis:** Die folgenden Bilder sind anonymisierte Demo-Ansichten. Namen und sensible Werte wurden bewusst ersetzt.
-
----
-
-## Funktionsübersicht
-
-| Bereich | Beschreibung |
-| --- | --- |
-| Übersicht | Kennzahlen, aktuelle Rückläufer und schneller Einstieg in den Arbeitsalltag |
-| Retouren | Erfassung, Filterung und Bearbeitung von Rückläufern mit Status und Gründen |
-| Produkte | Gemeinsamer Produktbestand mit Kategorien, Lieferanten und Preisen |
-| Scan-Erfassung | Aufnahme neuer Geräte per Seriennummer, Kamera, Foto oder PDF |
-| Chat | Teamkommunikation, Gruppen und Dateianhänge direkt im System |
-| Stammdaten | Pflege von Lieferanten, Herstellern, Kategorien, Gründen, Zuständen und Statuswerten |
-| Administration | Benutzerkonten, Sicherungen, Benachrichtigungen und weitere Verwaltung |
+> **Hinweis:** Die folgenden Screenshots sind Demo-Ansichten und können in dieser README direkt verwendet werden.
 
 ---
 
 ## Screenshots
 
-### Übersicht
+### Dashboard / Übersicht
+
+<table>
+  <tr>
+    <td width="80%">
+      <img src="readme_assets/overview-desktop-de.png" alt="Desktop Übersicht">
+    </td>
+    <td width="20%" align="center" valign="top">
+      <img src="readme_assets/overview-mobile-de.png" alt="Mobile Übersicht" width="100%">
+    </td>
+  </tr>
+</table>
+
+Die Übersicht zeigt offene Rückläufer, laufende Prüfungen, aktive Produkte und die nächsten konkreten Arbeitsschritte auf einen Blick.
+
+### Retourenverwaltung
 
 <p>
-  <img src="readme_assets/overview-hero.png" alt="Übersicht" width="100%">
+  <img src="readme_assets/returns-list.png" alt="Retourenliste" width="100%">
 </p>
 
-### Retouren
+Retouren lassen sich durchsuchen, filtern und nach Bearbeitungsstatus organisieren. Wichtige Informationen wie Seriennummer, Retourengrund, Zuständigkeit und nächster Schritt sind direkt sichtbar.
+
+### Retourendetails
 
 <p>
-  <img src="readme_assets/returns-top.png" alt="Retourenbereich" width="100%">
+  <img src="readme_assets/returns-detail.png" alt="Retourendetails" width="100%">
 </p>
+
+Die Detailansicht bündelt alle Informationen zu einer Retoure – inklusive Gerätedaten, Zuordnung, Prüfung, Bearbeitung und Aktionen wie Bearbeiten, Status ändern oder Etikett drucken.
 
 ### Produkte
 
 <p>
-  <img src="readme_assets/products.png" alt="Produktübersicht" width="100%">
+  <img src="readme_assets/products.png" alt="Produkte" width="100%">
 </p>
 
-### Scan-Erfassung
+Die Produktverwaltung hält den gemeinsamen Bestand an einem Ort zusammen – mit Kategorie, Lieferant, Preis und Status.
+
+### Teamchat
 
 <p>
-  <img src="readme_assets/scan.png" alt="Scan-Erfassung" width="100%">
+  <img src="readme_assets/chat.png" alt="Chat" width="100%">
 </p>
 
-### Chat
+Direkte Kommunikation im System hilft, Rückfragen und Abstimmungen ohne Medienbruch festzuhalten.
 
-<p>
-  <img src="readme_assets/chat.png" alt="Teamchat" width="100%">
-</p>
+---
 
-### Stammdaten
+## Funktionsbereiche
 
-<p>
-  <img src="readme_assets/masterdata.png" alt="Stammdaten" width="100%">
-</p>
+| Bereich | Beschreibung |
+| --- | --- |
+| Übersicht | Kennzahlen, Aufgaben und aktuelle Rückläufer |
+| Retouren | Erfassung, Suche, Filter, Zuständigkeiten und Status |
+| Produktbestand | Gemeinsame Verwaltung aller Produkte |
+| Scan-Erfassung | Schnelles Anlegen neuer Rückläufer |
+| Chat | Teamkommunikation und Abstimmung |
+| Administration | Verwaltung von Konten, Regeln und Grundeinstellungen |
+| CSV | Import und Export strukturierter Daten |
 
 ---
 
@@ -101,22 +115,20 @@ http://SERVER-IP:3000
 ### Nützliche Befehle
 
 ```bash
-# Container starten / aktualisieren
+# Starten / aktualisieren
 docker compose up -d --build
 
 # Status prüfen
 docker compose ps
 
-# Logs ansehen
+# Logs verfolgen
 docker compose logs -f retourenboard
 
-# Container stoppen
+# Stoppen
 docker compose down
 ```
 
-### Datenhaltung
-
-Die Anwendung sollte mit **persistenten Daten** betrieben werden, damit Datenbank, Uploads und Sicherungen erhalten bleiben. Die bereitgestellte `compose.yaml` verwendet dafür ein dauerhaftes Volume.
+Die mitgelieferte `compose.yaml` ist für einen einfachen Start gedacht. Für produktive Umgebungen empfiehlt sich zusätzlich ein Reverse Proxy mit HTTPS und regelmäßigen Backups.
 
 ---
 
@@ -124,46 +136,26 @@ Die Anwendung sollte mit **persistenten Daten** betrieben werden, damit Datenban
 
 1. Anwendung starten
 2. Im Browser öffnen
-3. Erstes Administratorkonto anlegen
-4. Stammdaten pflegen
-5. Produkte anlegen oder importieren
+3. Administratorkonto anlegen
+4. Stammdaten und Benutzer einrichten
+5. Produkte importieren oder anlegen
 6. Retouren erfassen und im Team bearbeiten
-
----
-
-## Typische Einsatzbereiche
-
-- Interne Retouren- und Prüfprozesse
-- Verwaltung von Rückläufern im Lager oder Service
-- Dokumentation von Zuständen, Gründen und Lösungen
-- Gemeinsame Bearbeitung durch mehrere Mitarbeitende
-- Strukturierte Geräteerfassung mit Seriennummern
 
 ---
 
 ## Technische Basis
 
 - **Backend:** Node.js
-- **Frontend:** Web-Oberfläche
+- **Frontend:** Weboberfläche
 - **Datenbank:** SQLite
-- **Betrieb:** Selbsthosted, z. B. per Docker Compose oder Linux-Installation
+- **Betrieb:** Self-Hosted
 
 ---
 
-## Hinweise
+## Dateien in diesem Paket
 
-- Diese README zeigt absichtlich **keine feste Versionsnummer** im Bildmaterial.
-- Die Screenshots wurden für die Dokumentation anonymisiert.
-- Für produktive Nutzung empfiehlt sich ein Reverse Proxy mit HTTPS.
+- `README.md`
+- `compose.yaml`
+- `readme_assets/` mit allen eingebundenen Screenshots
 
----
-
-## Support / Projekt
-
-Wenn du retourenboard. intern oder öffentlich bereitstellst, empfiehlt sich zusätzlich:
-
-- regelmäßige Backups
-- abgesicherter Zugriff
-- HTTPS per Reverse Proxy
-- klare Benutzer- und Rechteverwaltung
-
+Wenn du diese README in ein Repository übernimmst, sollten die Bilder im Ordner `readme_assets/` mit übernommen werden, damit die Vorschau korrekt angezeigt wird.
