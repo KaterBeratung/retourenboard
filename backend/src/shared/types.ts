@@ -1,0 +1,10 @@
+export type Role='admin'|'member'|'viewer';
+export type Capabilities={edit:boolean;delete:boolean;import:boolean;export:boolean;admin:boolean};
+export type Actor={id:number|null;name:string;source:'user'|'system';operationId?:string};
+export type Clock={now():number};
+export type Page<T>={items:T[];total:number;page:number;pageSize:number};
+export type ReturnRules={requiredFields:('serialNumber'|'orderNumber'|'supplier'|'notes')[];deadlineDays:number;numberPrefix:string;timezone:string};
+export type BackupSettings={enabled:boolean;frequency:'daily'|'weekly';time:string;weekday:number;timezone:string;retain:number};
+export type AccountPreferences={theme:'system'|'light'|'dark';reduceMotion:boolean};
+export type NotificationSettings={inApp:boolean;newReturn:boolean;overdue:boolean;backupError:boolean;emailEnabled:boolean;smtpHost:string;smtpPort:number;smtpMode:'tls'|'starttls';smtpUser:string;from:string;recipients:string[];eventTypes:('newReturn'|'overdue'|'backupError')[]};
+export type PreferenceSections={rules:ReturnRules;backups:BackupSettings;notifications:NotificationSettings};
