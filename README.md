@@ -4,7 +4,7 @@
 
 retourenboard. ist eine Webanwendung zum Selbsthosten für Produkte, Retouren und die Zusammenarbeit im Team. Alle Konten arbeiten mit demselben Bestand; welche Aktionen erlaubt sind, entscheidet die Kontoverwaltung. Bestandsdaten, Chats und Dateianhänge sind ausschließlich nach Anmeldung zugänglich.
 
-**Projektstand: 3.2.56** · [Neueste veröffentlichte Version herunterladen](https://github.com/KaterBeratung/retourenboard/releases/latest) · [Alle Releases](https://github.com/KaterBeratung/retourenboard/releases)
+**Projektstand: 3.2.55** · [Neueste veröffentlichte Version herunterladen](https://github.com/KaterBeratung/retourenboard/releases/latest) · [Alle Releases](https://github.com/KaterBeratung/retourenboard/releases)
 
 **Produktbilder:** Zehn Aufnahmen der tatsächlichen Oberfläche mit synthetischen Demodaten liegen separat unter [`demo/`](demo/README.md): Übersicht in Hell/Dunkel und DE/EN, Retourenliste, Detailpanel, Produktkatalog, Teamchat, mobile Ansichten und Etikettenvorschau. Die [lokale Galerie](demo/index.html) zeigt alle Motive; Originale, Bildgrößen und Prüfsummen sind dort ebenfalls enthalten.
 
