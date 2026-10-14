@@ -1,25 +1,12 @@
-<img width="2172" height="724" alt="2026, 12_05_16" src="https://github.com/user-attachments/assets/510dea99-48e7-4297-a704-af789a9a6c20" />
-
-
 # retourenboard.
 
 **Ein Ort für alle Rückläufer.**
 
 retourenboard. ist eine Webanwendung zum Selbsthosten für Produkte, Retouren und die Zusammenarbeit im Team. Alle Konten arbeiten mit demselben Bestand; welche Aktionen erlaubt sind, entscheidet die Kontoverwaltung. Bestandsdaten, Chats und Dateianhänge sind ausschließlich nach Anmeldung zugänglich.
 
-**Projektstand: 3.2.55** · [Neueste veröffentlichte Version herunterladen](https://github.com/KaterBeratung/retourenboard/releases/latest) · [Alle Releases](https://github.com/KaterBeratung/retourenboard/releases)
+**Projektstand: 3.2.56** · [Neueste veröffentlichte Version herunterladen](https://github.com/KaterBeratung/retourenboard/releases/latest) · [Alle Releases](https://github.com/KaterBeratung/retourenboard/releases)
 
-### Schnellstart mit Docker Compose (Version 3.2.55)
-
-Dieses Release enthält `Dockerfile`, `compose.yaml` und einen fertigen `dist/`-Build. Nach dem Entpacken im Projektordner:
-
-```bash
-docker compose up -d --build
-docker compose ps
-docker compose logs -f retourenboard
-```
-
-**Öffnen:** http://127.0.0.1:3000 auf dem Docker-Host. Beim ersten Aufruf wird der Administrator im Browser eingerichtet. Für LAN-Zugriff `.env.compose.example` nach `.env` kopieren, `RB_BIND_IP=0.0.0.0` setzen und `docker compose up -d` erneut ausführen. Die Daten bleiben im Docker-Volume `retourenboard-data` erhalten. [Docker-Details, HTTPS und Backups](#docker).
+**Produktbilder:** Zehn Aufnahmen der tatsächlichen Oberfläche mit synthetischen Demodaten liegen separat unter [`demo/`](demo/README.md): Übersicht in Hell/Dunkel und DE/EN, Retourenliste, Detailpanel, Produktkatalog, Teamchat, mobile Ansichten und Etikettenvorschau. Die [lokale Galerie](demo/index.html) zeigt alle Motive; Originale, Bildgrößen und Prüfsummen sind dort ebenfalls enthalten.
 
 Die Oberfläche verwendet abgestimmte Karten, Suchfelder, Statusanzeigen und Formularabstände. Farbige Workflow-Icons kennzeichnen Eingang, Prüfung, Bearbeitung und Abschluss; Kennzahlenkarten bleiben auch bei mehrzeiligen Texten gleich hoch. Übersicht, Konto, Administration, Chat und Login sind für Desktop und mobile Ansichten in beiden Sprachen und Farbschemata gestaltet.
 
@@ -521,110 +508,63 @@ Die fertigen Dateien unter `website/dist/` können separat statisch gehostet wer
 
 ## Docker
 
-Die Release-Version **3.2.55** enthält bereits den fertigen `dist/`-Build und ein `Dockerfile` auf Basis von Node.js 24. Die mitgelieferte **`compose.yaml` baut das Image lokal** aus diesem Paket und benötigt weder `npm install` noch ein Registry-Login. Verzeichnisstruktur beim Start:
+Das fertige Image ist in der GitHub Container Registry verfügbar: **`ghcr.io/katerberatung/retourenboard:latest`** für **Linux amd64 und arm64**. `latest` folgt dem veröffentlichten Release; es ist unabhängig vom lokalen Projektstand. Ein eigener Build ist zum Start nicht erforderlich.
 
-```text
-retourenboard/
-├── README.md
-├── compose.yaml
-├── Dockerfile
-├── .dockerignore
-├── .env.compose.example
-├── dist/
-├── scripts/
-└── package.json
+### Mit Docker Compose starten
+
+Die folgende Konfiguration als `compose.yaml` speichern:
+
+```yaml
+services:
+  retourenboard:
+    image: ghcr.io/katerberatung/retourenboard:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      HOST: "0.0.0.0"
+      PORT: "3000"
+      DB_PATH: "/data/retouren.sqlite"
+      NODE_ENV: "development"
+      SECURE_COOKIES: "false"
+    volumes:
+      - retourenboard-data:/data
+volumes:
+  retourenboard-data:
 ```
 
-### Installation mit Docker Compose
-
-Voraussetzungen: Docker Engine mit Docker-Compose-Plugin (`docker compose`), ein freier TCP-Port 3000 und der **vollständig entpackte** Release-Ordner. Im Ordner mit der `compose.yaml`:
-
-```bash
-# Optional: nur wenn du Port, Netzwerkschnittstelle oder HTTPS einstellen möchtest.
-cp .env.compose.example .env
-
-# Container aus dem enthaltenen Release bauen und starten.
-docker compose up -d --build
-
-# Status und Protokolle ansehen.
-docker compose ps
-docker compose logs --tail=100 -f retourenboard
+```sh
+docker compose up -d
+docker compose logs -f retourenboard
 ```
 
-Ohne `.env` ist die Weboberfläche **nur auf dem Docker-Host** unter **http://127.0.0.1:3000** erreichbar. Beim ersten Aufruf wird der erste Administrator angelegt. Die Container-Gesundheitsprüfung nutzt `GET /health` auf dem internen Port 3000. Das Image läuft als nichtprivilegierter Benutzer `node`.
+Auf dem Dockerhost **http://127.0.0.1:3000** öffnen und den ersten Administrator anlegen. Die obige Portfreigabe ist auf localhost des Hosts beschränkt. Für einen direkten LAN-Zugang beispielsweise `"3000:3000"` verwenden und die Firewall passend einstellen.
 
-Die Compose-Datei nutzt das benannte Volume **`retourenboard-data`** unter `/data`. Dort liegen `retouren.sqlite` einschließlich SQLite-WAL-Dateien sowie `attachments/`, `chat-attachments/`, `backups/`, `secrets/` und weitere zur Laufzeit angelegte Daten. Es ist kein separater Datenbankcontainer notwendig.
+Für öffentlichen Betrieb einen HTTPS-Reverse-Proxy verwenden. In `environment` zusätzlich `PUBLIC_ORIGIN: "https://retouren.example.com"`, `NODE_ENV: "production"`, `SECURE_COOKIES: "true"` und die tatsächlichen Proxy-IP-Adressen in `TRUSTED_PROXIES` setzen. Nach einer Konfigurationsänderung den Container mit `docker compose up -d` neu erstellen. Ein separater Proxycontainer benötigt einen passenden Netzwerkzugang zum Anwendungscontainer.
 
-### LAN-Zugriff und Port ändern
+### Ohne Compose
 
-Im Projektordner die Datei `.env` aus `.env.compose.example` erzeugen und beispielsweise Folgendes eintragen:
-
-```dotenv
-RB_BIND_IP=0.0.0.0
-RB_PORT=3000
-RB_NODE_ENV=development
-RB_SECURE_COOKIES=false
+```sh
+docker pull ghcr.io/katerberatung/retourenboard:latest
+docker volume create retourenboard-data
+docker run -d --name retourenboard --restart unless-stopped \
+  -p 127.0.0.1:3000:3000 \
+  -e HOST=0.0.0.0 -e DB_PATH=/data/retouren.sqlite \
+  -v retourenboard-data:/data ghcr.io/katerberatung/retourenboard:latest
 ```
 
-Danach `docker compose up -d` ausführen und **http://SERVER-IP:3000** im LAN öffnen. `RB_PORT=3001` würde **nur den Host-Port** ändern (`http://SERVER-IP:3001`); der interne Container-Port muss **3000** bleiben. Diesen internen Port auch nicht über die Admin-Netzwerkeinstellungen der App ändern, da die Compose-Portzuordnung und der Healthcheck davon ausgehen. Bei LAN-Freigabe Firewall und Netzwerksegmentierung beachten. HTTP überträgt Anmeldedaten unverschlüsselt; es ist nur für ein vertrauenswürdiges LAN geeignet.
+### Container aktualisieren
 
-### HTTPS und Reverse Proxy
+Vorher eine konsistente Sicherung erstellen, anschließend:
 
-Für externen Zugriff **HTTPS** und einen Reverse Proxy (z. B. Nginx Proxy Manager, Traefik oder Pangolin) verwenden. Beispiel für `.env`:
-
-```dotenv
-RB_BIND_IP=127.0.0.1
-RB_PORT=3000
-RB_NODE_ENV=production
-RB_SECURE_COOKIES=true
-RB_PUBLIC_ORIGIN=https://retouren.example.com
-RB_TRUSTED_PROXIES=
-```
-
-`RB_PUBLIC_ORIGIN` ist die echte öffentliche HTTPS-Adresse **ohne Pfad**. `RB_TRUSTED_PROXIES` enthält ausschließlich die IP-Adresse(n) tatsächlich eingesetzter Reverse-Proxys, wenn deren `X-Forwarded-For`-Header ausgewertet werden sollen. Ohne vertrauenswürdigen Proxy ist der Wert leer. Für einen Proxy in einem **anderen Docker-Container** ist `127.0.0.1` des Proxycontainers nicht der Anwendungscontainer: dort einen gemeinsamen Docker-Netzwerkzugang mit dem Dienst `retourenboard:3000` herstellen oder den Host-Port bewusst für diesen Proxy freigeben. **Keinen ungeschützten Port ins Internet weiterleiten.**
-
-Die Konfiguration ist auf einen bereits eingerichteten HTTPS-Reverse-Proxy ausgelegt; sie stellt selbst kein TLS-Zertifikat aus. Weitere Informationen zu Weiterleitungsheadern stehen unter [Domain, Reverse Proxy und HTTPS](#domain-reverse-proxy-und-https). Nach Änderungen:
-
-```bash
+```sh
+docker compose pull
 docker compose up -d
 ```
 
-### Updates
+Das Volume `retourenboard-data` enthält Datenbank, Anhänge, Sicherungen und Schlüssel und wird wieder eingebunden. **`docker compose down -v` entfernt dieses Volume und seine Daten.** Für einen festen Versionsstand statt `latest` ein veröffentlichtes Versionstag verwenden. In-App-Paketupdates benötigen den systemd-Updaterdienst und ersetzen keine Dockercontainer.
 
-Um **diese Paketversion** neu zu bauen:
-
-```bash
-docker compose up -d --build
-```
-
-Für eine **neuere Version** das neue vollständige Release-Paket in einen neuen Ordner entpacken, dort die Compose-Konfiguration übernehmen und `docker compose up -d --build` ausführen. Der feste Docker-Volume-Name `retourenboard-data` sorgt dafür, dass die bestehenden Anwendungsdaten erhalten bleiben, selbst wenn sich der Paketordner ändert. Vor einem Versionswechsel eine vollständige Sicherung erstellen und nicht zwei Retourenboard-Instanzen gleichzeitig mit demselben Volume starten. Die Image-Version in `compose.yaml` (`retourenboard:3.2.55`) sollte beim Versionswechsel ebenfalls angepasst werden.
-
-Alternativ gibt es das veröffentlichte Registry-Image `ghcr.io/katerberatung/retourenboard:latest` (amd64 / arm64). Dafür in `compose.yaml` den `build:`-Abschnitt entfernen und `image:` auf das gewünschte Registry-Tag setzen; danach `docker compose pull && docker compose up -d`. `latest` kann eine andere Version als dieses Paket enthalten. **In-App-Updates mit systemd-Updater sind kein Ersatz für ein Docker-Image-Update.**
-
-### Sicherungen
-
-Im Dashboard unter **Adminbereich → Sicherungen** konsistente TAR-Backups erstellen und herunterladen. Zusätzlich sollte regelmäßig eine *vollständige Offline-Kopie des Volumes* angelegt werden, weil z. B. `secrets/mfa.key` **nicht** Teil eines herunterladbaren App-Backups ist. Container vorher stoppen, um eine konsistente SQLite-Kopie zu erhalten:
-
-```bash
-docker compose stop retourenboard
-mkdir -p ./retourenboard-sicherung
-docker compose cp retourenboard:/data/. ./retourenboard-sicherung/
-docker compose start retourenboard
-```
-
-Die Offline-Kopie muss sicher und außerhalb des Dockerhosts aufbewahrt werden; sie enthält sensible Geschäfts- und Zugangsdaten. Prüfe nach der Sicherung, dass der Container wieder läuft. Dateien im Volume nie gleichzeitig über mehrere Instanzen beschreiben lassen. **`docker compose down -v` oder `docker volume rm retourenboard-data` löschen die gespeicherten Daten**. Dagegen entfernt `docker compose down` alleine das Volume nicht.
-
-### Fehlerbehebung
-
-| Problem | Prüfung |
-| --- | --- |
-| Seite nicht erreichbar | `docker compose ps`, `docker compose logs --tail=100 retourenboard`, Host-Port, Firewall und `RB_BIND_IP` prüfen |
-| Container `unhealthy` | `docker compose logs` und interne Port-Einstellung (3000) kontrollieren |
-| Port 3000 belegt | In `.env` z. B. `RB_PORT=3001` setzen, anschließend `docker compose up -d` |
-| Login/Origin hinter HTTPS fehlerhaft | `RB_PUBLIC_ORIGIN`, `RB_SECURE_COOKIES`, tatsächliche HTTPS-Adresse und vertrauenswürdige Proxys prüfen |
-| Daten nach Neuinstallation fehlen | Prüfen, ob wirklich dasselbe Docker-Volume `retourenboard-data` verwendet wird; keine leere zweite Instanz initialisieren |
-
-Weitere Hinweise stehen unter [Fehlerbehebung](#fehlerbehebung).
+Wer selbst bauen möchte, kann weiterhin `npm ci`, `npm run build` und `docker build -t retourenboard .` im lokalen Quellprojekt ausführen.
 
 ## Projektstruktur und Releasepakete
 
@@ -633,7 +573,6 @@ Weitere Hinweise stehen unter [Fehlerbehebung](#fehlerbehebung).
 | `backend/src/` | Maßgebliche Serverquellen und gemeinsame Datenlogik |
 | `frontend/src/`, `frontend/assets/` | Browserquellen, HTML und Stylesheets |
 | `dist/` | Kompilierte Anwendung und gebündelte Serverbibliotheken |
-| `compose.yaml`, `Dockerfile`, `.env.compose.example`, `.dockerignore` | Docker-Compose-Installation und lokale Image-Build-Konfiguration |
 | `website/` | Separate Produktwebseite und ihre Dokumentation |
 | `previews/design/` | Zusatzdateien für die Demo |
 | `scripts/`, `deploy/` | Build, Installation, Start, Recovery und systemd-Vorlagen |
