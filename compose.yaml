@@ -1,0 +1,44 @@
+# Retourenboard 3.2.55 – lokaler Build aus dem Release-Paket.
+# Standardmäßig nur auf dem Docker-Host erreichbar (127.0.0.1:3000).
+# Für LAN-Zugriff: RB_BIND_IP=0.0.0.0 in .env setzen und Firewall prüfen.
+name: retourenboard
+
+services:
+  retourenboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: retourenboard:3.2.55
+    restart: unless-stopped
+    init: true
+    ports:
+      - "${RB_BIND_IP:-127.0.0.1}:${RB_PORT:-3000}:3000"
+    environment:
+      HOST: "0.0.0.0"
+      PORT: "3000"
+      DB_PATH: "/data/retouren.sqlite"
+      NODE_ENV: "${RB_NODE_ENV:-development}"
+      SECURE_COOKIES: "${RB_SECURE_COOKIES:-false}"
+      PUBLIC_ORIGIN: "${RB_PUBLIC_ORIGIN:-}"
+      TRUSTED_PROXIES: "${RB_TRUSTED_PROXIES:-}"
+    volumes:
+      - retourenboard-data:/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r => { if (!r.ok) process.exit(1); }).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    stop_grace_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  retourenboard-data:
+    # Der Volume-Name bleibt auch beim Wechsel in ein neues Release-Verzeichnis gleich.
+    name: retourenboard-data
