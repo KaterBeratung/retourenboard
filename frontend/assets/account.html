@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#172322">
+  <title data-i18n="Mein Konto · retourenboard.">Mein Konto · retourenboard.</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <script src="/theme.js"></script>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/theme.css">
+  <script type="module" src="/bootstrap.js"></script>
+  <link rel="stylesheet" href="/design.css">
+  <link rel="stylesheet" href="/settings.css">
+  <link rel="stylesheet" href="/switches.css">
+  <link rel="stylesheet" href="/chat.css">
+  <link rel="stylesheet" href="/workspace-tools.css">
+  <link rel="stylesheet" href="/workflow.css">
+    <link rel="stylesheet" href="/workspace-refinements.css">
+    <link rel="stylesheet" href="/workspace-insights.css">
+    <link rel="stylesheet" href="/scan-labels.css">
+    <link rel="stylesheet" href="/return-labels.css">
+    <link rel="stylesheet" href="/return-drafts.css">
+    <link rel="stylesheet" href="/workspace-personalization.css">
+  <link rel="stylesheet" href="/scan-intake.css">
+  <link rel="stylesheet" href="/inventory-polish.css">
+  <link rel="stylesheet" href="/motion.css">
+</head>
+<body data-ui="board" class="auth-screen" data-page="account">
+  <div class="language-switch language-switch-auth" role="group" aria-label="Sprache auswählen" data-language-switch data-language="de"><svg class="language-switch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18m-9-9a17 17 0 0 1 0 18 17 17 0 0 1 0-18"/></svg><div class="language-options"><button type="button" data-language-button="de" lang="de" aria-label="Deutsch" title="Deutsch" aria-pressed="true">DE</button><button type="button" data-language-button="en" lang="en" aria-label="English" title="English" aria-pressed="false">EN</button></div></div>
+  <button class="btn secondary theme-switch theme-switch-auth" data-theme-toggle aria-label="Farbschema wechseln" data-rb-i18n-aria-label="%5B%22Farbschema%20wechseln%22%2C%22Switch%20color%20scheme%22%5D"><svg class="icon theme-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20.8 13.3A9 9 0 0 1 10.7 3.2a9 9 0 1 0 10.1 10.1Z"/></svg><svg class="icon theme-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></svg><span class="theme-label-dark"><!--rb-i18n:%5B%22Dunkel%22%2C%22Dark%22%5D-->Dunkel<!--/rb-i18n--></span><span class="theme-label-light"><!--rb-i18n:%5B%22Hell%22%2C%22Light%22%5D-->Hell<!--/rb-i18n--></span></button>
+  <main id="auth-page" class="auth-page" aria-labelledby="auth-title"><div class="loading"><span class="spinner"></span><!--rb-i18n:%5B%22Anmeldung%20wird%20geladen%20%E2%80%A6%22%2C%22Loading%20sign-in%20%E2%80%A6%22%5D-->Anmeldung wird geladen …<!--/rb-i18n--></div></main>
+  <a class="skip-link" href="#content"><!--rb-i18n:%5B%22Zum%20Inhalt%20springen%22%2C%22Skip%20to%20content%22%5D-->Zum Inhalt springen<!--/rb-i18n--></a>
+  <button id="nav-backdrop" class="nav-backdrop" aria-label="Navigation schließen" data-rb-i18n-aria-label="%5B%22Navigation%20schlie%C3%9Fen%22%2C%22Close%20navigation%22%5D" tabindex="-1"></button><aside class="sidebar" id="main-sidebar"><button id="nav-close" class="icon-btn nav-close" aria-label="Navigation schließen" data-rb-i18n-aria-label="%5B%22Navigation%20schlie%C3%9Fen%22%2C%22Close%20navigation%22%5D">×</button>
+    <a class="brand" href="/" aria-label="retourenboard. Startseite" data-rb-i18n-aria-label="%5B%22retourenboard.%20Startseite%22%2C%22retourenboard.%20home%22%5D"><span class="brand-mark" aria-hidden="true"><img src="/favicon.svg" alt="" width="48" height="48"></span><span class="brand-copy"><span>retourenboard<span class="brand-dot">.</span></span><small class="brand-slogan"><!--rb-i18n:%5B%22Ein%20Ort%20f%C3%BCr%20alle%20R%C3%BCckl%C3%A4ufer%22%2C%22One%20place%20for%20all%20returns%22%5D-->Ein Ort für alle Rückläufer<!--/rb-i18n--></small></span></a>
+    <div class="nav-label"><!--rb-i18n:%5B%22MEIN%20KONTO%22%2C%22MY%20ACCOUNT%22%5D-->MEIN KONTO<!--/rb-i18n--></div>
+    <nav aria-label="Kontonavigation" data-rb-i18n-aria-label="%5B%22Kontonavigation%22%2C%22Account%20navigation%22%5D"><a href="/account" aria-current="page"><span data-icon="lock"></span><!--rb-i18n:%5B%22Mein%20Konto%22%2C%22My%20account%22%5D-->Mein Konto<!--/rb-i18n--></a><a href="/admin" id="admin-link"><span data-icon="settings"></span><!--rb-i18n:%5B%22Adminbereich%22%2C%22Admin%20area%22%5D-->Adminbereich<!--/rb-i18n--></a></nav>
+    <div class="nav-label tools-label"><!--rb-i18n:%5B%22ARBEITSBEREICH%22%2C%22WORKSPACE%22%5D-->ARBEITSBEREICH<!--/rb-i18n--></div>
+    <nav aria-label="Zum Bestand wechseln" data-rb-i18n-aria-label="%5B%22Zum%20Bestand%20wechseln%22%2C%22Go%20to%20inventory%22%5D">
+      <a href="/#overview"><span data-icon="dashboard"></span><!--rb-i18n:%5B%22Zur%20%C3%9Cbersicht%22%2C%22Go%20to%20overview%22%5D-->Zur Übersicht<!--/rb-i18n--></a>
+      <a href="/#returns"><span data-icon="return"></span><!--rb-i18n:%5B%22Retouren%22%2C%22Returns%22%5D-->Retouren<!--/rb-i18n--></a>
+      <a href="/#products"><span data-icon="box"></span><!--rb-i18n:%5B%22Produkte%22%2C%22Products%22%5D-->Produkte<!--/rb-i18n--></a>
+      <a href="#chat" data-chat-link hidden><span data-icon="chat"></span>Chat</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="shared-note"><span class="live-dot"></span><!--rb-i18n:%5B%22Verwaltung%22%2C%22Management%22%5D-->Verwaltung<!--/rb-i18n--><p><!--rb-i18n:%5B%22Profil%20und%20Sicherheit%20verwalten.%22%2C%22Manage%20profile%20and%20security.%22%5D-->Profil und Sicherheit verwalten.<!--/rb-i18n--></p></div>
+      <button id="access-button" class="access-button"><span data-icon="lock"></span><span><strong><!--rb-i18n:%5B%22Anmeldung%20erforderlich%22%2C%22Sign-in%20required%22%5D-->Anmeldung erforderlich<!--/rb-i18n--></strong><small><!--rb-i18n:%5B%22Mit%20pers%C3%B6nlichem%20Konto%20anmelden%22%2C%22Sign%20in%20with%20a%20personal%20account%22%5D-->Mit persönlichem Konto anmelden<!--/rb-i18n--></small></span><span data-icon="chevron"></span></button>
+    </div>
+  </aside>
+  <div class="app-shell">
+    <header class="topbar"><div class="topbar-start"><button id="nav-toggle" class="icon-btn nav-toggle" aria-label="Navigation öffnen" data-rb-i18n-aria-label="%5B%22Navigation%20%C3%B6ffnen%22%2C%22Open%20navigation%22%5D" aria-controls="main-sidebar" aria-expanded="false"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><div class="breadcrumb"><!--rb-i18n:%5B%22Konto%22%2C%22Account%22%5D-->Konto<!--/rb-i18n--><span>/</span><strong id="breadcrumb-current"><!--rb-i18n:%5B%22Mein%20Konto%22%2C%22My%20account%22%5D-->Mein Konto<!--/rb-i18n--></strong></div></div><div class="topbar-right"><div class="language-switch" role="group" aria-label="Sprache auswählen" data-language-switch data-language="de"><svg class="language-switch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18m-9-9a17 17 0 0 1 0 18 17 17 0 0 1 0-18"/></svg><div class="language-options"><button type="button" data-language-button="de" lang="de" aria-label="Deutsch" title="Deutsch" aria-pressed="true">DE</button><button type="button" data-language-button="en" lang="en" aria-label="English" title="English" aria-pressed="false">EN</button></div></div><button class="btn small secondary theme-switch theme-switch-dashboard" data-theme-toggle aria-label="Farbschema wechseln" data-rb-i18n-aria-label="%5B%22Farbschema%20wechseln%22%2C%22Switch%20color%20scheme%22%5D"><svg class="icon theme-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20.8 13.3A9 9 0 0 1 10.7 3.2a9 9 0 1 0 10.1 10.1Z"/></svg><svg class="icon theme-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></svg></button><button id="header-access" class="btn small secondary"><span data-icon="lock"></span><!--rb-i18n:%5B%22Anmelden%22%2C%22Sign%20in%22%5D-->Anmelden<!--/rb-i18n--></button></div></header>
+    <main id="content" tabindex="-1"><div class="view-skeleton" role="status" aria-label="Inhalte werden geladen" data-rb-i18n-aria-label="%5B%22Inhalte%20werden%20geladen%22%2C%22Loading%20content%22%5D"><span class="sr-only" data-rb-i18n-text="%5B%22Inhalte%20werden%20geladen%20%E2%80%A6%22%2C%22Loading%20content%20%E2%80%A6%22%5D">Inhalte werden geladen …</span><div aria-hidden="true"><div class="skeleton-heading"><span class="skeleton-line"></span><span class="skeleton-line wide"></span></div><div class="skeleton-settings"><div class="skeleton-card"><span class="skeleton-line"></span><span class="skeleton-line wide"></span><span class="skeleton-line wide"></span></div><div class="skeleton-card"><span class="skeleton-line"></span><span class="skeleton-line wide"></span><span class="skeleton-line wide"></span></div></div></div></div></main>
+    <footer class="page-footer"><span>retourenboard. <span class="footer-divider">/</span><!--rb-i18n:%5B%22%20Weniger%20Aufwand.%20Mehr%20%C3%9Cberblick.%22%2C%22%20Less%20effort.%20More%20clarity.%22%5D--> Weniger Aufwand. Mehr Überblick.<!--/rb-i18n--></span><span class="footer-meta"><a class="support-link" href="https://ko-fi.com/katerberatung" target="_blank" rel="noopener noreferrer"><!--rb-i18n:%5B%22Auf%20Ko-fi%20unterst%C3%BCtzen%22%2C%22Support%20on%20Ko-fi%22%5D-->Auf Ko-fi unterstützen<!--/rb-i18n--><span aria-hidden="true"> ↗</span></a><span id="app-version"></span><span id="sync-time"></span></span></footer>
+  </div>
+  <dialog id="dialog" aria-labelledby="dialog-title"></dialog>
+  <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+</body>
+</html>
+

@@ -1,0 +1,54 @@
+/* One motion vocabulary. Animate finite entrances and feedback, never live
+   fields, layout sizes or the whole page's opacity during navigation. */
+[data-ui="board"]{
+  --motion-fast:120ms;
+  --motion-enter:160ms;
+  --motion-drawer:200ms;
+  --motion-switch:300ms;
+  --motion-ease:cubic-bezier(.22,1,.36,1);
+  --motion-spring:cubic-bezier(.22,1.28,.36,1);
+}
+@keyframes board-dialog{from{opacity:.85;translate:0 6px;scale:.995}to{opacity:1;translate:0 0;scale:1}}
+@keyframes board-drawer{from{translate:12px 0}to{translate:0 0}}
+@keyframes board-menu{from{opacity:0;translate:0 -4px}to{opacity:1;translate:0 0}}
+@keyframes board-backdrop{from{opacity:0}to{opacity:1}}
+
+/* Toasts have one reversible transition, including quick successive messages. */
+[data-ui="board"] .toast-region{transform:translateX(-50%);translate:0 6px;animation:none;transition:none}
+[data-ui="board"] .toast-region.visible{transform:translateX(-50%);translate:0 0}
+@media(prefers-reduced-motion:no-preference){
+  [data-ui="board"] :is(.btn,.icon-btn,.text-link,.status-tabs button,.admin-tabs button,.chat-channel,.workflow-row,.support-link,.currency-option,.currency-control summary){transition:background-color var(--motion-fast) ease,border-color var(--motion-fast) ease,color var(--motion-fast) ease,box-shadow var(--motion-fast) ease,transform var(--motion-fast) var(--motion-ease)}
+  /* Navigation labels and SVG strokes must not repaint or shift on hover. */
+  [data-ui="board"] .sidebar :is(nav a,.nav-tool,.nav-tools summary){transition:background-color var(--motion-fast) ease}
+  [data-ui="board"] .auth-card,[data-ui="board"] dialog[open]:not(.detail-drawer){animation:board-dialog var(--motion-enter) var(--motion-ease)}
+  [data-ui="board"] dialog.detail-drawer[open]{animation:board-drawer var(--motion-drawer) var(--motion-ease)}
+  [data-ui="board"] dialog[open]::backdrop,[data-ui="board"].nav-open .nav-backdrop{animation:board-backdrop var(--motion-enter) ease-out}
+  [data-ui="board"] :is(.currency-control[open] .currency-menu,.product-search-popover:not([hidden]),.mention-menu:not([hidden])){animation:board-menu var(--motion-enter) var(--motion-ease)}
+  [data-ui="board"] .btn:active:not(:disabled){transform:translateY(1px)}
+  [data-ui="board"] .kpi-link{transition:border-color var(--motion-fast) ease,transform var(--motion-enter) var(--motion-ease),box-shadow var(--motion-enter) ease}
+  [data-ui="board"] .kpi-link>small .icon{transition:transform var(--motion-enter) var(--motion-ease)}
+  [data-ui="board"] .kpi-link:hover>small .icon{transform:translateX(3px)}
+  [data-ui="board"] .toast-region{transition:opacity var(--motion-enter) ease,translate var(--motion-enter) var(--motion-ease)}
+  [data-ui="board"] .sidebar{transition:transform var(--motion-drawer) var(--motion-ease)}
+  [data-ui="board"] .language-options::before{transition:transform var(--motion-drawer) var(--motion-ease)}
+  [data-ui="board"] .language-options button{transition:color var(--motion-fast) ease,transform var(--motion-fast) var(--motion-ease)}
+  [data-ui="board"] .currency-caret{transition:transform var(--motion-enter) var(--motion-ease)}
+  [data-ui="board"] .switch-control{transition:background-color var(--motion-fast),border-color var(--motion-fast),box-shadow var(--motion-fast)}
+  [data-ui="board"] .switch-thumb{transition:translate var(--motion-switch) var(--motion-spring),background-color var(--motion-fast)}
+  @supports(appearance:base-select){
+    [data-ui="board"] select:where(:not([multiple]):not([hidden]):not([size])):open::picker(select){animation:board-menu var(--motion-enter) var(--motion-ease)}
+  }
+}
+/* Suppress positional feedback as well as animation for BOTH preferences.
+   State colours, checked positions and keyboard focus remain visible. */
+html[data-motion="reduce"] [data-ui="board"] :is(.kpi-link:hover,.btn:active,.currency-option:active,.language-options button:active){transform:none}
+html[data-motion="reduce"] [data-ui="board"] .kpi-link:hover>small .icon{transform:none}
+@media(prefers-reduced-motion:reduce){
+  [data-ui="board"] *,[data-ui="board"] *::before,[data-ui="board"] *::after,[data-ui="board"] dialog::backdrop{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+  [data-ui="board"] :is(.kpi-link:hover,.btn:active,.currency-option:active,.language-options button:active),[data-ui="board"] .kpi-link:hover>small .icon{transform:none}
+}
+html[data-motion="reduce"] [data-ui="board"] dialog::backdrop{animation:none!important}
+@supports(appearance:base-select){
+  html[data-motion="reduce"] [data-ui="board"] select::picker(select){animation:none!important;transition:none!important}
+  @media(prefers-reduced-motion:reduce){[data-ui="board"] select::picker(select){animation:none!important;transition:none!important}}
+}
