@@ -1,5 +1,20 @@
 <div align="center">
-
+> [!WARNING]
+> **⚠️ Hinweis: Software in aktiver Entwicklung**
+>
+> Retourenboard befindet sich derzeit in einer intensiven Entwicklungsphase.
+> Die Anwendung wird kontinuierlich weiterentwickelt und verbessert.
+>
+> Daher können noch Fehler, unerwartetes Verhalten oder Einschränkungen
+> einzelner Funktionen auftreten. Auch Änderungen an bestehenden
+> Funktionen sind jederzeit möglich.
+>
+> **Wichtig:** Wir empfehlen regelmäßige Datensicherungen, insbesondere
+> vor Updates. Vor einem produktiven Einsatz in Unternehmen sollte die
+> Software ausreichend getestet werden.
+>
+> Vielen Dank für dein Verständnis! Fehlerberichte und
+> Verbesserungsvorschläge sind jederzeit willkommen.
 <img src="readme_assets/logo.svg" alt="retourenboard icon" width="74" height="74">
 
 # retourenboard.
