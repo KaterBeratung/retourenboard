@@ -1,4 +1,5 @@
 <div align="center">
+  
 > [!WARNING]
 > **⚠️ Hinweis: Software in aktiver Entwicklung**
 >
@@ -15,6 +16,7 @@
 >
 > Vielen Dank für dein Verständnis! Fehlerberichte und
 > Verbesserungsvorschläge sind jederzeit willkommen.
+
 <img src="readme_assets/logo.svg" alt="retourenboard icon" width="74" height="74">
 
 # retourenboard.
