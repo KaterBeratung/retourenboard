@@ -1,3 +1,20 @@
+> [!WARNING]
+> **⚠️ Notice: Software Under Active Development**
+>
+> Retourenboard is currently under intensive development.
+> The application is continuously being improved and expanded.
+>
+> Bugs, unexpected behavior, or limitations in certain features
+> may still occur. Existing functionality may also change
+> as development progresses.
+>
+> **Important:** We strongly recommend regular backups, especially
+> before updates. The software should be thoroughly tested
+> before being used in a production business environment.
+>
+> Thank you for your understanding! Bug reports and
+> suggestions for improvement are always welcome.
+
 <div align="center">
 
 <img src="readme_assets/logo.svg" alt="retourenboard icon" width="74" height="74">
