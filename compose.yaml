@@ -1,0 +1,6 @@
+# Canonical PostgreSQL deployment (Docker Compose >= 2.20.3).
+# First run: node scripts/setup-docker.mjs
+# Start: docker compose --env-file deploy/docker/.env up -d --build
+name: retourenboard
+include:
+  - path: deploy/docker/compose.yml

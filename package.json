@@ -1,0 +1,37 @@
+{
+  "name": "retourenboard",
+  "version": "4.0.69",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env scripts/start.mjs",
+    "test": "node scripts/test-postgres.mjs",
+    "test:postgres": "node scripts/test-postgres.mjs",
+    "preview": "node scripts/design-preview.mjs",
+    "website:build": "node scripts/build-website.mjs",
+    "website:preview": "node scripts/website-preview.mjs",
+    "build": "node scripts/build.mjs",
+    "build:preview": "npm run build",
+    "package": "node scripts/build-linux-installer.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/nodemailer": "8.0.2",
+    "@types/pg": "8.23.1",
+    "@types/qrcode": "1.5.6",
+    "@zxing/browser": "0.1.5",
+    "@zxing/library": "0.21.3",
+    "esbuild": "0.28.2",
+    "nodemailer": "10.0.15",
+    "openid-client": "6.8.8",
+    "otpauth": "9.5.2",
+    "pg": "8.23.1",
+    "qrcode": "1.5.4",
+    "tar": "7.5.22",
+    "tesseract.js": "7.0.0",
+    "typescript": "7.0.2"
+  }
+}
