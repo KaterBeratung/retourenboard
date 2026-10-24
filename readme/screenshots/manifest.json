@@ -1,0 +1,140 @@
+{
+  "version": "4.0.65",
+  "capturedAt": "2026-10-24T20:51:11.573Z",
+  "source": "Local retourenboard demo;synthetic data only",
+  "images": [
+    {
+      "file": "overview-dark-de.jpg",
+      "route": "/#overview",
+      "language": "de",
+      "theme": "dark",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 139135,
+      "sha256": "fb630c30185def51d746f129720b70a46636be922e6a290d11fa1432cfddd074"
+    },
+    {
+      "file": "returns-de.jpg",
+      "route": "/#returns",
+      "language": "de",
+      "theme": "dark",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 152289,
+      "sha256": "1e6dde8292291b0f5dbce6aeaca6f25a824980cd679608dd79ab76e9c7552629"
+    },
+    {
+      "file": "products-de.jpg",
+      "route": "/#products",
+      "language": "de",
+      "theme": "dark",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 133229,
+      "sha256": "be138826661ec16b1a9f9e439157b490a9fd76f65a98f4527671fa545500e4f3"
+    },
+    {
+      "file": "scan-de.jpg",
+      "route": "/#scan-intake",
+      "language": "de",
+      "theme": "dark",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 123578,
+      "sha256": "61cdf08b8aa02522dbddfbb909dd2630b1a2934b2b019eae18a56607d6e56fd6"
+    },
+    {
+      "route": "/chat",
+      "file": "chat-de.jpg",
+      "language": "de",
+      "theme": "dark",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 102296,
+      "sha256": "c719cd880df9ba77a7b8d4972425c428108ff81ad2feaef6175edb052cc994aa"
+    },
+    {
+      "route": "/admin#masterdata",
+      "file": "admin-de.jpg",
+      "language": "de",
+      "theme": "dark",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 126615,
+      "sha256": "cdaae3796a6afdb8654a9ae018c9c0fbb10a3a79f5264e52d549da5602665e7a"
+    },
+    {
+      "file": "overview-light-de.jpg",
+      "route": "/#overview",
+      "language": "de",
+      "theme": "light",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 139464,
+      "sha256": "8094374258b359cc3808474ab40bdede53468e1bfaf4af1a8379621531371989"
+    },
+    {
+      "file": "overview-light-en.jpg",
+      "route": "/#overview",
+      "language": "en",
+      "theme": "light",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 133158,
+      "sha256": "1e7ba80bad7bce196763c3a8b46bac876ab606cff8a089b4229529488e500f6e"
+    },
+    {
+      "file": "overview-dark-en.jpg",
+      "route": "/#overview",
+      "language": "en",
+      "theme": "dark",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 133056,
+      "sha256": "f6019a6500dd35da01c50c38d3860f613f2afe5e6dd42dab56008fd3ec5313b2"
+    },
+    {
+      "file": "mobile-overview-en.jpg",
+      "route": "/#overview",
+      "language": "en",
+      "theme": "dark",
+      "width": 390,
+      "height": 844,
+      "bytes": 38002,
+      "sha256": "002fa2a74a1e30a954df2cc5d78edc3ccd81799d37c7dbf58abf3c5cb996d911"
+    },
+    {
+      "file": "mobile-overview-de.jpg",
+      "route": "/#overview",
+      "language": "de",
+      "theme": "dark",
+      "width": 390,
+      "height": 844,
+      "bytes": 37861,
+      "sha256": "1a431a2713f2d419a4489bf5fc27cd74e662ea73c475a638b390750adf24b075"
+    },
+    {
+      "file": "mobile-returns-de.jpg",
+      "route": "/#returns",
+      "language": "de",
+      "theme": "dark",
+      "width": 390,
+      "height": 844,
+      "bytes": 38631,
+      "sha256": "eb0909b112214eb728712a5887ef46d3aeca27306d1fec7e26bacacc7ad578ee",
+      "version": "4.0.67",
+      "capturedAt": "2026-10-24T21:39:35.485Z"
+    },
+    {
+      "file": "mobile-chat-de.jpg",
+      "route": "/chat",
+      "language": "de",
+      "theme": "dark",
+      "width": 390,
+      "height": 844,
+      "bytes": 27865,
+      "sha256": "3a4881970382f4fd9bcb640ea21830f2749f743484cf0ca7397aa0d3cb02c216"
+    }
+  ],
+  "updatedAt": "2026-10-24T21:39:35.485Z"
+}
