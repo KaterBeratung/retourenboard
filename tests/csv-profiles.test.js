@@ -1,0 +1,84 @@
+import test from './helpers/postgres-context.js';
+import assert from 'node:assert/strict';
+import { runtimeFixture, testPassword } from './helpers/runtime.js';
+const setup = async (t) => { const f = await runtimeFixture(t), { auth } = await f.setup(); return { ...f, auth }; };
+test('CSV profiles map header names after column reordering and reject stale revisions', async (t) => {
+    const f = await setup(t), input = { name: 'Produktliste', kind: 'products', delimiter: ';', mapping: { sku: 'SKU', name: 'Name' }, duplicates: 'error' };
+    const create = await f.request('/api/admin/csv-profiles', 'POST', input, f.auth);
+    assert.equal(create.status, 201);
+    const profile = await create.json();
+    const payload = { kind: 'products', text: 'Name;SKU\nProdukt;A', profileId: profile.id, profileRevision: profile.revision };
+    const preview = await (await f.request('/api/import/preview', 'POST', payload, f.auth)).json();
+    assert.equal(preview.errors.length, 0);
+    assert.equal(preview.rows[0].data.sku, 'A');
+    assert.equal((await f.request(`/api/admin/csv-profiles/${profile.id}`, 'PUT', { ...input, name: 'Geändert' }, f.auth)).status, 200);
+    assert.equal((await f.request('/api/import/commit', 'POST', payload, f.auth)).status, 409);
+    assert.equal((await f.app.store.listProducts()).length, 0);
+    for (const text of ['SKU;SKU\nA;B', 'Name;Anderes\nA;B'])
+        assert.equal((await f.request('/api/import/preview', 'POST', { ...payload, profileRevision: profile.revision + 1, text }, f.auth)).status, 400);
+});
+test('duplicate skip keeps existing values and product update preserves unmapped fields', async (t) => {
+    const f = await setup(t);
+    await f.request('/api/products', 'POST', { sku: 'A', name: 'Alt', ean: '12345678', description: 'Erhalten' }, f.auth);
+    const p = { kind: 'products', text: 'SKU,Name\nA,Neu\nB,Zwei', mapping: { sku: 0, name: 1 }, delimiter: ',', duplicates: 'skip' };
+    const skip = await f.request('/api/import/commit', 'POST', p, f.auth);
+    assert.equal(skip.status, 200);
+    assert.deepEqual(await skip.json(), { created: 1, updated: 0, skipped: 1 });
+    assert.equal((await f.app.store.findProduct('A')).name, 'Alt');
+    const update = await f.request('/api/import/commit', 'POST', { ...p, text: 'SKU,Name\nA,Neu', duplicates: 'update' }, f.auth);
+    assert.equal(update.status, 200);
+    assert.equal((await f.app.store.findProduct('A')).ean, '12345678');
+    assert.equal((await f.app.store.findProduct('A')).description, 'Erhalten');
+    assert.equal((await f.app.store.findProduct('A')).name, 'Neu');
+});
+test('return number skip keeps values while update changes the matched return and errors roll back the whole import', async (t) => {
+    const f = await setup(t), p = await (await f.request('/api/products', 'POST', { sku: 'A', name: 'Produkt' }, f.auth)).json();
+    await f.request('/api/returns', 'POST', { serialNumber: 'TEST-SN', productId: p.id, receiptDate: '2026-10-06', returnNumber: 'EXIST' }, f.auth);
+    const payload = { kind: 'returns', text: 'SKU;Datum;Nummer;SN\nA;2026-10-07;EXIST;S1\nA;2026-10-07;;S2', mapping: { sku: 0, receiptDate: 1, returnNumber: 2, serialNumber: 3 }, duplicates: 'skip' };
+    const result = await f.request('/api/import/commit', 'POST', payload, f.auth);
+    assert.equal(result.status, 200);
+    assert.deepEqual(await result.json(), { created: 1, updated: 0, skipped: 1 });
+    assert.equal((await f.app.store.findReturn('EXIST')).receiptDate, '2026-10-06');
+    assert.equal((await f.request('/api/import/commit', 'POST', { ...payload, duplicates: 'update' }, f.auth)).status, 200);
+    assert.equal((await f.app.store.findReturn('EXIST')).receiptDate, '2026-10-07');
+    assert.equal((await f.app.store.findReturn('EXIST')).serialNumber, 'S1');
+    assert.equal((await f.request('/api/import/commit', 'POST', { kind: 'products', text: 'SKU;Name\nC;Drei\nX;', mapping: { sku: 0, name: 1 }, duplicates: 'error' }, f.auth)).status, 400);
+    assert.equal(await f.app.store.findProduct('C'), null);
+});
+test('return CSV status updates preserve unmapped details, images and original creation dates', async (t) => {
+    const f = await setup(t), p = await f.app.store.createProduct({ sku: 'A', name: 'Product', image: { name: 'Product.png', data: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a5WQAAAAASUVORK5CYII=' } }), returned = await f.app.store.createReturn({ productId: p.id, resolutionId:17,returnNumber: 'RET-A', serialNumber: 'ORIGINAL', replacementSerialNumber: 'REPLACEMENT', notes: 'Keep notes', customerReference: 'Keep reference', quantity: 3 });
+    const payload = { kind: 'returns', text: 'SKU;Number;Status\nA;RET-A;Abgeschlossen', mapping: { sku: 0, returnNumber: 1, status: 2 }, duplicates: 'update' };
+    const preview = await f.request('/api/import/preview', 'POST', payload, f.auth);
+    assert.equal(preview.status, 200);
+    const plan = await preview.json();
+    assert.equal(plan.updated, 1);
+    assert.deepEqual(plan.errors, []);
+    assert.equal((await f.app.store.findReturn('RET-A')).status, 'Eingegangen');
+    const response = await f.request('/api/import/commit', 'POST', payload, f.auth);
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).updated, 1);
+    const saved = await f.app.store.findReturn('RET-A');
+    assert.equal(saved.id, returned.id);
+    assert.equal(saved.serialNumber, 'ORIGINAL');
+    assert.equal(saved.replacementSerialNumber, 'REPLACEMENT');
+    assert.equal(saved.notes, 'Keep notes');
+    assert.equal(saved.customerReference, 'Keep reference');
+    assert.equal(saved.quantity, 3);
+    assert.equal(saved.status, 'Abgeschlossen');
+    assert.equal(saved.createdAt, returned.createdAt);
+    assert.equal(saved.imageVersion, p.imageVersion);
+});
+test('return CSV updates require edit and status permission and permit saved update profiles', async (t) => {
+    const f = await setup(t), p = await f.app.store.createProduct({ sku: 'A', name: 'Product' });
+    await f.app.store.createReturn({ productId: p.id, resolutionId:17,returnNumber: 'RET-A', serialNumber: 'SN' });
+    const profileResponse = await f.request('/api/admin/csv-profiles', 'POST', { name: 'Return status', kind: 'returns', delimiter: ';', duplicates: 'update', mapping: { sku: 'SKU', returnNumber: 'Number', status: 'Status' } }, f.auth);
+    assert.equal(profileResponse.status, 201);
+    const profile = await profileResponse.json(), payload = { kind: 'returns', text: 'SKU;Number;Status\nA;RET-A;Abgeschlossen', profileId: profile.id, profileRevision: profile.revision };
+    await f.request('/api/users', 'POST', { username: 'Importer', password: testPassword, role: 'member', permissions: { returnsImport: true, returnsEdit: true, returnsStatus: false } }, f.auth);
+    const member = (await f.login('Importer')).auth;
+    for (const endpoint of ['preview', 'commit'])
+        assert.equal((await f.request('/api/import/' + endpoint, 'POST', payload, member)).status, 403);
+    assert.equal((await f.app.store.findReturn('RET-A')).status, 'Eingegangen');
+    assert.equal((await f.request('/api/import/commit', 'POST', payload, f.auth)).status, 200);
+    assert.equal((await f.app.store.findReturn('RET-A')).status, 'Abgeschlossen');
+});

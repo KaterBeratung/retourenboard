@@ -1,0 +1,57 @@
+import {html,locale,setText,t,apiError} from './i18n.js';
+import {switchField} from './switches.js';
+import {h,icon,openDialog} from './ui.js';
+export function createRestartFlow(api:any){let busy=false,accepted=false;return {get busy(){return busy;},get accepted(){return accepted;},async start(input:any){if(busy||accepted)throw Error(t('Ein Neustart läuft bereits.'));if(input.confirmed!==true)throw Error(t('Neustart bitte ausdrücklich bestätigen.'));busy=true;try{const result=await api('/api/admin/server/restart',{method:'POST',body:input});if(result.accepted!==true)throw Error(t('Neustart wurde nicht angenommen.'));accepted=true;return result;}finally{if(!accepted)busy=false;}}};}
+export async function waitForRestart({fetcher=fetch,now=Date.now,pause=(ms:number)=>new Promise(r=>setTimeout(r,ms)),timeout=60000}:{fetcher?:typeof fetch;now?:()=>number;pause?:(ms:number)=>Promise<any>;timeout?:number}={}){
+ const end=now()+timeout;while(now()<end){try{const response=await fetcher('/api/session',{cache:'no-store',signal:AbortSignal.timeout(3000)});if(response.ok){const session=await response.json();if(session.unlocked===false)return {relogin:true};}}catch{}await pause(1000);}throw Error(t('Der Server ist noch nicht wieder erreichbar. Dienstprotokoll prüfen oder die neue Adresse öffnen.'));
+}
+const levels={info:t('Hinweis'),warn:t('Warnung'),error:t('Fehler')};
+export async function readServerPanel(api:any){
+ const [status,logs]=await Promise.allSettled([api('/api/admin/server'),api('/api/admin/server/logs')]);
+ return {status:status.status==='fulfilled'?status.value:undefined,logs:logs.status==='fulfilled'?logs.value:undefined,errors:[status,logs].filter(result=>result.status==='rejected').map((result:any)=>result.reason?.message||t('Serverdaten konnten nicht geladen werden.'))};
+}
+export function renderLogEntries(entries:any[],{level='',search=''}={}){
+ const needle=search.trim().toLocaleLowerCase('de-DE'),filtered=entries.filter(item=>(!level||item.level===level)&&(!needle||String(item.message).toLocaleLowerCase('de-DE').includes(needle)));
+ if(!filtered.length)return html`<div class="server-log-empty">${icon('info')}<p>${entries.length?t('Keine passenden Protokolleinträge. Filter anpassen.'):t('Noch keine Protokolleinträge vorhanden.')}</p></div>`;
+ return filtered.slice().reverse().map(item=>html`<article class="server-log-row"><time datetime="${h(item.time)}">${h(new Date(item.time).toLocaleString(locale()))}</time><span class="server-log-level ${Object.hasOwn(levels,item.level)?item.level:'info'}">${h(levels[item.level]||t('Hinweis'))}</span><pre>${h(item.message)}</pre></article>`).join('');
+}
+export function renderServerOperations(){return html`<section class="panel settings-panel server-operations" id="server-operations">
+ <div class="panel-heading"><div><h2>Serverbetrieb</h2><p>Server neu starten und aktuelle Protokolleinträge prüfen.</p></div><span class="settings-tag">Nur Administratoren</span></div>
+ <div class="server-restart-bar"><div><strong id="server-operation-state">Serverstatus wird geladen …</strong><p class="muted" id="server-operation-help">Gespeicherte Netzwerkänderungen werden beim Neustart übernommen. Alle Sitzungen enden.</p></div><button class="btn secondary" id="server-restart" disabled>${icon('return')}Server neu starten …</button></div>
+ <div class="server-log-heading"><div><h3>Serverprotokoll</h3><p class="muted" id="server-log-source">Protokoll wird geladen …</p></div><button class="btn secondary" id="server-log-refresh">${icon('clock')}Aktualisieren</button></div>
+ <div class="server-log-toolbar"><label class="field"><span>Schweregrad</span><select id="server-log-level"><option value="">Alle Einträge</option><option value="error">Fehler</option><option value="warn">Warnungen</option><option value="info">Hinweise</option></select></label><label class="field"><span>Protokoll durchsuchen</span><input id="server-log-search" type="search" placeholder="Nach einer Meldung suchen" maxlength="200"></label>${switchField("",t("Automatisch aktualisieren"),true,{id:"server-log-auto"})}</div>
+ <p class="form-error" id="server-log-error" role="alert" hidden></p><div class="server-log-list" id="server-log-list" role="region" aria-label="Serverprotokoll" tabindex="0"><p class="muted">Protokoll wird geladen …</p></div><div class="server-log-footer"><span id="server-log-count"></span><span id="server-log-updated" role="status"></span></div>
+ </section>`;}
+export function renderRestartForm(requiresSecondFactor=false){return html`<form class="action-form" data-form-mode="action"><div class="dialog-body"><p class="settings-message">Gespeicherte Änderungen an Domain, HTTPS und Port werden übernommen. Konten, Produkte, Retouren und Dateien bleiben erhalten. Alle angemeldeten Personen werden abgemeldet.</p>${requiresSecondFactor?html('<label class="field"><span>2FA-Code oder Recoverycode</span><input name="factor" autocomplete="one-time-code" maxlength="100" required><small>Bestätige den Neustart mit deinem zweiten Faktor.</small></label>'):''}${switchField('confirmed',t('Ich bestätige den Serverneustart.'),false,{required:true,confirmation:true})}<p class="form-error" role="alert" hidden></p></div><div class="dialog-footer"><button class="btn secondary" type="button" data-close>Abbrechen</button><button class="btn primary" type="submit">Jetzt neu starten</button></div></form>`;}
+export function bindServerOperations(ctx:any,root:any){
+ const section=root.querySelector('#server-operations');if(!section||!ctx.isAdmin)return;
+ const connected=()=>section.isConnected&&ctx.isAdmin&&root.querySelector('#server-operations')===section;
+ const button=section.querySelector('#server-restart'),refresh=section.querySelector('#server-log-refresh'),error=section.querySelector('#server-log-error'),auto=section.querySelector('#server-log-auto');
+ let status:any=null,entries:any[]=[],loading=false,timer:any;const flow=createRestartFlow(ctx.api);
+ function render(){if(!connected())return;section.querySelector('#server-log-list').innerHTML=renderLogEntries(entries,{level:section.querySelector('#server-log-level').value,search:section.querySelector('#server-log-search').value});setText(section.querySelector('#server-log-count'),t`${entries.length} geladene Einträge · neueste zuerst`);}
+ async function load(){if(loading||!connected()||flow.accepted)return;loading=true;refresh.disabled=true;error.hidden=true;
+  try{const result=await readServerPanel(ctx.api);if(!connected())return;const state=result.status,data=result.logs;
+   if(state){status=state;const busy=['prepared','restarting'].includes(state.state);button.disabled=!state.available||busy;
+   const label=!state.available?t('Nicht erreichbar'):busy?t('Neustart läuft'):state.state==='failed'?t('Neustart fehlgeschlagen'):t('Bereit');setText(section.querySelector('#server-operation-state'),(state.mode==='service'?t('Linuxdienst · '):t('Anwendungsserver · '))+label);
+   setText(section.querySelector('#server-operation-help'),state.available?(state.mode==='service'?t('Startet den Linuxdienst neu und übernimmt gespeicherte Netzwerkänderungen. Alle Sitzungen enden.'):t('Startet die Anwendung neu und übernimmt gespeicherte Netzwerkänderungen. Der Node.js-Prozess bleibt aktiv. Alle Sitzungen enden.')):state.message);
+   }else{status=null;button.disabled=true;setText(section.querySelector('#server-operation-state'),t('Serverstatus nicht erreichbar'));}
+   if(data){entries=data.entries||[];setText(section.querySelector('#server-log-source'),data.source==='journal'?t('Dienstprotokoll · retourenboard.service'):(data.message?apiError(data.message):t('Anwendungsereignisse dieser Laufzeit')));setText(section.querySelector('#server-log-updated'),t('Aktualisiert ')+new Date(data.checkedAt).toLocaleTimeString(locale()));render();}
+   if(result.errors.length){setText(error,result.errors.join(' '));error.hidden=false;}
+  }catch(err){if(connected()){setText(error,apiError(err.message));error.hidden=false;}}finally{loading=false;if(connected())refresh.disabled=false;clearTimeout(timer);if(connected()&&auto.checked&&!flow.accepted)timer=setTimeout(()=>{if(!document.hidden)void load();else schedule();},10000);}
+ }
+ function schedule(){clearTimeout(timer);if(connected()&&auto.checked&&!flow.accepted)timer=setTimeout(()=>{if(!document.hidden)void load();else schedule();},10000);}
+ section.querySelector('#server-log-level').addEventListener('change',render);section.querySelector('#server-log-search').addEventListener('input',render);auto.addEventListener('change',()=>auto.checked?schedule():clearTimeout(timer));refresh.addEventListener('click',()=>void load());
+ button.addEventListener('click',()=>{
+  if(!status?.available||flow.busy||flow.accepted)return;
+  if(root.querySelector('#server-settings-form')?.dataset.dirty==='true'){ctx.toast(t('Bitte deine Änderungen zuerst speichern oder verwerfen.'));return;}
+  const dialog=openDialog({title:t('Server jetzt neu starten?'),subtitle:t('Kurze Unterbrechung · danach erneut anmelden.'),body:renderRestartForm(status.requiresSecondFactor)});
+  const form=dialog.querySelector('form'),formError=form.querySelector('.form-error'),close=dialog.querySelector('.dialog-close'),cancel=dialog.oncancel,click=dialog.onclick;
+  form.onsubmit=async(event:any)=>{event.preventDefault();if(flow.busy)return;const data=new FormData(form);formError.hidden=true;form.querySelectorAll('input,button').forEach((node:any)=>node.disabled=true);close.disabled=true;dialog.oncancel=(e:any)=>e.preventDefault();dialog.onclick=null;
+   try{const result=await flow.start({factor:data.get('factor'),confirmed:data.get('confirmed')==='on'});clearTimeout(timer);if(!dialog.open)return;
+    const next=result.nextOrigin||location.origin;if(next!==location.origin){form.innerHTML=html`<div class="dialog-body"><p class="restore-progress" role="status">Neustart angefordert. Die Adresse oder der Port ändern sich.</p><p>Öffne nach dem Neustart die neue Adresse und melde dich erneut an. Bei einem SSH-Tunnel auch die Portweiterleitung anpassen.</p><a class="btn primary" href="${h(next+'/admin#settings')}">Neue Adresse öffnen</a><p class="muted">Falls die neue Adresse nicht erreichbar ist, prüfe auch die bisherige Adresse. Nach einem fehlgeschlagenen Portwechsel kann die Anwendung dort weiterlaufen.</p><button class="btn secondary" type="button" data-server-reload>Bisherige Adresse erneut laden</button></div>`;form.querySelector('[data-server-reload]').onclick=()=>location.reload();close.disabled=false;dialog.oncancel=cancel;dialog.onclick=click;return;}
+    form.innerHTML=html('<div class="dialog-body"><p class="restore-progress" role="status"><span class="spinner"></span>Server wird neu gestartet …</p><p class="muted">Die Verbindung kann kurz unterbrochen werden. Danach erscheint die Anmeldung.</p></div>');await waitForRestart();location.replace('/admin#settings');
+   }catch(err){if(!dialog.open)return;if(flow.accepted){form.innerHTML=html`<div class="dialog-body"><p class="form-error" role="alert">${h(err.message)}</p><button class="btn secondary" type="button" data-server-reload>Seite erneut laden</button></div>`;form.querySelector('[data-server-reload]').onclick=()=>location.reload();}else{setText(formError,apiError(err.message));formError.hidden=false;form.querySelectorAll('input,button').forEach((node:any)=>node.disabled=false);}close.disabled=false;dialog.oncancel=cancel;dialog.onclick=click;}
+  };
+ });
+ void load();
+}

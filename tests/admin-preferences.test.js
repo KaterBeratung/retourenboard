@@ -1,0 +1,23 @@
+import test from './helpers/postgres-context.js';
+import assert from 'node:assert/strict';
+import { DatabaseSync } from 'node:sqlite';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { join, relative, isAbsolute } from 'node:path';
+import { tmpdir } from 'node:os';
+import { createApp } from './helpers/postgres-fixtures.js';
+import { runtimeFixture } from './helpers/runtime.js';
+test('admin preferences persist and are rejected for unprivileged users', async (t) => {
+    const { request, setup, login } = await runtimeFixture(t), { auth } = await setup();
+    const rules = await request('/api/admin/rules', 'GET', undefined, auth);
+    assert.equal(rules.status, 200);
+    assert.deepEqual(await rules.json(), { requiredFields: [], deadlineDays: 14, numberPrefix: 'RET', timezone: 'Europe/Berlin',completionRequiredFields:['resolution'],requireReplacementSerialOnExchange:true,requireCompletedDisposal:true,protectClosedReturns:true,exchangeResolutionIds:[],disposalResolutionIds:[] });
+    const save = await request('/api/admin/rules', 'PUT', { deadlineDays: 30, numberPrefix: 'RMA' }, auth);
+    assert.equal(save.status, 200);
+    assert.equal((await (await request('/api/admin/rules', 'GET', undefined, auth)).json()).deadlineDays, 30);
+    assert.equal((await request('/api/admin/rules', 'PUT', { deadlineDays: 366 }, auth)).status, 400);
+    assert.equal((await request('/api/admin/rules', 'PUT', { unknown: true }, auth)).status, 400);
+    await request('/api/users', 'POST', { username: 'Worker', password: 'Testkonto-Passwort!' }, auth);
+    const member = (await login('Worker')).auth;
+    assert.equal((await request('/api/admin/rules', 'GET', undefined, member)).status, 403);
+    assert.equal((await request('/api/admin/rules')).status, 401);
+});

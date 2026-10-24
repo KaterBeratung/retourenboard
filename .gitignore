@@ -1,0 +1,37 @@
+# Private configuration and runtime data
+.env
+.env.*
+!.env.example
+data/
+attachments/
+*.sqlite
+*.sqlite-*
+*.db
+*.log
+*.pem
+*.key
+*.pfx
+*.p12
+id_rsa
+id_ed25519
+
+# Dependencies and generated output
+node_modules/
+dist/
+website/dist/
+releases/
+
+# Local tooling, internal reports, and archived checkouts
+.qa/
+.codex/
+.agents/
+.aws/
+.superpowers/
+.test-output/
+AGENTS.md
+retourenboard/
+readme_assets/
+docs/superpowers/
+docs/CHANGE-*.md
+docs/STABILITY-*.md
+docs/WEBSITE-*.md

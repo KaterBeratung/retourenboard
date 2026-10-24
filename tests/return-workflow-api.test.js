@@ -1,0 +1,232 @@
+import test from './helpers/postgres-context.js';
+import assert from 'node:assert/strict';
+import { DatabaseSync } from 'node:sqlite';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { once } from 'node:events';
+import { runtimeFixture, testPassword } from './helpers/runtime.js';
+import { createStore } from './helpers/postgres-fixtures.js';
+import { validateReturn } from '../dist/shared/model.js';
+import { parseCsv, guessCsvMapping } from '../dist/shared/csv.js';
+import { previewImport, commitImport } from '../dist/server/import.js';
+import { exportInventory, commitInventoryImport } from '../dist/server/inventory-transfer.js';
+async function team(t) {
+    const f = await runtimeFixture(t), { auth, data } = await f.setup();
+    const response = await f.request('/api/users', 'POST', { username: 'Handler', displayName: 'Bearbeiter', role: 'member', password: testPassword }, auth);
+    const member = await response.json();
+    const viewer = await (await f.request('/api/users', 'POST', { username: 'Reader', role: 'viewer', password: testPassword }, auth)).json();
+    const product = await f.app.store.createProduct({ name: 'Workflow Produkt', sku: 'WORKFLOW-1' });
+    const create = async (input = {}) => f.app.store.createReturn({ productId: product.id, serialNumber: 'SN-WORKFLOW', ...input });
+    return { ...f, auth, admin: data.user, member, viewer, product, create, memberAuth: (await f.login('Handler')).auth, viewerAuth: (await f.login('Reader')).auth };
+}
+test('workflow return validation accepts nullable assignment and trims a bounded next step', () => {
+    const base = { productId: 1, serialNumber: 'SN' };
+    assert.equal(validateReturn({ ...base, assignedUserId: 3, nextStep: '  Etikett prüfen  ' }).assignedUserId, 3);
+    assert.equal(validateReturn({ ...base, assignedUserId: null, nextStep: '  Etikett prüfen  ' }).nextStep, 'Etikett prüfen');
+    assert.equal(validateReturn(base).assignedUserId, null);
+    assert.equal(validateReturn(base).nextStep, '');
+    for (const assignedUserId of [0, -1, 1.2, true, {}, '1.2', '', Number.MAX_SAFE_INTEGER + 1])
+        assert.throws(() => validateReturn({ ...base, assignedUserId }), /Zuständ|Zuweis/);
+    for (const nextStep of [42, 'x'.repeat(501)])
+        assert.throws(() => validateReturn({ ...base, nextStep }), /500/);
+});
+test('assignment directory is minimal, authenticated, active and available without administrative rights', async (t) => {
+    const f = await team(t);
+    assert.equal((await f.request('/api/returns/assignees')).status, 401);
+    const response = await f.request('/api/returns/assignees', 'GET', undefined, f.viewerAuth);
+    assert.equal(response.status, 200);
+    const directory = await response.json();
+    assert.equal(directory.length, 3);
+    assert.deepEqual(Object.keys(directory[0]).sort(), ['displayName', 'id', 'username']);
+    await f.app.users.update(f.member.id, { active: false });
+    const after = await (await f.request('/api/returns/assignees', 'GET', undefined, f.auth)).json();
+    assert.ok(!after.some(u => u.id === f.member.id));
+});
+test('assignment and next step persist while omitted updates preserve them and inactive history remains readable', async (t) => {
+    const f = await team(t), ret = await f.create({ assignedUserId: f.member.id, nextStep: 'Gerät prüfen' });
+    assert.equal(ret.assignedUserId, f.member.id);
+    assert.equal(ret.assignedDisplayName, 'Bearbeiter');
+    assert.equal(ret.nextStep, 'Gerät prüfen');
+    await f.app.users.update(f.member.id, { active: false });
+    const input = { ...ret, serialNumber: 'NEU' };
+    delete input.assignedUserId;
+    delete input.assignedDisplayName;
+    delete input.nextStep;
+    const response = await f.request(`/api/returns/${ret.id}`, 'PUT', input, f.auth);
+    assert.equal(response.status, 200);
+    const updated = await response.json();
+    assert.equal(updated.assignedUserId, f.member.id);
+    assert.equal(updated.assignedDisplayName, 'Bearbeiter');
+    assert.equal(updated.nextStep, 'Gerät prüfen');
+    await assert.rejects(async () => f.create({ assignedUserId: f.member.id }), /aktiv/);
+    await assert.rejects(async () => f.create({ assignedUserId: 987654 }), /Konto|Zuständ|Zuweis/);
+    const cleared = await (await f.request(`/api/returns/${ret.id}`, 'PUT', { ...updated, assignedUserId: null, nextStep: '' }, f.auth)).json();
+    assert.equal(cleared.assignedUserId, null);
+    assert.equal(cleared.assignedDisplayName, '');
+    assert.equal(cleared.nextStep, '');
+    assert.equal((await f.request(`/api/returns/${ret.id}`, 'PUT', { ...ret, assignedUserId: f.viewer.id }, f.viewerAuth)).status, 403);
+});
+test('CSV and inventory transfers round trip assignment and next step and older files retain defaults', async (t) => {
+    const f = await team(t), ret = await f.create({ returnNumber: 'WF-EXPORT', assignedUserId: f.member.id, nextStep: 'Prüfen; dann Rückruf\nmit Team' });
+    const response = await f.request(`/api/export/returns?ids=${ret.id}`, 'GET', undefined, f.auth);
+    assert.equal(response.status, 200);
+    const csv = await response.text(), parsed = parseCsv(csv);
+    assert.ok(parsed.headers.includes('Zuständig (Konto-ID)'));
+    assert.ok(parsed.headers.includes('Nächster Schritt'));
+    const clone = csv.replace('WF-EXPORT', 'WF-CSV-COPY'), mapping = guessCsvMapping('returns', parsed.headers);
+    assert.equal((await previewImport(f.app.store, 'returns', clone, mapping, { duplicates: 'skip' })).errors.length, 0);
+    await commitImport(f.app.store, 'returns', clone, mapping, { duplicates: 'skip' });
+    const copied = await f.app.store.findReturn('WF-CSV-COPY');
+    assert.equal(copied.assignedUserId, f.member.id);
+    assert.equal(copied.nextStep, ret.nextStep);
+    const inventory = await exportInventory(f.app.store);
+    inventory.returns = inventory.returns.filter(r => r.returnNumber === 'WF-EXPORT').map(r => ({ ...r, returnNumber: 'WF-INVENTORY-COPY' }));
+    await commitInventoryImport(f.app.store, JSON.stringify(inventory), { duplicates: 'skip', createMissingMasterdata: false }, () => { });
+    assert.equal((await f.app.store.findReturn('WF-INVENTORY-COPY')).assignedUserId, f.member.id);
+    assert.equal((await f.app.store.findReturn('WF-INVENTORY-COPY')).nextStep, ret.nextStep);
+    const legacy = 'Retourennummer;Artikelnummer;Seriennummer\nWF-LEGACY;WORKFLOW-1;OLD';
+    await commitImport(f.app.store, 'returns', legacy, guessCsvMapping('returns', parseCsv(legacy).headers), { duplicates: 'skip' });
+    assert.equal((await f.app.store.findReturn('WF-LEGACY')).assignedUserId, null);
+    assert.equal((await f.app.store.findReturn('WF-LEGACY')).nextStep, '');
+});
+test('selected CSV exports only selected returns and rejects malformed, missing and oversized selections', async (t) => {
+    const f = await team(t), one = await f.create({ returnNumber: 'SELECT-ONE' }), two = await f.create({ returnNumber: 'SELECT-TWO' });
+    const csv = await (await f.request(`/api/export/returns?ids=${one.id}`, 'GET', undefined, f.auth)).text();
+    assert.match(csv, /SELECT-ONE/);
+    assert.doesNotMatch(csv, /SELECT-TWO/);
+    for (const ids of ['', `${one.id},no`, `${one.id},0`, `${one.id},1.5`, Array.from({ length: 201 }, (_, i) => i + 1).join(','), '9007199254740992'])
+        assert.equal((await f.request(`/api/export/returns?ids=${ids}`, 'GET', undefined, f.auth)).status, 400);
+    assert.equal((await f.request(`/api/export/returns?ids=${one.id},999999`, 'GET', undefined, f.auth)).status, 404);
+    assert.equal((await f.request(`/api/export/returns?ids=${one.id}&ids=${two.id}`, 'GET', undefined, f.auth)).status, 400);
+    await f.app.users.update(f.member.id, { permissions: { returnsExport: false, productsExport: true } });
+    assert.equal((await f.request(`/api/export/returns?ids=${one.id}`, 'GET', undefined, f.memberAuth)).status, 403);
+});
+test('bulk status validates the entire selection before updating and audits each actual change once', async (t) => {
+    const f = await team(t), one = await f.create(), two = await f.create({ statusId: 13 }), three = await f.create();
+    let response = await f.request('/api/returns/bulk/status', 'POST', { ids: [one.id, two.id], statusId: 13,revisions:{[one.id]:one.revision,[two.id]:two.revision} }, f.memberAuth);
+    assert.equal(response.status, 200);
+    const result = await response.json();
+    assert.equal(result.updated, 1);
+    assert.deepEqual(result.items.map(r => r.id), [one.id, two.id]);
+    assert.equal((await f.app.store.getReturn(one.id)).statusId, 13);
+    const history = (await f.app.store.db.query("SELECT actorName,changes FROM audit WHERE entity='returns' AND entityId=$1 AND action='update'", [String(one.id)])).rows;
+    assert.equal(history.length, 1);
+    assert.equal(history[0].actorName, 'Bearbeiter');
+    assert.deepEqual(JSON.parse(history[0].changes).status, { before: 'Eingegangen', after: 'In Prüfung' });
+    response = await f.request('/api/returns/bulk/status', 'POST', { ids: [three.id, 999999], statusId: 15,revisions:{[three.id]:three.revision,999999:1} }, f.auth);
+    assert.equal(response.status, 404);
+    assert.equal((await f.app.store.getReturn(three.id)).statusId, 12);
+    for (const body of [{ ids: [], statusId: 13 }, { ids: [one.id, one.id], statusId: 13 }, { ids: [one.id, 0], statusId: 13 }, { ids: [String(one.id)], statusId: 13 }, { ids: [one.id], statusId: '13' }, { ids: [one.id], statusId: 999 }, { ids: Array.from({ length: 201 }, (_, i) => i + 1), statusId: 13 }])
+        assert.equal((await f.request('/api/returns/bulk/status', 'POST', {...body,revisions:{[one.id]:(await f.app.store.getReturn(one.id)).revision}}, f.auth)).status, 400);
+    assert.equal((await f.request('/api/returns/bulk/status', 'POST', { ids: [one.id], statusId: 15 }, { ...f.auth, 'X-CSRF-Token': 'invalid' })).status, 403);
+    assert.equal((await f.request('/api/returns/bulk/status', 'POST', { ids: [one.id], statusId: 15 }, f.viewerAuth)).status, 403);
+    await f.app.users.update(f.member.id, { permissions: { returnsEdit: false, returnsStatus: true } });
+    assert.equal((await f.request('/api/returns/bulk/status', 'POST', { ids: [three.id], statusId: 14,revisions:{[three.id]:three.revision} }, f.memberAuth)).status, 200);
+});
+test('bulk status rolls back data and audit if a later row cannot be saved', async (t) => {
+    const f = await team(t), one = await f.create({resolutionId:17}), two = await f.create({resolutionId:17}), before = (await f.app.store.db.query("SELECT COUNT(*) AS n FROM audit", [])).rows[0].n;
+    const original=f.app.store.db.query;f.app.store.db.query=async function(sql,values){if(/^UPDATE returns SET /i.test(sql)&&values?.at(-1)===two.id)throw Error('test rollback');return original.call(this,sql,values);};
+    const response = await f.request('/api/returns/bulk/status', 'POST', { ids: [one.id, two.id], statusId: 15,revisions:{[one.id]:one.revision,[two.id]:two.revision} }, f.auth);
+    assert.equal(response.status, 500);
+    assert.equal((await f.app.store.getReturn(one.id)).statusId, 12);
+    assert.equal((await f.app.store.getReturn(two.id)).statusId, 12);
+    assert.equal((await f.app.store.db.query("SELECT COUNT(*) AS n FROM audit", [])).rows[0].n, before);
+});
+test('queued bulk status rechecks status rights after permission revocation', async (t) => {
+    const f = await team(t), ret = await f.create();
+    let unblock, entered;
+    const waiting = new Promise(r => entered = r);
+    const block = f.app.coordinator.run(() => new Promise(r => { unblock = r; entered(); }));
+    await waiting;
+    const arrived = once(f.app.server, 'request');
+    const pending = f.request('/api/returns/bulk/status', 'POST', { ids: [ret.id], statusId: 15,revisions:{[ret.id]:ret.revision} }, f.memberAuth);
+    await arrived;
+    await f.app.users.update(f.member.id, { permissions: { returnsStatus: false } });
+    unblock();
+    await block;
+    assert.equal((await pending).status, 403);
+    assert.equal((await f.app.store.getReturn(ret.id)).statusId, 12);
+});
+test('timeline shares only allowed return fields and live comments and filters attachment events by current rights', async (t) => {
+    const f = await team(t), ret = await f.create({ assignedUserId: f.member.id, nextStep: 'Prüfplatz vorbereiten', notes: 'PRIVATE RETURN NOTES' });
+    await f.app.store.updateReturn(ret.id, { ...ret, statusId: 13, nextStep: 'Etikett prüfen', notes: 'PRIVATE CHANGED NOTES' });
+    const comment = await (await f.request(`/api/returns/${ret.id}/comments`, 'POST', { text: 'Sichtbarer Kommentar' }, f.memberAuth)).json();
+    const deleted = await (await f.request(`/api/returns/${ret.id}/comments`, 'POST', { text: 'DELETED COMMENT SECRET' }, f.memberAuth)).json();
+    await f.request(`/api/returns/${ret.id}/comments/${deleted.id}`, 'DELETE', undefined, f.memberAuth);
+    const attachment = Number((await f.app.store.db.query("INSERT INTO attachments(returnId,originalName,storedName,mediaType,size,createdAt) VALUES($1,$2,$3,$4,$5,$6) RETURNING id", [ret.id, 'sichtbar.pdf', 'test-live.pdf', 'application/pdf', 12, new Date().toISOString()])).rows[0].id);
+    const gone = Number((await f.app.store.db.query("INSERT INTO attachments(returnId,originalName,storedName,mediaType,size,createdAt) VALUES($1,$2,$3,$4,$5,$6) RETURNING id", [ret.id, 'DELETED FILE SECRET.pdf', 'test-gone.pdf', 'application/pdf', 12, new Date().toISOString()])).rows[0].id);
+    await f.app.store.recordChange({ entity: 'attachments', id: attachment, action: 'create', after: { id: attachment, returnId: ret.id, originalName: 'sichtbar.pdf' } });
+    await f.app.store.recordChange({ entity: 'attachments', id: gone, action: 'create', after: { id: gone, returnId: ret.id, originalName: 'DELETED FILE SECRET.pdf' } });
+    await f.app.store.db.query("DELETE FROM attachments WHERE id=$1", [gone]);
+    await f.app.store.recordChange({ entity: 'masterdata', id: ret.id, action: 'update', after: { notes: 'PRIVATE MASTER NOTES' } });
+    await f.app.store.recordChange({ entity: 'account', id: ret.id, action: 'update', after: { displayName: 'PRIVATE PROFILE SECRET' } });
+    const path = `/api/returns/${ret.id}/timeline`;
+    assert.equal((await f.request(path)).status, 401);
+    const response = await f.request(path, 'GET', undefined, f.viewerAuth);
+    assert.equal(response.status, 200);
+    const timeline = await response.json();
+    assert.ok(timeline.items.some(item => item.type === 'created'));
+    assert.ok(timeline.items.some(item => item.type === 'status' && item.text.includes('In Prüfung')));
+    assert.ok(timeline.items.some(item => item.type === 'assignment' && item.text.includes('Bearbeiter')));
+    assert.ok(timeline.items.some(item => item.type === 'nextStep' && item.text.includes('Etikett prüfen')));
+    assert.ok(timeline.items.some(item => item.type === 'comment' && item.commentId === comment.id));
+    assert.ok(timeline.items.some(item => item.type === 'attachment' && item.attachmentId === attachment));
+    assert.doesNotMatch(JSON.stringify(timeline), /PRIVATE|DELETED|storedName|password|changes|mentions/);
+    for (const item of timeline.items) {
+        assert.equal(typeof item.id, 'string');
+        assert.equal(typeof item.actorName, 'string');
+        assert.equal(typeof item.at, 'string');
+        assert.equal(item.returnId, ret.id);
+    }
+    await f.app.users.update(f.viewer.id, { permissions: { attachmentsView: false } });
+    const restricted = await (await f.request(path, 'GET', undefined, f.viewerAuth)).json();
+    assert.ok(!restricted.items.some(item => item.type === 'attachment'));
+});
+test('timeline pagination is bounded, opaque, stable across equal timestamps and validates cursor scope', async (t) => {
+    const f = await team(t), ret = await f.create(), other = await f.create();
+    for (let i = 0; i < 8; i++)
+        await f.app.collaboration.postComment(f.member, ret.id, { text: 'Kommentar ' + i });
+    await f.app.store.db.query("UPDATE return_comments SET createdAt=$1 WHERE returnId=$2", ['2026-10-12T08:00:00.000Z', ret.id]);
+    await f.app.store.db.query("UPDATE audit SET createdAt=$1 WHERE entity='returns' AND entityId=$2", ['2026-10-12T08:00:00.000Z', String(ret.id)]);
+    const path = `/api/returns/${ret.id}/timeline`;
+    const response = await f.request(path + '?limit=3', 'GET', undefined, f.auth);
+    assert.equal(response.status, 200);
+    const first = await response.json();
+    assert.equal(first.items.length, 3);
+    assert.equal(typeof first.nextCursor, 'string');
+    assert.ok(!/^\d+$/.test(first.nextCursor));
+    const second = await (await f.request(path + `?limit=3&before=${encodeURIComponent(first.nextCursor)}`, 'GET', undefined, f.auth)).json();
+    assert.equal(second.items.length, 3);
+    assert.equal(new Set([...first.items, ...second.items].map(item => item.id)).size, 6);
+    const third = await (await f.request(path + `?limit=3&before=${encodeURIComponent(second.nextCursor)}`, 'GET', undefined, f.auth)).json();
+    assert.equal(third.items.length, 3);
+    assert.equal(third.nextCursor, null);
+    assert.equal(new Set([...first.items, ...second.items, ...third.items].map(item => item.id)).size, 9);
+    for (const query of ['?limit=0', '?limit=101', '?limit=1.5', '?before=garbage', '?before=', '?before=' + first.nextCursor.slice(0, -2) + 'xx'])
+        assert.equal((await f.request(path + query, 'GET', undefined, f.auth)).status, 400);
+    assert.equal((await f.request(`/api/returns/${other.id}/timeline?before=${encodeURIComponent(first.nextCursor)}`, 'GET', undefined, f.auth)).status, 400);
+    assert.equal((await f.request('/api/returns/999999/timeline', 'GET', undefined, f.auth)).status, 404);
+});
+test('historical imports preserve known inactive assignment but refuse an unknown account without partial changes', async (t) => {
+    const f = await team(t), ret = await f.create({ returnNumber: 'WF-INACTIVE', assignedUserId: f.member.id, nextStep: 'Historischer Schritt' });
+    await f.app.users.update(f.member.id, { active: false });
+    const response = await f.request(`/api/export/returns?ids=${ret.id}`, 'GET', undefined, f.auth), csv = (await response.text()).replace('WF-INACTIVE', 'WF-INACTIVE-COPY'), mapping = guessCsvMapping('returns', parseCsv(csv).headers);
+    await commitImport(f.app.store, 'returns', csv, mapping, { duplicates: 'skip' });
+    assert.equal((await f.app.store.findReturn('WF-INACTIVE-COPY')).assignedDisplayName, 'Bearbeiter');
+    const unknown = 'Retourennummer;Artikelnummer;Seriennummer;Zuständig (Konto-ID);Nächster Schritt\nWF-VALID;WORKFLOW-1;SN;;unassigned\nWF-UNKNOWN;WORKFLOW-1;SN;999999;unknown';
+    await assert.rejects(async () => commitImport(f.app.store, 'returns', unknown, guessCsvMapping('returns', parseCsv(unknown).headers), { duplicates: 'skip' }), /Konto/);
+    assert.equal(await f.app.store.findReturn('WF-VALID'), null);
+});
+test('status history retains IDs across a renamed status and does not expose unrelated audit changes', async (t) => {
+    const f = await team(t), ret = await f.create();
+    await f.app.store.updateReturn(ret.id, { ...ret, statusId: 13, nextStep: 'Prüfen' });
+    await f.app.store.updateMasterData(13, { name: 'Eigene Prüfung' });
+    const timeline = await (await f.request(`/api/returns/${ret.id}/timeline`, 'GET', undefined, f.auth)).json(), status = timeline.items.find(item => item.type === 'status');
+    assert.equal(status.fromStatus, 'Eingegangen');
+    assert.equal(status.toStatus, 'In Prüfung');
+    assert.equal(status.fromStatusId, 12);
+    assert.equal(status.toStatusId, 13);
+    assert.equal(timeline.items.filter(item => item.type === 'status').length, 1);
+    assert.equal((await f.request(`/api/returns/${ret.id}/timeline?limit=3&limit=4`, 'GET', undefined, f.auth)).status, 400);
+});

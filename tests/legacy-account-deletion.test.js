@@ -1,0 +1,23 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { runtimeFixture, testPassword } from './helpers/runtime.js';
+import { sourceModule } from './helpers/source-module.js';
+import { enableMfa } from './helpers/mfa.js';
+import { createStore } from '../dist/server/legacy-sqlite/store.js';
+import { createUsers } from '../dist/server/legacy-sqlite/users.js';
+const confirmation = username => ({ username, confirmed: true, password: testPassword });
+test('deletion migration preserves legacy accounts, runs twice safely and never allows removing the last administrator', async (t) => {
+    const store = createStore(':memory:');
+    t.after(() => store.close());
+    let users = createUsers(store);
+    const admin = await users.createFirst({ username: 'Admin', password: testPassword });
+    store.db.exec('ALTER TABLE users DROP COLUMN deletedAt');
+    store.db.prepare('DELETE FROM migrations WHERE name=?').run('users-account-deletion-v1');
+    users = createUsers(store);
+    assert.equal(users.get(admin.id).username, 'Admin');
+    assert.equal(users.credentialsById(admin.id).deletedAt, null);
+    assert.throws(() => users.remove(admin.id, admin.id), /aktiver Administrator/);
+    users = createUsers(store);
+    assert.equal(users.list().length, 1);
+    assert.equal(users.setupRequired(), false);
+});

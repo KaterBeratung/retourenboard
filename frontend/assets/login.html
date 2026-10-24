@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#171a20">
+  <meta name="description" content="Produkte und Retouren gemeinsam verwalten. Mit Lieferanten, Seriennummern und CSV-Import.">
+  <title data-i18n="Anmelden · retourenboard.">Anmelden · retourenboard.</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <script src="/theme.js"></script>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/theme.css">
+  <script type="module" src="/bootstrap.js"></script>
+  <link rel="stylesheet" href="/design.css">
+  <link rel="stylesheet" href="/settings.css">
+  <link rel="stylesheet" href="/switches.css">
+  <link rel="stylesheet" href="/motion.css">
+</head>
+<body data-ui="board" class="auth-screen" data-page="login">
+  <div class="language-switch language-switch-auth" role="group" aria-label="Sprache auswählen" data-language-switch data-language="de"><svg class="language-switch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18m-9-9a17 17 0 0 1 0 18 17 17 0 0 1 0-18"/></svg><div class="language-options"><button type="button" data-language-button="de" lang="de" aria-label="Deutsch" title="Deutsch" aria-pressed="true">DE</button><button type="button" data-language-button="en" lang="en" aria-label="English" title="English" aria-pressed="false">EN</button></div></div>
+  <button class="btn secondary theme-switch theme-switch-auth" data-theme-toggle aria-label="Farbschema wechseln" data-rb-i18n-aria-label="%5B%22Farbschema%20wechseln%22%2C%22Switch%20color%20scheme%22%5D" title="Hell oder Dunkel auswählen" data-rb-i18n-title="%5B%22Hell%20oder%20Dunkel%20ausw%C3%A4hlen%22%2C%22Select%20light%20or%20dark%22%5D"><svg class="icon theme-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20.8 13.3A9 9 0 0 1 10.7 3.2a9 9 0 1 0 10.1 10.1Z"/></svg><svg class="icon theme-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></svg><span class="theme-label-dark"><!--rb-i18n:%5B%22Dunkel%22%2C%22Dark%22%5D-->Dunkel<!--/rb-i18n--></span><span class="theme-label-light"><!--rb-i18n:%5B%22Hell%22%2C%22Light%22%5D-->Hell<!--/rb-i18n--></span></button>
+  <main id="auth-page" class="auth-page" aria-labelledby="auth-title"><div class="loading"><span class="spinner"></span><!--rb-i18n:%5B%22Anmeldung%20wird%20geladen%20%E2%80%A6%22%2C%22Loading%20sign-in%20%E2%80%A6%22%5D-->Anmeldung wird geladen …<!--/rb-i18n--></div></main>
+  <dialog id="dialog" aria-labelledby="dialog-title"></dialog>
+  <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+</body>
+</html>

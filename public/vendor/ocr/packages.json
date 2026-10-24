@@ -1,0 +1,27 @@
+{
+  "tesseractJs": "7.0.0",
+  "core": "7.0.0",
+  "tessdataFastCommit": "87416418657359cb625c412a48b6e1d6d41c29bd",
+  "source": "https://github.com/tesseract-ocr/tessdata_fast",
+  "files": {
+    "core/tesseract-core-simd-lstm.wasm.js": "c58b46a4c796c0b8afccf77591d5b875b6896b45d402bbce8caa6f5362447b38",
+    "core/tesseract-core-relaxedsimd.wasm.js": "843074aa5bad1cc6421b74a86201768ced9f244795e4d81435435a61a40ce535",
+    "worker.min.js": "576b7df7e3393e137e51849357c9adb53fe7ac1bb69bfa06cf3d61520f182c6d",
+    "core/tesseract-core-lstm.wasm.js": "eef5f8b2f8e20e150680b20adaec4a60babafee3adbe8a94583c81fee46e8680",
+    "tesseract.esm.min.js": "16e25a1e44cb3b7e15c14cce158f4f3cade7f51ee2cdda6dceff9aa568923dc1",
+    "tesseract.min.js.LICENSE.txt": "cdf963ced7d25a0f98901a547647b4d6e2dbe0197fd78c87a059a87b0e542fe2",
+    "core/tesseract-core-relaxedsimd-lstm.wasm.js": "861a536cf9ef8e63cb644d57bab39c388f37f7d6b6f60024b741c5f6b39a59b3",
+    "core/tesseract-core.wasm.js": "0bc6ce3e5fbbd0cd89706cf2fd70960e3372f4f01ee24265b26990808aaeb286",
+    "LICENSE-TESSDATA": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "LICENSE-TESSERACT-JS.md": "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1",
+    "lang/deu.traineddata.gz": "1dec0e00cb662292a85f12b0112074fa417d51934d67ad091f1e7b98af475aef",
+    "LICENSE-TESSERACT-CORE": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08",
+    "core/tesseract-core-simd.wasm.js": "6b61ef4e911b5cf57e656bbfe983d6e2b3711a02dd164154ddda064566e8e09d",
+    "lang/eng.traineddata.gz": "9bf11f95058d9dbffb389e1d20da36d8323e69faaaabdf6d057513c3105590c8",
+    "worker.min.js.LICENSE.txt": "45f54171aeaa1d10c0c1a66f374b7bba1f02472b1487fbe892eec04f840002ac"
+  },
+  "patches": [
+    "Reject and terminate failed initialization",
+    "AbortSignal stops pending initialization and recognition"
+  ]
+}

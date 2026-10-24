@@ -1,0 +1,23 @@
+[data-ui="board"] .switch-field{position:relative;display:flex;align-items:center;gap:12px;color:var(--ink);cursor:pointer;touch-action:manipulation;--switch-on:var(--accent);--switch-off:var(--surface-hover);--switch-line:var(--line-strong);--switch-knob:#ffffff;--switch-knob-off:#ffffff;font-size:13px;line-height:1.5;min-height:40px}
+[data-theme="dark"] [data-ui="board"] .switch-field{--switch-on:var(--accent);--switch-off:var(--surface-hover);--switch-line:var(--line-strong);--switch-knob:#ffffff;--switch-knob-off:#ffffff}
+[data-ui="board"] .switch-field input.switch-input[type=checkbox]{position:absolute;left:0;top:50%;transform:translateY(-50%);width:50px;height:30px;margin:0;padding:0;border:0;opacity:0;cursor:inherit}
+.switch-control{display:block;position:relative;width:50px;height:30px;flex:0 0 50px;border:1px solid var(--switch-line);border-radius:999px;background:var(--switch-off);pointer-events:none;box-shadow:inset 0 1px 2px #00000012}
+.switch-thumb{position:absolute;left:2px;top:2px;width:24px;height:24px;border-radius:50%;background:var(--switch-knob-off);translate:0 0;scale:1 1;transition:translate var(--motion-switch) var(--motion-ease),background-color var(--motion-fast);box-shadow:0 2px 4px #00000026}
+.switch-input:checked+.switch-control{background:var(--switch-on);border-color:var(--switch-on)}
+.switch-input:checked+.switch-control .switch-thumb{translate:20px 0;background:var(--switch-knob)}
+.switch-input:focus-visible+.switch-control{outline:2px solid var(--switch-on);outline-offset:4px}
+.switch-field:hover .switch-input:not(:disabled)+.switch-control{box-shadow:0 0 0 3px color-mix(in srgb,var(--switch-on) 14%,transparent)}
+.switch-label{min-width:0;line-height:1.6}
+.switch-input:disabled+.switch-control,.switch-input:disabled~.switch-label{opacity:.5}
+.switch-field:has(.switch-input:disabled){cursor:not-allowed}
+@media(prefers-reduced-motion:no-preference){
+.switch-control{transition:background-color .18s,border-color .18s,box-shadow .18s}
+.switch-thumb{transition:translate .36s cubic-bezier(.34,1.56,.64,1),background-color .18s}
+}
+@media(forced-colors:active){
+.switch-control{forced-color-adjust:none;background:Canvas;border-color:ButtonText}
+.switch-thumb{background:ButtonText}
+.switch-input:checked+.switch-control{background:Highlight;border-color:Highlight}
+.switch-input:checked+.switch-control .switch-thumb{background:HighlightText}
+.switch-input:focus-visible+.switch-control{outline-color:Highlight}
+}

@@ -1,0 +1,47 @@
+name: retourenboard-external
+services:
+  retourenboard: &application
+    image: retourenboard:local
+    build:
+      context: ../..
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3000
+      DATA_DIR: /data
+      DATABASE_URL: ${DATABASE_URL:?Provide a private external database configuration}
+      NODE_ENV: "${RB_NODE_ENV:-development}"
+      SECURE_COOKIES: "${RB_SECURE_COOKIES:-false}"
+      PUBLIC_ORIGIN: "${RB_PUBLIC_ORIGIN:-}"
+      TRUSTED_PROXIES: "${RB_TRUSTED_PROXIES:-}"
+    ports:
+      - "${RB_BIND_IP:-127.0.0.1}:${RETOURENBOARD_HTTP_PORT:-${RB_PORT:-3000}}:3000"
+    volumes:
+      - retourenboard-data:/data
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3000/health').then(r=>r.json()).then(h=>process.exit(h.ok&&h.databaseEngine==='postgresql'?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+  migrate:
+    <<: *application
+    profiles: [migration]
+    restart: "no"
+    ports: []
+    healthcheck:
+      disable: true
+    volumes:
+      - retourenboard-data:/data
+      - legacy-data:/legacy:ro
+    entrypoint: [node, scripts/migrate-sqlite.mjs]
+    command: [--check, --data-dir, /data, --source-data, /legacy, --sqlite, /legacy/retouren.sqlite]
+volumes:
+  retourenboard-data:
+    name: ${RETOURENBOARD_DATA_VOLUME:-retourenboard-data}
+  legacy-data:
+    external: true
+    name: ${RETOURENBOARD_LEGACY_DATA_VOLUME:-retourenboard-legacy-data}

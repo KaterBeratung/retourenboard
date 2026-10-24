@@ -1,0 +1,1 @@
+export function paginate<T>(rows:T[],page=1,pageSize=25){if(![10,25,50,100].includes(pageSize))pageSize=25;const pages=Math.max(1,Math.ceil(rows.length/pageSize)),current=Math.max(1,Math.min(pages,Number.isFinite(page)?Math.floor(page):1));return {rows:rows.slice((current-1)*pageSize,current*pageSize),total:rows.length,page:current,pages};}

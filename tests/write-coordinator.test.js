@@ -1,0 +1,30 @@
+import test from './helpers/postgres-context.js';
+import assert from 'node:assert/strict';
+import { runtimeFixture } from './helpers/runtime.js';
+test('write coordinator serializes commits and recovers after a failed write', async () => {
+    const mod = await import('../dist/server/write-coordinator.js').catch(() => ({}));
+    assert.equal(typeof mod.createWriteCoordinator, 'function');
+    const writes = mod.createWriteCoordinator(), order = [];
+    let release;
+    const gate = new Promise(r => { release = r; });
+    const first = writes.run(async () => { order.push('first'); await gate; throw new Error('expected'); });
+    const firstError = assert.rejects(first, /expected/);
+    const second = writes.run(() => order.push('second'));
+    await Promise.resolve();
+    assert.deepEqual(order, ['first']);
+    release();
+    await firstError;
+    await second;
+    assert.deepEqual(order, ['first', 'second']);
+    await writes.close();
+    await assert.rejects(writes.run(() => order.push('late')), /beendet|geschlossen/i);
+});
+test('a failed recorded mutation rolls back both inventory and change metadata', async (t) => {
+    const { app } = await runtimeFixture(t);
+    const mod = await import('../dist/server/changes.js').catch(() => ({}));
+    assert.equal(typeof mod.createChanges, 'function');
+    const changes = mod.createChanges(app.store);
+    await assert.rejects(() => changes.run({ id: null, name: 'Test', source: 'system' }, { entity: 'products', action: 'create' }, async () => { await app.store.createProduct({ sku: 'A', name: 'A' }); throw new Error('rollback'); }), /rollback/);
+    assert.equal((await app.store.listProducts()).length, 0);
+    assert.equal((await app.store.db.query("SELECT COUNT(*) AS n FROM audit", [])).rows[0].n, 0);
+});

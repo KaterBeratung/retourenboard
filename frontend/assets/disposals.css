@@ -1,0 +1,121 @@
+[data-ui="board"] .disposal-guide{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 24px;color:var(--muted);font-size:12px}
+[data-ui="board"] .disposal-guide>span{display:inline-flex;align-items:center;gap:8px}
+.disposal-guide .icon{width:16px;height:16px}
+.disposal-guide>span>.icon{color:var(--design-accent)}
+[data-ui="board"] .disposal-status-tabs{margin:16px var(--space-panel) 20px;padding:4px;gap:4px;max-width:calc(100% - var(--space-panel) - var(--space-panel))}
+.disposal-list .table-toolbar{padding-block:20px}
+.disposal-table td{white-space:normal;min-width:130px}
+.disposal-table td:first-child{min-width:210px}
+.disposal-table td:last-child{min-width:96px}
+.disposal-table td>small{display:block;margin-top:6px;color:var(--muted);font-size:11px}
+.disposal-table .mono{overflow-wrap:anywhere}
+.disposal-table .row-link{font-size:13px}
+.disposal-table td:nth-child(4){min-width:205px}
+.disposal-intro{color:var(--muted);font-size:13px;line-height:1.65;margin:0}
+.disposal-catalog{padding:0 0 24px;border-bottom:1px solid var(--line)}
+.disposal-catalog h3{font-size:14px;line-height:1.5;margin:0 0 14px}
+.disposal-extra{border-block:1px solid var(--line);padding:18px 0;margin:0}
+.disposal-extra>.form-grid{margin-top:18px}
+.disposal-scan-line{display:flex;gap:10px;align-items:stretch}
+.disposal-scan-line>input{min-width:0;flex:1}
+.disposal-scan-line>.btn{flex:none;min-height:var(--control-height)}
+.disposal-linked{padding:12px 16px;display:flex;align-items:center;gap:8px;border-radius:10px;background:var(--design-tint);font-size:13px;flex-wrap:wrap}
+[data-ui="board"] .disposal-form .dialog-body{display:flex;flex-direction:column;gap:24px}
+.disposal-form .field{margin:0;min-width:0}
+.disposal-form .field-optional{display:inline;font-size:11px;font-weight:400;color:var(--muted);margin-left:6px}
+.disposal-form .product-picker>small{display:block;margin-top:8px;font-size:12px;line-height:1.6}
+.disposal-form .form-grid{gap:20px}
+.disposal-form .disposal-action-device{margin-bottom:0}
+[data-ui="board"] .disposal-form-footer{display:flex;justify-content:flex-end;gap:12px}
+.disposal-form-footer>.btn{min-height:var(--control-height);min-width:120px;justify-content:center}
+.disposal-form-footer>.primary{min-width:140px}
+[data-ui="board"] .disposal-workspace .heading-actions{align-items:center;gap:10px}
+.disposal-workspace .heading-actions>.btn{min-height:var(--control-height);justify-content:center}
+.disposal-list .toolbar-right{gap:10px;align-items:stretch}
+.disposal-list .toolbar-right>.btn{min-height:var(--control-height)}
+.disposal-list .toolbar-right select{min-height:var(--control-height)}
+.disposal-detail-lead{display:flex;gap:18px;align-items:flex-start;margin-bottom:26px}
+.disposal-detail-lead h3{margin:0 0 6px;font-size:21px;line-height:1.4;overflow-wrap:anywhere}
+.disposal-detail-lead .mono{margin:0 0 12px;overflow-wrap:anywhere}
+.disposal-device-icon{display:grid;place-items:center;flex:none;width:48px;height:48px;border-radius:14px;color:var(--design-accent);background:var(--design-tint)}
+.disposal-device-icon>.icon{width:24px;height:24px}
+.disposal-next-step{padding:20px;border-radius:12px;background:var(--design-tint);margin-bottom:26px;display:flex;align-items:flex-start;flex-direction:column;gap:12px}
+.disposal-next-step .eyebrow{margin:0}
+.disposal-next-step>strong{font-size:15px}
+.disposal-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin:0 0 26px}
+.disposal-facts dt{font-size:11px;color:var(--muted);margin-bottom:6px}
+.disposal-facts dd{margin:0;font-size:13px;line-height:1.6;overflow-wrap:anywhere;white-space:pre-wrap}
+.disposal-notes{padding:20px 0;border-top:1px solid var(--line);margin:0 0 20px}
+.disposal-notes p{font-size:13px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
+.disposal-detail h3{font-size:14px}
+.disposal-history{margin-top:26px;border-top:1px solid var(--line);padding-top:20px}
+.disposal-history ol{list-style:none;margin:20px 0 0;padding:0}
+.disposal-history li{display:flex;gap:14px;padding-bottom:22px;align-items:flex-start;font-size:12px}
+.disposal-history li>div{flex:1;min-width:0;overflow-wrap:anywhere}
+.disposal-history p{margin:6px 0;color:var(--muted);font-size:11px}
+.disposal-history-dot{width:9px;height:9px;border-radius:50%;background:var(--design-accent);margin-top:5px;flex:none}
+.disposal-detail-actions{flex-wrap:wrap;gap:10px}
+.disposal-action-device{display:grid;gap:8px;padding:16px;background:var(--design-tint);border-radius:12px;margin-bottom:22px}
+.disposal-action-device>.mono{overflow-wrap:anywhere}
+.disposal-action-device>span:last-child{font-size:12px;color:var(--muted)}
+/* Centered desktop sheets have enough width for facts and a short event row. */
+@media(min-width:1000px){
+.disposal-detail-lead{margin-bottom:20px;align-items:center}
+.disposal-next-step{padding:16px;border-radius:var(--control-radius);gap:6px;margin-bottom:20px}
+.disposal-facts{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px 20px;margin-bottom:20px}
+.disposal-history{margin-top:20px;padding-top:16px}
+.disposal-history ol{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+.disposal-history li{gap:8px;padding:12px;border:1px solid var(--line);border-radius:var(--radius-small);background:var(--menu-group)}
+.disposal-history li>small{flex:none}
+}
+@media(max-width:760px){
+.disposal-workspace .heading-actions{display:flex;flex-wrap:wrap;gap:8px}
+.disposal-workspace .heading-actions>.btn{flex:1}
+.disposal-guide{gap:9px!important;font-size:11px!important}
+.disposal-list .table-toolbar{align-items:stretch}
+.disposal-list .toolbar-right{margin:0;width:100%;justify-content:space-between}
+.disposal-scan-line{flex-wrap:wrap}
+.disposal-scan-line>.btn{width:100%;min-height:var(--control-height)}
+.disposal-facts{gap:18px 14px}
+.disposal-detail-actions>.btn{flex:1}
+.disposal-table td{font-size:12px}
+}
+@media(max-width:400px){
+.disposal-facts{grid-template-columns:1fr}
+.disposal-guide>svg{display:none}
+.disposal-guide{justify-content:space-between}
+}
+@media(max-width:620px){
+[data-ui="board"] .disposal-form .dialog-body{gap:20px}
+.disposal-form .disposal-catalog{padding-bottom:20px}
+.disposal-form .form-grid{gap:18px}
+[data-ui="board"] .disposal-form-footer{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.disposal-form-footer>.btn{min-width:0;width:100%;padding-inline:10px}
+.disposal-scan-line{flex-wrap:nowrap}
+.disposal-scan-line>.btn{width:auto;flex:none}
+.disposal-workspace .heading-actions>[data-disposal-create]{flex-basis:100%}
+}
+@media(max-width:760px){
+.disposal-status-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;overflow:visible}
+.disposal-status-tabs>button:first-child{grid-column:1/-1}
+.disposal-status-tabs>button{min-width:0;min-height:var(--control-height);display:flex;justify-content:center;align-items:center;gap:6px;padding:9px 6px;font-size:11px}
+.disposal-status-tabs>button>span{margin-left:0}
+}
+@media(max-width:1100px){
+.disposal-table{width:100%;table-layout:fixed}
+.disposal-table thead{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden}
+.disposal-table tbody{display:block}
+.disposal-table tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"device status" "serial serial" "mode actions" "created created";gap:var(--list-card-gap);padding:var(--list-card-padding);border-top:1px solid var(--line)}
+[data-ui="board"] .disposal-table td{display:block;min-width:0;padding:0!important;border:0;overflow-wrap:anywhere}
+.disposal-table td:nth-child(1){grid-area:device}
+.disposal-table td:nth-child(2){grid-area:serial}
+.disposal-table td:nth-child(3){grid-area:mode;align-self:center;color:var(--muted);font-size:11px}
+.disposal-table td:nth-child(4){grid-area:status;text-align:right}
+.disposal-table td:nth-child(5){grid-area:created;color:var(--muted);font-size:10px}
+.disposal-table td:nth-child(6){grid-area:actions;justify-self:end}
+.disposal-table td[data-label]::before{content:attr(data-label);font-size:10px;color:var(--muted);margin-right:8px}
+.disposal-table td:nth-child(2)::before{display:block;margin:0 0 5px}
+.disposal-table .row-link{max-width:100%}
+.disposal-table .record-actions{gap:8px}
+.disposal-table .record-actions button{min-width:44px;min-height:44px}
+}

@@ -1,0 +1,17 @@
+import {html,t,apiError} from './i18n.js';
+import {h,icon,openDialog,trackFormSave} from './ui.js';
+import {masterLabel,workflowStatuses} from './inventory-display.js';
+import {bindReturnAssignees} from './form-feedback.js';
+import {captureAuthContext} from './auth-context.js';
+export function returnTransition(ctx:any,item:any,action:'reopen'|'handover',onSaved:(item:any)=>void){
+ if(!ctx.can('returnsEdit')||!ctx.can('returnsStatus'))return;
+ const statuses=workflowStatuses(ctx.masterdata.statuses.filter(row=>row.active&&!row.isClosed));if(!statuses.length){ctx.toast(t('Kein offener Status verfügbar. Bitte im Adminbereich anlegen.'));return;}
+ const reopen=action==='reopen',title=reopen?'Retoure wieder öffnen':'Retoure übergeben';
+ const dialog:HTMLDialogElement=openDialog({title:t(title),subtitle:item.returnNumber,body:html`<form><div class="dialog-body grouped-form"><p class="muted">${t(reopen?'Wiederöffnung begründen und einen offenen Status wählen.':'Status, Zuständigkeit und nächsten Schritt gemeinsam festlegen.')}</p><div class="form-grid"><label class="field full"><span>Neuer Status</span><select name="statusId" required>${statuses.map(row=>html`<option value="${row.id}"${row.id===item.statusId?' selected':''}>${h(masterLabel(row))}</option>`).join('')}</select></label>${reopen?html`<label class="field full"><span>Begründung <b>*</b></span><textarea name="reason" maxlength="500" rows="3" required></textarea></label>`:html`<label class="field full"><span>Verantwortliche Person <b>*</b></span><select name="assignedUserId" required><option value="">Keine Zuordnung</option></select><small data-assignee-help></small></label><label class="field full"><span>Nächster Schritt <b>*</b></span><textarea name="nextStep" maxlength="500" rows="3" required>${h(item.nextStep)}</textarea></label>`}</div><p class="form-error" role="alert" hidden></p></div><div class="dialog-footer"><button class="btn secondary" type="button" data-close>Abbrechen</button><button class="btn primary" type="submit">${icon(reopen?'refresh':'users')}${t(reopen?'Wieder öffnen':'Übergabe')}</button></div></form>`});
+ const form=dialog.querySelector<HTMLFormElement>('form'),auth=captureAuthContext(ctx),current=()=>auth()&&dialog.open&&dialog.querySelector('form')===form&&ctx.can('returnsEdit')&&ctx.can('returnsStatus'),start=trackFormSave(form);let busy=false;
+ if(!reopen)void bindReturnAssignees(form,ctx,item,current);
+ form.onsubmit=async event=>{event.preventDefault();if(busy||!current())return;busy=true;const button=form.querySelector<HTMLButtonElement>('[type=submit]'),error=form.querySelector<HTMLElement>('.form-error'),committed=start();button.disabled=true;error.hidden=true;
+ try{const values=Object.fromEntries(new FormData(form)),body={...values,statusId:Number(values.statusId),...(!reopen?{assignedUserId:Number(values.assignedUserId)}:{}),expectedUpdatedAt:item.updatedAt,revision:item.revision};const saved=await ctx.api(`/api/returns/${item.id}/${action}`,{method:'POST',body});if(!current()||!committed())return;dialog.close();await ctx.reload();if(auth())onSaved(saved);}
+ catch(err){if(current()){error.textContent=String(apiError(err.message));error.hidden=false;}}
+ finally{busy=false;if(current())button.disabled=false;}};
+}

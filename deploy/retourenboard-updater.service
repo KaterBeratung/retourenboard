@@ -1,0 +1,31 @@
+[Unit]
+Description=retourenboard. - manueller In-App-Updater
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/usr/local/lib/retourenboard-updater
+EnvironmentFile=/etc/retourenboard.env
+ExecStart=/opt/retourenboard/node/bin/node /usr/local/lib/retourenboard-updater/server/updater-entry.js
+Restart=on-failure
+RestartSec=5
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+RuntimeDirectory=retourenboard-updater
+RuntimeDirectoryMode=0750
+ReadWritePaths=/opt/retourenboard /var/lib/retourenboard /var/lib/retourenboard-updater /run/retourenboard-updater /var/lib
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target

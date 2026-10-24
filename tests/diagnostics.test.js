@@ -1,0 +1,30 @@
+import test from './helpers/postgres-context.js';
+import assert from 'node:assert/strict';
+import { runtimeFixture } from './helpers/runtime.js';
+test('diagnostics reports own storage and runtime without leaking environment or keys', async (t) => {
+    const f = await runtimeFixture(t), { auth } = await f.setup();
+    const response = await f.request('/api/admin/diagnostics', 'GET', undefined, auth);
+    assert.equal(response.status, 200);
+    const data = await response.json();
+    assert.ok(data.storage.databaseBytes > 0);
+    assert.equal(data.nodeVersion, process.version);
+    assert.ok(data.storage.freeBytes === null || data.storage.freeBytes > 0);
+    assert.equal(JSON.stringify(data).includes(f.dataDir), false);
+    assert.equal((await f.request('/api/admin/diagnostics')).status, 401);
+});
+test('diagnostics includes counts, last successful backup, pending network changes and mail states', async (t) => {
+    const f = await runtimeFixture(t), { auth } = await f.setup();
+    const created = await f.request('/api/admin/backups/create', 'POST', {}, auth);
+    assert.equal(created.status, 201);
+    await f.app.store.db.query("INSERT INTO mail_outbox(eventKey,payload,nextAt,createdAt) VALUES('diagnostic-mail','{}',0,'2026-10-06T12:00:00Z') RETURNING id", []);
+    await f.app.settings.update({ port: 4321 });
+    const data = await (await f.request('/api/admin/diagnostics?refresh=true', 'GET', undefined, auth)).json();
+    assert.equal(data.attachments.count, 0);
+    assert.ok(data.backups.lastSuccess.finishedAt);
+    assert.ok(data.backups.lastSuccess.size > 0);
+    assert.equal(data.network.pendingRestart, true);
+    assert.equal(data.network.configured.port, 4321);
+    assert.equal(data.mail.pending, 1);
+    assert.equal(data.mail.failed, 0);
+    assert.equal(JSON.stringify(data).includes('diagnostic-mail'), false);
+});

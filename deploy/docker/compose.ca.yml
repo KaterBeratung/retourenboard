@@ -1,0 +1,11 @@
+services:
+  retourenboard:
+    environment:
+      DATABASE_CA_FILE: /run/retourenboard-database-ca.pem
+    volumes:
+      - ${RETOURENBOARD_DATABASE_CA_FILE:?Provide the public database CA certificate}:/run/retourenboard-database-ca.pem:ro
+  migrate:
+    environment:
+      DATABASE_CA_FILE: /run/retourenboard-database-ca.pem
+    volumes:
+      - ${RETOURENBOARD_DATABASE_CA_FILE:?Provide the public database CA certificate}:/run/retourenboard-database-ca.pem:ro

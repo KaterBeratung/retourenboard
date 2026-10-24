@@ -1,0 +1,140 @@
+@keyframes board-search-reveal{from{opacity:0;translate:0 -4px}to{opacity:1;translate:0 0}}
+@keyframes board-dialog{from{opacity:0;translate:0 10px;scale:.97}to{opacity:1;translate:0 0;scale:1}}
+@keyframes board-menu{from{opacity:0}to{opacity:1}}
+@keyframes board-disclosure{from{opacity:0}to{opacity:1}}
+@keyframes board-backdrop{from{opacity:0}to{opacity:1}}
+@keyframes board-confirm{from{opacity:.5;scale:.85}to{opacity:1;scale:1}}
+@keyframes board-notice{from{opacity:0}to{opacity:1}}
+@keyframes board-symbol-turn{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+@keyframes board-symbol-lid{0%,100%{transform:none}34%,56%{transform:translateY(-.3px) rotate(-14deg)}78%{transform:rotate(2deg)}}
+@keyframes board-symbol-scan{0%{opacity:0;transform:translateY(0)}14%{opacity:1}80%{opacity:1;transform:translateY(9px)}100%{opacity:0;transform:translateY(9px)}}
+@keyframes board-symbol-scan-bars{0%,100%{opacity:1}40%{opacity:.5}72%{opacity:1}}
+@keyframes board-symbol-copy-front{0%,100%{transform:none}38%,60%{transform:translate(-2px,-2px)}}
+@keyframes board-symbol-copy-back{0%,100%{transform:none}38%,60%{transform:translate(2px,2px)}}
+@keyframes board-symbol-shift{0%,100%{transform:none}42%,58%{transform:translate(var(--symbol-x,0px),var(--symbol-y,0px))}}
+@keyframes board-symbol-tilt{0%,100%{transform:none}40%,60%{transform:rotate(var(--symbol-angle,8deg))}}
+@keyframes board-symbol-ring{0%,100%{transform:none}24%{transform:rotate(var(--symbol-angle,6deg))}52%{transform:rotate(calc(var(--symbol-angle,6deg) * -.65))}76%{transform:rotate(calc(var(--symbol-angle,6deg) * .25))}}
+@keyframes board-symbol-blink{0%,100%{transform:none}34%{transform:scaleY(.18)}65%{transform:scaleY(1)}}
+@keyframes board-symbol-meridian{0%,100%{transform:none}45%,55%{transform:scaleX(.22)}}
+@keyframes board-symbol-quarter-turn{from{transform:rotate(0)}to{transform:rotate(90deg)}}
+@keyframes board-symbol-trace{0%{stroke-dasharray:1;stroke-dashoffset:1}72%,100%{stroke-dasharray:1;stroke-dashoffset:0}}
+@keyframes board-symbol-tile{0%,100%{transform:none}38%{transform:scale(.88)}72%{transform:scale(1.04)}}
+@keyframes board-symbol-add{0%,100%{transform:none}38%{transform:scale(.78)}72%{transform:scale(1.08)}}
+@keyframes board-symbol-clock{0%,100%{transform:none}48%{transform:rotate(32deg)}}
+@keyframes board-symbol-send{0%,100%{transform:none}42%{transform:translate(1.2px,-1.2px) scale(.96)}72%{transform:translate(-.3px,.3px)}}
+@keyframes board-symbol-filter{0%,100%{transform:none}40%{transform:scaleX(.86)}}
+@keyframes board-symbol-search{0%,100%{transform:none}40%,55%{transform:scale(1.08)}}
+@keyframes board-symbol-pencil{0%,100%{transform:none}30%{transform:rotate(3deg)}65%{transform:translateX(.6px) rotate(-2deg)}}
+[data-ui="board"] svg.icon[aria-hidden="true"]{pointer-events:none}
+[data-ui="board"] .icon>:is(path,rect,circle,ellipse,line,polyline,polygon){transform-box:view-box;transform-origin:12px 12px}
+/* Symbol-specific artwork, shared by navigation, cards, menus and buttons. */
+[data-ui="board"] .icon{--symbol-animation:none;--symbol-duration:var(--motion-symbol);--symbol-easing:var(--motion-symbol-ease);--symbol-delay:0ms}
+[data-ui="board"] .icon[data-symbol="refresh"]{--symbol-animation:board-symbol-turn;--symbol-duration:var(--motion-symbol-detail)}
+[data-ui="board"] .icon>.icon-logout-arrow{--symbol-animation:board-symbol-shift;--symbol-x:2px}
+[data-ui="board"] .icon>.icon-trash-lid{--symbol-animation:board-symbol-lid;--symbol-duration:var(--motion-symbol-detail);transform-origin:6px 6px}
+[data-ui="board"] .icon>.icon-scan-line{--symbol-animation:board-symbol-scan;--symbol-duration:var(--motion-symbol-detail)}
+[data-ui="board"] .icon>.icon-scan-bars{--symbol-animation:board-symbol-scan-bars;--symbol-duration:var(--motion-symbol-detail)}
+[data-ui="board"] .icon>.icon-copy-front{--symbol-animation:board-symbol-copy-front;--symbol-duration:var(--motion-symbol-detail)}
+[data-ui="board"] .icon>.icon-copy-back{--symbol-animation:board-symbol-copy-back;--symbol-duration:var(--motion-symbol-detail)}
+[data-ui="board"] .icon[data-symbol="menu"]>path{--symbol-animation:board-symbol-shift;--symbol-x:1.5px}
+[data-ui="board"] .icon[data-symbol="menu"]>path:nth-child(2){--symbol-x:-1.5px;--symbol-delay:35ms}
+[data-ui="board"] .icon[data-symbol="menu"]>path:nth-child(3){--symbol-delay:70ms}
+[data-ui="board"] .icon>:is(.icon-chat-bubble,.icon-file-sheet){--symbol-animation:board-symbol-tilt;--symbol-angle:-5deg}
+[data-ui="board"] .icon>.icon-eye-pupil{--symbol-animation:board-symbol-blink}
+[data-ui="board"] .icon:is([data-symbol="eyeOff"],[data-symbol="at"],[data-symbol="info"])>path:last-child,
+[data-ui="board"] .icon[data-symbol="calendar"]>path[pathLength],
+[data-ui="board"] .icon:is([data-symbol="return"],[data-symbol="check"],[data-symbol="paperclip"])>path{--symbol-animation:board-symbol-trace}
+[data-ui="board"] .icon[data-symbol="search"]>circle{--symbol-animation:board-symbol-search;transform-origin:10.5px 10.5px}
+[data-ui="board"] .icon[data-symbol="calendar"]>path:last-child{--symbol-delay:70ms}
+[data-ui="board"] .icon:is([data-symbol="user"],[data-symbol="users"])>circle,[data-ui="board"] .icon>.icon-user-head{--symbol-animation:board-symbol-shift;--symbol-y:-.8px}
+[data-ui="board"] .icon>.icon-user-head{--symbol-delay:70ms}
+[data-ui="board"] .icon[data-symbol="globe"]>ellipse{--symbol-animation:board-symbol-meridian}
+[data-ui="board"] .icon[data-symbol="send"]{--symbol-animation:board-symbol-send}
+[data-ui="board"] .icon>:is(.icon-slider-a,.icon-slider-b,.icon-slider-c){--symbol-animation:board-symbol-shift;--symbol-x:1px}
+[data-ui="board"] .icon>.icon-slider-b{--symbol-x:-1px;--symbol-delay:50ms}
+[data-ui="board"] .icon>.icon-slider-c{--symbol-delay:100ms}
+[data-ui="board"] .icon>.icon-bell-body{--symbol-animation:board-symbol-ring;transform-origin:12px 4px}
+[data-ui="board"] .icon>.icon-bell-clapper{--symbol-animation:board-symbol-ring;--symbol-angle:-8deg;--symbol-delay:35ms;transform-origin:12px 17px}
+[data-ui="board"] .icon[data-symbol="dashboard"]>rect{--symbol-animation:board-symbol-tile;transform-box:fill-box;transform-origin:center}
+[data-ui="board"] .icon[data-symbol="dashboard"]>rect:nth-child(2){--symbol-delay:35ms}
+[data-ui="board"] .icon[data-symbol="dashboard"]>rect:nth-child(3){--symbol-delay:70ms}
+[data-ui="board"] .icon[data-symbol="dashboard"]>rect:nth-child(4){--symbol-delay:105ms}
+[data-ui="board"] .icon>.icon-box-left{--symbol-animation:board-symbol-tilt;--symbol-angle:-6deg;transform-origin:12px 13px}
+[data-ui="board"] .icon>.icon-box-right{--symbol-animation:board-symbol-tilt;--symbol-angle:6deg;transform-origin:12px 13px}
+[data-ui="board"] .icon>.icon-box-seam{--symbol-animation:board-symbol-trace}
+[data-ui="board"] .icon>.icon-transfer-arrow{--symbol-animation:board-symbol-shift;--symbol-y:-1.5px}
+[data-ui="board"] .icon[data-symbol="download"]>.icon-transfer-arrow{--symbol-y:1.5px}
+[data-ui="board"] .icon>.icon-lock-shackle{--symbol-animation:board-symbol-tilt;--symbol-angle:-9deg;transform-origin:8px 10px}
+[data-ui="board"] .icon[data-symbol="unlock"]>.icon-lock-shackle{--symbol-angle:9deg}
+[data-ui="board"] .icon:is([data-symbol="chevron"],[data-symbol="arrow"]){--symbol-animation:board-symbol-shift;--symbol-x:1.5px}
+[data-ui="board"] .icon[data-symbol="arrowLeft"]{--symbol-animation:board-symbol-shift;--symbol-x:-1.5px}
+[data-ui="board"] .icon[data-symbol="chevronDown"]{--symbol-animation:board-symbol-shift;--symbol-y:1.5px}
+[data-ui="board"] .icon[data-symbol="plus"]{--symbol-animation:board-symbol-add}
+[data-ui="board"] .icon[data-symbol="close"]{--symbol-animation:board-symbol-quarter-turn}
+[data-ui="board"] .icon>.icon-clock-minute{--symbol-animation:board-symbol-clock;--symbol-duration:var(--motion-symbol-detail)}
+[data-ui="board"] .icon>.icon-clock-hour{--symbol-animation:board-symbol-tilt;--symbol-angle:12deg}
+[data-ui="board"] .icon[data-symbol="filter"]{--symbol-animation:board-symbol-filter}
+[data-ui="board"] .icon[data-symbol="edit"]>path{--symbol-animation:board-symbol-pencil;transform-origin:4px 20px}
+[data-ui="board"] .icon[data-symbol="more"]>circle{--symbol-animation:board-symbol-shift;--symbol-y:-1.5px}
+[data-ui="board"] .icon[data-symbol="more"]>circle:nth-child(2){--symbol-delay:60ms}
+[data-ui="board"] .icon[data-symbol="more"]>circle:nth-child(3){--symbol-delay:120ms}
+[data-ui="board"] .icon.theme-sun>path{--symbol-animation:board-symbol-quarter-turn}
+[data-ui="board"] .icon.theme-sun>circle{--symbol-animation:board-symbol-tile}
+[data-ui="board"] .icon.theme-moon>path{--symbol-animation:board-symbol-tilt;--symbol-angle:8deg}
+[data-ui="board"] .toast-region{transform:translateX(-50%);translate:0 6px;animation:none;transition:none}
+[data-ui="board"] .toast-region.visible{transform:translateX(-50%);translate:0 0}
+[data-ui="board"] .notice-card.notice-leaving{animation:none;opacity:0;translate:0 0;pointer-events:none}
+html[data-motion="normal"] [data-ui="board"] :is(.btn,.icon-btn,.text-link,.status-tabs button,.admin-tabs button,.chat-channel,.workflow-row,.support-link,.currency-option,.currency-control summary){transition:background-color var(--motion-fast) ease,border-color var(--motion-fast) ease,color var(--motion-fast) ease,box-shadow var(--motion-fast) ease}
+html[data-motion="normal"] [data-ui="board"] .sidebar :is(nav a,.nav-tool,.nav-tools summary){transition:background-color var(--motion-fast) ease,color var(--motion-fast) ease}
+html[data-motion="normal"] [data-ui="board"] .auth-card,html[data-motion="normal"] [data-ui="board"] dialog[open]{animation:board-dialog var(--motion-enter) var(--motion-ease)}
+html[data-motion="normal"] [data-ui="board"] dialog[open]::backdrop,html[data-motion="normal"] [data-ui="board"].nav-open .nav-backdrop{animation:board-backdrop var(--motion-enter) ease-out}
+html[data-motion="normal"] [data-ui="board"] :is(.header-menu[open]>.header-menu-panel,.currency-control[open] .currency-menu,.product-search-popover:not([hidden]),.mention-menu:not([hidden]),.record-menu-popup:not([hidden])){animation:board-menu var(--motion-enter) var(--motion-ease)}
+html[data-motion="normal"] [data-ui="board"] .chat-message-search:not([hidden]){animation:board-search-reveal var(--motion-enter) var(--motion-ease)}
+/* Press feedback does not move the pointer target or trigger layout. */
+html[data-motion="normal"] [data-ui="board"] .btn:active:not(:disabled){box-shadow:inset 0 2px 5px #0000001a;filter:brightness(.96)}
+/* Animate the artwork inside the fixed SVG viewport, never the click target. */
+html[data-motion="normal"] [data-ui="board"] :is(.btn,.icon-btn,.text-link,.record-menu-item):not(:disabled)>.icon,
+html[data-motion="normal"] [data-ui="board"] :is(.sidebar nav a>.icon,.nav-tool .icon,.kpi-icon,.kpi-link>small .icon,.workflow-symbol,.chat-channel-symbol){transition:opacity var(--motion-fast) ease,color var(--motion-fast) ease,background-color var(--motion-fast) ease}
+html[data-motion="normal"] [data-ui="board"] :is(.btn,.icon-btn):active:not(:disabled)>.icon{opacity:.7}
+html[data-motion="normal"] [data-ui="board"] .kpi-link{transition:border-color var(--motion-fast) ease,box-shadow var(--motion-enter) ease}
+html[data-motion="normal"] [data-ui="board"] .icon-btn[data-copy-state="copied"]>.icon{animation:board-confirm 220ms var(--motion-ease)}
+html[data-motion="normal"] [data-ui="board"] .toast-region{transition:opacity var(--motion-enter) ease,translate var(--motion-enter) var(--motion-ease)}
+/* Fades keep floating surfaces inside their measured, scrollable bounds. */
+html[data-motion="normal"] [data-ui="board"] .notice-card{animation:board-notice var(--motion-enter) var(--motion-ease);transition:opacity var(--motion-enter) ease}
+html[data-motion="normal"] [data-ui="board"] .notice-card.notice-leaving{animation:none}
+html[data-motion="normal"] [data-ui="board"] .sidebar{transition:transform var(--motion-drawer) var(--motion-ease)}
+html[data-motion="normal"] [data-ui="board"] .language-options::before{transition:transform var(--motion-drawer) var(--motion-ease)}
+html[data-motion="normal"] [data-ui="board"] .language-options button{transition:color var(--motion-fast) ease}
+html[data-motion="normal"] [data-ui="board"] .currency-caret{transition:transform var(--motion-enter) var(--motion-ease)}
+html[data-motion="normal"] [data-ui="board"] .switch-control{transition:background-color var(--motion-fast),border-color var(--motion-fast),box-shadow var(--motion-fast)}
+html[data-motion="normal"] [data-ui="board"] .switch-thumb{transition:translate var(--motion-switch) var(--motion-spring),background-color var(--motion-fast)}
+html[data-motion="normal"] [data-ui="board"] .product-search-option{transition:background-color var(--motion-fast)}
+html[data-motion="normal"] [data-ui="board"] .skeleton-line{animation:skeleton-breathe 2.2s ease-in-out .2s infinite}
+html[data-motion="normal"] [data-ui="board"] .table-preferences-menu{animation:board-menu var(--motion-fast) var(--motion-ease)}
+html[data-motion="normal"] [data-ui="board"] .density-options button{transition:background-color var(--motion-fast) ease,border-color var(--motion-fast) ease}
+html[data-motion="normal"] [data-ui="board"] .month-bar{transition:opacity var(--motion-fast)}
+@supports(appearance:base-select){
+html[data-motion="normal"] [data-ui="board"] select:where(:not([multiple]):not([hidden]):not([size])):open::picker(select){animation:board-menu var(--motion-enter) var(--motion-ease)}
+}
+html[data-motion="normal"] [data-ui="board"] details>summary::after{transition:rotate var(--motion-enter) var(--motion-ease)}
+html[data-motion="normal"] [data-ui="board"] details:where(:not(.header-menu,.table-preferences,.workspace-saved-filters,.currency-control))[open]>:not(summary){animation:board-disclosure var(--motion-enter) var(--motion-ease)}
+/* A delegated interaction starts one complete sequence, including after pointer exit. */
+html[data-motion="normal"] [data-ui="board"] .icon[data-icon-motion="active"]:not(:is(:disabled,[aria-disabled="true"],[data-copy-state="copied"]) *)>:is(path,rect,circle,ellipse,line,polyline,polygon){animation:var(--symbol-animation,none) var(--symbol-duration,var(--motion-symbol)) var(--symbol-easing,var(--motion-symbol-ease)) var(--symbol-delay,0ms)}
+@media(hover:hover) and (pointer:fine){
+html[data-motion="normal"] [data-ui="board"] .kpi-link:is(:hover,:focus-visible) .kpi-icon{background-color:color-mix(in srgb,var(--metric-accent) 22%,var(--surface))}
+}
+/* The resolved account mode owns motion; the system is the safe default before it loads. */
+html[data-motion="reduce"] [data-ui="board"] *,html[data-motion="reduce"] [data-ui="board"] *::before,html[data-motion="reduce"] [data-ui="board"] *::after,html[data-motion="reduce"] [data-ui="board"] dialog::backdrop{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+html[data-motion="reduce"] [data-ui="board"] select::picker-icon{animation:none!important;transition:none!important}
+html[data-motion="reduce"] [data-ui="board"] input::file-selector-button{animation:none!important;transition:none!important}
+@media(prefers-reduced-motion:reduce){
+html:not([data-motion="normal"]) [data-ui="board"] *,html:not([data-motion="normal"]) [data-ui="board"] *::before,html:not([data-motion="normal"]) [data-ui="board"] *::after,html:not([data-motion="normal"]) [data-ui="board"] dialog::backdrop{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+html:not([data-motion="normal"]) [data-ui="board"] select::picker-icon{animation:none!important;transition:none!important}
+html:not([data-motion="normal"]) [data-ui="board"] input::file-selector-button{animation:none!important;transition:none!important}
+}
+@supports(appearance:base-select){
+html[data-motion="reduce"] [data-ui="board"] select::picker(select){animation:none!important;transition:none!important}
+@media(prefers-reduced-motion:reduce){
+html:not([data-motion="normal"]) [data-ui="board"] select::picker(select){animation:none!important;transition:none!important}
+}
+}

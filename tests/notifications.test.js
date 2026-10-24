@@ -1,0 +1,36 @@
+import test from './helpers/postgres-context.js';
+import assert from 'node:assert/strict';
+import { runtimeFixture } from './helpers/runtime.js';
+test('notifications have private read state and backup failures only reach active administrators', async (t) => {
+    const f = await runtimeFixture(t), { auth } = await f.setup();
+    await f.request('/api/users', 'POST', { username: 'Worker', password: 'Testkonto-Passwort!' }, auth);
+    const worker = await f.login('Worker');
+    const p = await (await f.request('/api/products', 'POST', { sku: 'N', name: 'Test' }, auth)).json();
+    await f.request('/api/returns', 'POST', { serialNumber: 'TEST-SN', productId: p.id, receiptDate: '2026-10-06' }, auth);
+    const list = await f.request('/api/notifications', 'GET', undefined, auth);
+    assert.equal(list.status, 200);
+    const inbox = await list.json();
+    assert.equal(inbox.unread, 1);
+    assert.equal(inbox.items[0].kind, 'newReturn');
+    await f.request(`/api/notifications/${inbox.items[0].id}/read`, 'POST', {}, auth);
+    assert.equal((await (await f.request('/api/notifications', 'GET', undefined, worker.auth)).json()).unread, 1);
+    await f.app.notifications.publish({ id: 'backup-failure', type: 'backupError', payload: {} });
+    assert.equal((await (await f.request('/api/notifications', 'GET', undefined, worker.auth)).json()).items.some(n => n.kind === 'backupError'), false);
+    assert.equal((await (await f.request('/api/notifications', 'GET', undefined, auth)).json()).items.some(n => n.kind === 'backupError'), true);
+});
+test('overdue checks and grouped imports do not repeat notifications across workers', async (t) => {
+    let now = Date.parse('2026-10-06T12:00:00Z');
+    const f = await runtimeFixture(t, { now: () => now }), { auth } = await f.setup();
+    const p = await (await f.request('/api/products', 'POST', { sku: 'N', name: 'Test' }, auth)).json();
+    await f.request('/api/returns', 'POST', { serialNumber: 'TEST-SN', productId: p.id, receiptDate: '2026-09-01' }, auth);
+    assert.ok(f.app.notifications);
+    await f.app.notifications.checkOverdue();
+    await f.app.notifications.checkOverdue();
+    assert.equal((await (await f.request('/api/notifications', 'GET', undefined, auth)).json()).items.filter(n => n.kind === 'overdue').length, 1);
+    await f.app.preferences.update('rules', { deadlineDays: 10 });
+    await f.app.notifications.checkOverdue();
+    assert.equal((await (await f.request('/api/notifications', 'GET', undefined, auth)).json()).items.filter(n => n.kind === 'overdue').length, 1);
+    await f.request('/api/import/commit', 'POST', { kind: 'returns', text: 'SKU;SN\nN;SN1\nN;SN2', mapping: { sku: 0, serialNumber: 1 } }, auth);
+    const imported = (await (await f.request('/api/notifications', 'GET', undefined, auth)).json()).items.filter(n => n.message.includes('2 Retouren'));
+    assert.equal(imported.length, 1);
+});

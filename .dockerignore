@@ -1,0 +1,9 @@
+**
+!Dockerfile
+!package.json
+!dist/
+!dist/**
+!scripts/
+!scripts/**
+scripts/**/.env*
+scripts/**/*.sqlite*
