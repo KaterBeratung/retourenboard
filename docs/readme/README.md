@@ -21,7 +21,7 @@ Produkte verwalten. Retouren bearbeiten. Im Team den Überblick behalten.
 
 retourenboard. ist eine Webanwendung für die gemeinsame Retourenverwaltung. Dein Team arbeitet mit demselben Produkt- und Retourenbestand. Zuständigkeiten, Bearbeitungsstände, Gerätekennungen und Absprachen bleiben am jeweiligen Vorgang nachvollziehbar. Du betreibst die Anwendung auf deinem eigenen Server und vergibst die Zugänge und Rechte selbst.
 
-Alle hier gezeigten Aufnahmen stammen aus der Anwendung und enthalten **synthetische Demodaten**. Desktopbilder sind im Format **16:9**, Mobilansichten im Hochformat aufgenommen. [Bildübersicht und Prüfsummen](screenshots/README.md).
+Alle hier gezeigten Aufnahmen stammen aus der Anwendung und enthalten **synthetische Demodaten**. Desktopbilder sind in **3840 × 2160 Pixeln (4K, 16:9)** aufgenommen; Mobilansichten in **1320 × 2868 Pixeln** mit dem responsiven Format des iPhone 16 Pro Max. Dieselben Motive werden für die Werbeseite verwendet. [Bildübersicht, Aufnahmeverfahren und Prüfsummen](screenshots/README.md).
 
 ## Was du damit erledigen kannst
 
@@ -82,9 +82,9 @@ Die folgenden Ansichten zeigen den aktuellen Stand. Die verfügbaren Aktionen ri
 Mobile Ansichten verwenden passende Karten und eine untere Navigation. Auf dem Smartphone lassen sich Einträge und Aktionen ohne seitliches Scrollen durch breite Tabellen bedienen.
 
 <p align="center">
-  <img src="screenshots/mobile-overview-de.jpg" alt="Dashboard auf dem Smartphone" width="230" height="498">
-  <img src="screenshots/mobile-returns-de.jpg" alt="Kompakte Retourenkarten und Schnellaktionen auf dem Smartphone" width="230" height="498">
-  <img src="screenshots/mobile-chat-de.jpg" alt="Teamchat auf dem Smartphone" width="230" height="498">
+  <img src="screenshots/mobile-overview-de.jpg" alt="Dashboard auf dem Smartphone" width="230" height="500">
+  <img src="screenshots/mobile-returns-de.jpg" alt="Kompakte Retourenkarten und Schnellaktionen auf dem Smartphone" width="230" height="500">
+  <img src="screenshots/mobile-chat-de.jpg" alt="Teamchat auf dem Smartphone" width="230" height="500">
 </p>
 
 ## Installation

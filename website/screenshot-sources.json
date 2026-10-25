@@ -1,0 +1,246 @@
+{
+  "version": "4.0.70",
+  "sourceManifest": "../docs/readme/screenshots/manifest.json",
+  "images": [
+    {
+      "file": "src/assets/overview-dark-de.webp",
+      "source": "../docs/readme/screenshots/overview-dark-de.jpg",
+      "sourceSha256": "d291133cc91b87b2ece15c71bdfeba8527a36aa50d3c1115ec632bf0ba47a109",
+      "width": 1600,
+      "height": 900,
+      "bytes": 73718,
+      "sha256": "02d1700b198bb1cbf668f28b9f0cb506197d8aa2ea204746380a37bf64bbc295",
+      "presentation": "Full 16:9 desktop capture"
+    },
+    {
+      "file": "src/assets/overview-dark-en.webp",
+      "source": "../docs/readme/screenshots/overview-dark-en.jpg",
+      "sourceSha256": "488eea3000e67fe7838de049481fcac5ba59ce3152e3412d8b01cd73f6ce7f8d",
+      "width": 1600,
+      "height": 900,
+      "bytes": 69972,
+      "sha256": "692c0367b8b37575053b7237331476e9e511c5346927cd6169ca589b58b461eb",
+      "presentation": "Full 16:9 desktop capture"
+    },
+    {
+      "file": "src/assets/overview-light-de.webp",
+      "source": "../docs/readme/screenshots/overview-light-de.jpg",
+      "sourceSha256": "b136d74d828526bf7063bffd99f24c07bdb42e35143428e005199f941f30cb1e",
+      "width": 1600,
+      "height": 900,
+      "bytes": 72218,
+      "sha256": "e1dd546e8129c26245c11a11159744478cea20b2d9c33e5f0a96bdd3426f8989",
+      "presentation": "Full 16:9 desktop capture"
+    },
+    {
+      "file": "src/assets/overview-light-en.webp",
+      "source": "../docs/readme/screenshots/overview-light-en.jpg",
+      "sourceSha256": "6c385fbe4d1c64a7a09b7d11bd276d48687855520fcb47a34dc45245dcb2df67",
+      "width": 1600,
+      "height": 900,
+      "bytes": 68648,
+      "sha256": "a1d7f8aab57666b7f2275f4912af7ce23fad99b9c1378ac4f11ed17d222cda71",
+      "presentation": "Full 16:9 desktop capture"
+    },
+    {
+      "file": "src/assets/overview-mobile-dark-de.webp",
+      "source": "../docs/readme/screenshots/mobile-overview-de.jpg",
+      "sourceSha256": "b72ca2b1958eddef42d8bfc9d1d7ae902fa16eefbaff199c41449f5f7a767cd7",
+      "width": 1600,
+      "height": 900,
+      "bytes": 70778,
+      "sha256": "2ab10a5c15e7b937046d08893ade97df452b76462ef46ad186ff388281e34d9c",
+      "presentation": "Uncropped portrait capture in the existing 16:9 smartphone scene"
+    },
+    {
+      "file": "src/assets/overview-mobile-dark-en.webp",
+      "source": "../docs/readme/screenshots/mobile-overview-en.jpg",
+      "sourceSha256": "00ef59281a3c39d80a757604dd10445d5048fe0a6b5c26b52ef6d4bf08710c79",
+      "width": 1600,
+      "height": 900,
+      "bytes": 68516,
+      "sha256": "342e2cc599a7073ac7c132c75f9ba85e3d0f1827a618adfd51a8f34904d1f131",
+      "presentation": "Uncropped portrait capture in the existing 16:9 smartphone scene"
+    },
+    {
+      "file": "src/assets/overview-mobile-light-de.webp",
+      "source": "../docs/readme/screenshots/mobile-overview-light-de.jpg",
+      "sourceSha256": "eb5ce6a99e7f3610bb151ada552151a439ef4edb0398083cf6c44018e1b79d5c",
+      "width": 1600,
+      "height": 900,
+      "bytes": 70290,
+      "sha256": "190a02625390396b74001b822a47376c38ca18132b096599df6b8df6c0a8f04c",
+      "presentation": "Uncropped portrait capture in the existing 16:9 smartphone scene"
+    },
+    {
+      "file": "src/assets/overview-mobile-light-en.webp",
+      "source": "../docs/readme/screenshots/mobile-overview-light-en.jpg",
+      "sourceSha256": "146fb988f4e665d41bb30ba209e270a02f729004bdcd508886cc17dbdc804a55",
+      "width": 1600,
+      "height": 900,
+      "bytes": 68104,
+      "sha256": "f882b651c7c589f5758c4b811a718b04ef6db344b2983d70bb5c4b7c2e9bfdea",
+      "presentation": "Uncropped portrait capture in the existing 16:9 smartphone scene"
+    },
+    {
+      "file": "src/assets/returns-dark-de.webp",
+      "source": "../docs/readme/screenshots/returns-de.jpg",
+      "sourceSha256": "30bed7c9ccf3cfd01b03ae8a5f7712c292875fc1a4cbe90ef0fdd7ef2e00e506",
+      "width": 1600,
+      "height": 900,
+      "bytes": 78974,
+      "sha256": "243c6dc49472285acaa948c3bfeaf0423fd8fd4ee9626d3de1b213e3435ad33f",
+      "presentation": "Full 16:9 desktop capture"
+    },
+    {
+      "file": "src/assets/returns-dark-en.webp",
+      "source": "../docs/readme/screenshots/returns-dark-en.jpg",
+      "sourceSha256": "5277acc5ce653712f22a61041fa7fb51f47477783a809fb8f4fd4a1cbe978601",
+      "width": 1600,
+      "height": 900,
+      "bytes": 75552,
+      "sha256": "3c783e397eefce249ffb2b410f6cc4813fa6fb4e4404e359683df3c917923faf",
+      "presentation": "Full 16:9 desktop capture"
+    },
+    {
+      "file": "src/assets/returns-light-de.webp",
+      "source": "../docs/readme/screenshots/returns-light-de.jpg",
+      "sourceSha256": "ff44bb4362f28e82b93d4d80d4bc5a6cd8b75c0bca37ce461e4128e8ba4806fa",
+      "width": 1600,
+      "height": 900,
+      "bytes": 75470,
+      "sha256": "ced32a7a9f176eda4dfef9a69db0f45221c6295f60e8997278e79c69648a2c6c",
+      "presentation": "Full 16:9 desktop capture"
+    },
+    {
+      "file": "src/assets/returns-light-en.webp",
+      "source": "../docs/readme/screenshots/returns-light-en.jpg",
+      "sourceSha256": "244905fba4ba484e3885dd9e6ae9ebb526b84a9f37b27948f156ce1e154af0a5",
+      "width": 1600,
+      "height": 900,
+      "bytes": 72664,
+      "sha256": "b5fefdd7a1684ac6fdb749ff21c916fefbd536181ae987656f42676e0bb25cb4",
+      "presentation": "Full 16:9 desktop capture"
+    },
+    {
+      "file": "src/assets/returns-mobile-dark-de.webp",
+      "source": "../docs/readme/screenshots/mobile-returns-de.jpg",
+      "sourceSha256": "3a72a26b19978e6a61598a2642f0cc0ce687eb32ece7f2f5dd4c48c336b5028e",
+      "width": 1600,
+      "height": 900,
+      "bytes": 72034,
+      "sha256": "3fba6cab396c13ca0c4c9d173e563f85a4b6a09661196d3d69cf648b0abfe82f",
+      "presentation": "Uncropped portrait capture in the existing 16:9 smartphone scene"
+    },
+    {
+      "file": "src/assets/returns-mobile-dark-en.webp",
+      "source": "../docs/readme/screenshots/mobile-returns-en.jpg",
+      "sourceSha256": "9367a7b6d422af1f6c487962b2502800e10f94f9596afe32fdf59664d24b8f58",
+      "width": 1600,
+      "height": 900,
+      "bytes": 66850,
+      "sha256": "682d72521a823353f6095856a0192cc21590afc2c3887553d0eee15393917a35",
+      "presentation": "Uncropped portrait capture in the existing 16:9 smartphone scene"
+    },
+    {
+      "file": "src/assets/returns-mobile-light-de.webp",
+      "source": "../docs/readme/screenshots/mobile-returns-light-de.jpg",
+      "sourceSha256": "fab58c0cc5849e941ab5f17b81ce97dd5edac58abbd2d20abf41bfeff5687912",
+      "width": 1600,
+      "height": 900,
+      "bytes": 70914,
+      "sha256": "336eb8b57731363837b54006c94a5aaf6b248ee2b3b31d3058487ab17df94813",
+      "presentation": "Uncropped portrait capture in the existing 16:9 smartphone scene"
+    },
+    {
+      "file": "src/assets/returns-mobile-light-en.webp",
+      "source": "../docs/readme/screenshots/mobile-returns-light-en.jpg",
+      "sourceSha256": "c0a018e688a30ff3f4b522adecf6dd87313ba8fa1b17330077d15fed7656a07d",
+      "width": 1600,
+      "height": 900,
+      "bytes": 66048,
+      "sha256": "fda2ab8e61115d65caf3ca1fd53cfec437fa716be0e5abf40b1e270dba2d9f56",
+      "presentation": "Uncropped portrait capture in the existing 16:9 smartphone scene"
+    },
+    {
+      "file": "src/assets/team-dark-de.webp",
+      "source": "../docs/readme/screenshots/chat-de.jpg",
+      "sourceSha256": "25fc930c877f0dddf398349b7a6be928a4f1663db604eb40c721b0f8feb43e7f",
+      "width": 1600,
+      "height": 900,
+      "bytes": 56738,
+      "sha256": "b7eb7fcc35137ff66f4bfd7d9596d6354d4143b6bc3dde84d8aab7256a5f36f8",
+      "presentation": "Full 16:9 desktop capture"
+    },
+    {
+      "file": "src/assets/team-dark-en.webp",
+      "source": "../docs/readme/screenshots/chat-dark-en.jpg",
+      "sourceSha256": "fbc4a27bdf1cdfbd2a4de89d05c5808be1f0b35534b399a47999a66ccbe09514",
+      "width": 1600,
+      "height": 900,
+      "bytes": 54262,
+      "sha256": "2d994d613f9e646249e262573f192958259da8c7bcce31b758a5a70ef45f48b0",
+      "presentation": "Full 16:9 desktop capture"
+    },
+    {
+      "file": "src/assets/team-light-de.webp",
+      "source": "../docs/readme/screenshots/chat-light-de.jpg",
+      "sourceSha256": "b8ba578a7cd970a14ef1905542da99f913256ffc7d3b3f45a7c9a8760448ecbc",
+      "width": 1600,
+      "height": 900,
+      "bytes": 55236,
+      "sha256": "cbbc9ca4e644603931fcb0784074d40ec6c64dffc7b3b460d2dc0f9732f5e67e",
+      "presentation": "Full 16:9 desktop capture"
+    },
+    {
+      "file": "src/assets/team-light-en.webp",
+      "source": "../docs/readme/screenshots/chat-light-en.jpg",
+      "sourceSha256": "b514c5d7e5407e485f21093a3239a5f035221230c2f6df18856cafd9521c5ba5",
+      "width": 1600,
+      "height": 900,
+      "bytes": 52748,
+      "sha256": "9d04334eab7dfec47bb8746b00da2ec3492e7cc5f5c284c636d90fcb87ab8896",
+      "presentation": "Full 16:9 desktop capture"
+    },
+    {
+      "file": "src/assets/team-mobile-dark-de.webp",
+      "source": "../docs/readme/screenshots/mobile-chat-de.jpg",
+      "sourceSha256": "5b0dc9add8e54687ea77a047fcd27603b5707ebd196986e383014e7235fec3c8",
+      "width": 1600,
+      "height": 900,
+      "bytes": 68190,
+      "sha256": "1e31d534d665e5771c9e2640795c335a045d1b62b6ff3bb2a965654c9607b17a",
+      "presentation": "Uncropped portrait capture in the existing 16:9 smartphone scene"
+    },
+    {
+      "file": "src/assets/team-mobile-dark-en.webp",
+      "source": "../docs/readme/screenshots/mobile-chat-en.jpg",
+      "sourceSha256": "11178d5ecabb88848c5c3f67d0144b2768fc750df6bdf695505dbee3b423abb6",
+      "width": 1600,
+      "height": 900,
+      "bytes": 65960,
+      "sha256": "fe0dcdaae7179f11e76ff41cab0b6b0f38e7f1c426af458f8b47fa0dcb5dcd68",
+      "presentation": "Uncropped portrait capture in the existing 16:9 smartphone scene"
+    },
+    {
+      "file": "src/assets/team-mobile-light-de.webp",
+      "source": "../docs/readme/screenshots/mobile-chat-light-de.jpg",
+      "sourceSha256": "db28e078f5f8a9d352a5e2a492d70cb56549d2019cc00a3218d8dda33a89cf85",
+      "width": 1600,
+      "height": 900,
+      "bytes": 68064,
+      "sha256": "42a354a2721a06f872bde7a8dda154c562b40984f0a0cf22609116ae30c03fa2",
+      "presentation": "Uncropped portrait capture in the existing 16:9 smartphone scene"
+    },
+    {
+      "file": "src/assets/team-mobile-light-en.webp",
+      "source": "../docs/readme/screenshots/mobile-chat-light-en.jpg",
+      "sourceSha256": "3c07547e7c18b75dc4d10883f6dc50752ffc848f8b8a084152eec35919afaa74",
+      "width": 1600,
+      "height": 900,
+      "bytes": 66148,
+      "sha256": "f69471f3841a1cdd90a428d8145a570ddf74635082a8ab72444d6bb83bdfa5e4",
+      "presentation": "Uncropped portrait capture in the existing 16:9 smartphone scene"
+    }
+  ]
+}

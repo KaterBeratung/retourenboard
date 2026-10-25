@@ -21,7 +21,7 @@ Manage products. Process returns. Keep your team in sync.
 
 retourenboard. is a web application for shared returns management. Your team works with the same product and return records, with assignments, next steps, device identifiers and conversations attached to the relevant work. You run the application on your own server and control accounts and permissions.
 
-These screenshots show the actual application with **synthetic demo data**. Desktop captures use **16:9**; mobile captures use portrait orientation. [Screenshots and checksums](screenshots/README.md).
+These screenshots show the actual application with **synthetic demo data**. Desktop images are **3840 × 2160 pixels (4K, 16:9)**; mobile images are **1320 × 2868 pixels**, using the responsive iPhone 16 Pro Max format. The product website uses the same views. [Screenshots, capture method and checksums](screenshots/README.md).
 
 ## Features
 
@@ -43,7 +43,7 @@ The interface supports German and English, light and dark themes, desktop/tablet
 Mobile layouts use compact cards and bottom navigation, making records and their actions accessible without scrolling sideways through wide tables.
 
 <p align="center">
-  <img src="screenshots/mobile-overview-en.jpg" alt="English dashboard on a phone" width="260" height="563">
+  <img src="screenshots/mobile-overview-en.jpg" alt="English dashboard on a phone" width="260" height="565">
 </p>
 
 The [German README gallery](README.md#ein-blick-in-die-anwendung) also shows the returns list, products, scan intake, chat, administration and additional mobile screens.
