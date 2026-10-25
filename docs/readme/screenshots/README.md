@@ -43,7 +43,7 @@ Die Anwendung wurde direkt vom Browser hochauflösend gerendert; die JPEG-Dateie
 
 ## Gemeinsame Bilder für README und Werbeseite
 
-Die Produktvorschau der Werbeseite verwendet dieselben Aufnahmen als optimierte WebP-Ableitungen. Desktopbilder werden vollständig auf 1600 × 900 Pixel verkleinert; mobile Originale bleiben unbeschnitten im bestehenden Smartphone-Rahmen auf einer 16:9-Fläche. Die Zuordnung und Prüfsummen stehen in [website/screenshot-sources.json](../../../website/screenshot-sources.json). Die unabhängige Hero-Illustration bleibt erhalten.
+Die Produktvorschau der Werbeseite verwendet dieselben Aufnahmen als optimierte WebP-Ableitungen. Desktopbilder behalten ihre originale Auflösung von 3840 × 2160 Pixeln. Mobile Originale bleiben unbeschnitten im bestehenden Smartphone-Rahmen; diese 16:9-Kompositionen werden ebenfalls direkt mit 3840 × 2160 Pixeln gerendert. Alle 24 WebP-Dateien der Produktvorschau sind damit in 4K eingebunden. Die Zuordnung und Prüfsummen stehen in [website/screenshot-sources.json](../../../website/screenshot-sources.json). Die unabhängige Hero-Illustration bleibt erhalten.
 
 ## Aufnahmen erneuern
 
