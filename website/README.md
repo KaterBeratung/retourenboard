@@ -38,7 +38,7 @@ npm run website:build
 npm run website:preview
 ```
 
-Dann http://127.0.0.1:3020 öffnen. Ein anderer Port ist mit `npm run website:preview -- --port 3021` möglich. Strg+C beendet die Vorschau. Die Anwendung und ihre Anmeldung laufen auf einem eigenen Port.
+Dann http://127.0.0.1:3020 öffnen. Ein anderer Port ist mit `npm run website:preview -- --port 3021` möglich. Strg+C beendet die Vorschau. Die Anwendung und ihre Anmeldung laufen auf einem eigenen Port. Nach einem erneuten Website-Build liefert die laufende Vorschau die aktuellen Inhalte bereits bekannter Dateien aus. Ein Neuladen im Browser genügt für aktualisierte Bilder, Texte und Skripte. Wenn sich die Dateinamen im Bildmanifest ändern, die Vorschau einmal neu starten.
 
 Quellen: `src/index.html`, `src/site.css` und die kleinen TypeScript-Module für Sprache, Theme, Bewegung, Navigation und Downloads. Der Build prüft TypeScript, übernimmt die Version aus der Projekt-`package.json`, kopiert lokale Bilder nach `dist/assets/` und erzeugt ein Bildmanifest. Die Vorschau liefert ausschließlich die bekannten statischen Dateien und die im Manifest genannten Bilddateien aus; keine allgemeinen Projekt- oder API-Pfade.
 
