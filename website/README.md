@@ -13,7 +13,10 @@ Das Logo und Favicon stammen ausschließlich aus `../public/favicon.svg`. Der Bu
 ## Bedienung und Animationen
 
 - Einstieg mit gestaffelter Einblendung, ruhig schwebender Illustration und Scan-Lichtlinie.
-- Einmalige Einblendungen beim Scrollen, kurze Übergänge zwischen Produktansichten und Workflow-Schritten, Symbol- und Hoverfeedback.
+- Die Produktvorschau erscheint mit einer kurzen räumlichen Bewegung und einem einmaligen Lichtreflex. Funktionskarten bauen Überschrift und Beschreibung leicht gestaffelt auf.
+- Buttons erhalten einen kurzen Lichtreflex bei Hover oder Tastaturfokus. Symbole zeichnen sich beim Hover nach; Dokumentkarten fächern sich auf und die Chatillustration reagiert mit einer kurzen Einblendung. Die eigentlichen Klickflächen bleiben dabei an derselben Stelle.
+- Der Hintergrundschein der Paketgrafik bewegt sich ruhig mit und pausiert zusammen mit der vorhandenen Szene außerhalb des sichtbaren Bereichs. Workflow-Verbindungen füllen sich passend zum gewählten Schritt.
+- Die zusätzlichen Effekte verwenden CSS-Transformationen und Deckkraft, keine neue Animationsbibliothek. Die vorhandene Einstellung für reduzierte Bewegung und der Animationsschalter gelten auch für diese Effekte.
 - „Animationen“ pausiert beziehungsweise aktiviert die Bewegung. Dauerhaft gespeichert wird die Auswahl nur nach Zustimmung im Speicherbanner. Ohne Auswahl gilt `prefers-reduced-motion`.
 - Dekorative Dauereffekte pausieren außerhalb des Hero-Bereichs und bei ausgeblendetem Browsertab. Ohne JavaScript und bei Beobachtungsfehlern bleiben alle Inhalte sichtbar.
 - Die Produktansichten und Installationsarten lassen sich per Tastatur auswählen. Das mobile Menü verwendet natives HTML und funktioniert auch ohne JavaScript. FAQ-Antworten bleiben nativ aufklappbar.
