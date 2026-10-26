@@ -48,12 +48,14 @@ export function createPreferencePrivacy(raw:()=>PreferenceStorage|undefined,now:
 }
 
 export function bindPrivacyBanner(page:Document,privacy:ReturnType<typeof createPreferencePrivacy>){
- const banner=page.querySelector<HTMLElement>('#privacy-banner');if(!banner)return;
+ const banner=page.querySelector<HTMLDialogElement>('#privacy-banner');if(!banner)return;
  const openers=[...page.querySelectorAll<HTMLButtonElement>('[data-privacy-open]')];let opener:HTMLButtonElement|null=null;
- function show(){banner!.hidden=false;}
- function close(){banner!.hidden=true;opener?.focus({preventScroll:true});opener=null;}
- for(const button of openers){button.hidden=false;button.addEventListener('click',()=>{opener=button;show();banner.focus({preventScroll:true});});}
+ function show(){if(!banner!.open)banner!.showModal();}
+ function close(){if(banner!.open)banner!.close();}
+ page.querySelector<HTMLButtonElement>('[data-privacy-dismiss]')?.addEventListener('click',close);
+ banner.addEventListener('close',()=>{opener?.focus({preventScroll:true});opener=null;});
+ for(const button of openers){button.hidden=false;button.addEventListener('click',()=>{opener=button;show();});}
  for(const button of page.querySelectorAll<HTMLButtonElement>('[data-privacy-choice]'))button.addEventListener('click',()=>{privacy.choose(button.dataset.privacyChoice==='remember');close();});
- privacy.onChange(()=>{if(privacy.state()===null)show();});
+ privacy.onChange(()=>{if(privacy.state()===null)show();else close();});
  if(privacy.state()===null)show();
 }

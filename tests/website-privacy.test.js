@@ -66,3 +66,44 @@ test('privacy storage is limited to recognized preference keys and values',()=>{
  const f=fixture();f.privacy.choose(true);f.privacy.storage.setItem('unrelated','secret');f.privacy.storage.setItem(theme,'invalid');
  assert.equal(f.values.has('unrelated'),false);assert.equal(f.values.has(theme),false);assert.equal(f.privacy.storage.getItem('unrelated'),null);
 });
+
+
+function bannerFixture(privacy){
+ const events={},openerEvents={},choiceEvents={},dismissEvents={};
+ const banner={open:false,showCount:0,closeCount:0,focus(){},showModal(){this.open=true;this.showCount++;},close(){this.open=false;this.closeCount++;events.close?.();},addEventListener(name,fn){events[name]=fn;}};
+ const opener={hidden:true,focusCount:0,focus(){this.focusCount++;},addEventListener(name,fn){openerEvents[name]=fn;}};
+ const choices=['necessary','remember'].map(value=>({dataset:{privacyChoice:value},addEventListener(name,fn){choiceEvents[value]=fn;}}));
+ const dismiss={addEventListener(name,fn){dismissEvents[name]=fn;}};
+ const page={querySelector:selector=>selector==='#privacy-banner'?banner:dismiss,querySelectorAll:selector=>selector==='[data-privacy-open]'?[opener]:choices};
+ site.bindPrivacyBanner(page,privacy);
+ return {banner,opener,events,dismiss:()=>dismissEvents.click(),open:()=>openerEvents.click(),choose:value=>choiceEvents[value]()};
+}
+
+test('a first visit opens the privacy dialog modally without granting storage consent',()=>{
+ const f=fixture(),ui=bannerFixture(f.privacy);
+ assert.equal(ui.banner.open,true);assert.equal(ui.banner.showCount,1);assert.equal(f.privacy.state(),null);
+ assert.deepEqual(f.reads,[consent]);assert.equal(ui.opener.hidden,false);
+});
+
+test('saved choices skip the initial dialog, while the footer can reopen it and restore focus after a choice',()=>{
+ for(const remember of [true,false]){
+  const f=fixture();f.privacy.choose(remember);const ui=bannerFixture(f.privacy);
+  assert.equal(ui.banner.open,false);assert.equal(ui.banner.showCount,0);
+  ui.open();assert.equal(ui.banner.open,true);ui.choose(remember?'necessary':'remember');
+  assert.equal(ui.banner.open,false);assert.equal(f.privacy.state(),!remember);assert.equal(ui.opener.focusCount,1);
+ }
+});
+
+test('a privacy choice synchronized from another tab closes the modal and a cleared choice reopens it once',()=>{
+ const f=fixture(),ui=bannerFixture(f.privacy);
+ const other=site.createPreferencePrivacy(()=>f.raw,()=>Date.UTC(2026,9,24));other.choose(false);f.privacy.sync();
+ assert.equal(ui.banner.open,false);assert.equal(f.privacy.state(),false);
+ f.raw.removeItem(consent);f.privacy.sync();f.privacy.sync();
+ assert.equal(ui.banner.open,true);assert.equal(ui.banner.showCount,2);
+});
+
+test('dismissing a privacy dialog never grants optional storage and the footer remains available',()=>{
+ const f=fixture(),ui=bannerFixture(f.privacy);ui.dismiss();
+ assert.equal(f.privacy.state(),null);assert.equal(f.values.has(consent),false);
+ ui.open();assert.equal(ui.banner.open,true);ui.choose('necessary');assert.equal(f.privacy.state(),false);
+});

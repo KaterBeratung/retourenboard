@@ -1,4 +1,5 @@
 export const privacyEnglish:Readonly<Record<string,string>>={
+ 'Dialog schließen':'Close dialog',
  'Deine Privatsphäre.':'Your privacy.',
  'Keine Analyse, kein Marketing. Du entscheidest, ob wir Sprache, Farbschema und Animationen für deinen nächsten Besuch im Browser speichern dürfen.':'No analytics, no marketing. You decide whether we may remember your language, appearance and animation preferences in your browser for your next visit.',
  'Ohne Zustimmung bleiben Einstellungen nur auf dieser Seite. Deine Auswahl wird für 180 Tage gespeichert.':'Without consent, preferences last only on this page. Your privacy choice is remembered for 180 days.',
