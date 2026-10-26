@@ -69,14 +69,13 @@ test('privacy storage is limited to recognized preference keys and values',()=>{
 
 
 function bannerFixture(privacy){
- const events={},openerEvents={},choiceEvents={},dismissEvents={};
+ const events={},openerEvents={},choiceEvents={};
  const banner={open:false,showCount:0,closeCount:0,focus(){},showModal(){this.open=true;this.showCount++;},close(){this.open=false;this.closeCount++;events.close?.();},addEventListener(name,fn){events[name]=fn;}};
  const opener={hidden:true,focusCount:0,focus(){this.focusCount++;},addEventListener(name,fn){openerEvents[name]=fn;}};
  const choices=['necessary','remember'].map(value=>({dataset:{privacyChoice:value},addEventListener(name,fn){choiceEvents[value]=fn;}}));
- const dismiss={addEventListener(name,fn){dismissEvents[name]=fn;}};
- const page={querySelector:selector=>selector==='#privacy-banner'?banner:dismiss,querySelectorAll:selector=>selector==='[data-privacy-open]'?[opener]:choices};
+ const page={querySelector:selector=>selector==='#privacy-banner'?banner:null,querySelectorAll:selector=>selector==='[data-privacy-open]'?[opener]:choices};
  site.bindPrivacyBanner(page,privacy);
- return {banner,opener,events,dismiss:()=>dismissEvents.click(),open:()=>openerEvents.click(),choose:value=>choiceEvents[value]()};
+ return {banner,opener,events,open:()=>openerEvents.click(),choose:value=>choiceEvents[value]()};
 }
 
 test('a first visit opens the privacy dialog modally without granting storage consent',()=>{
@@ -103,7 +102,7 @@ test('a privacy choice synchronized from another tab closes the modal and a clea
 });
 
 test('dismissing a privacy dialog never grants optional storage and the footer remains available',()=>{
- const f=fixture(),ui=bannerFixture(f.privacy);ui.dismiss();
+ const f=fixture(),ui=bannerFixture(f.privacy);ui.banner.close();
  assert.equal(f.privacy.state(),null);assert.equal(f.values.has(consent),false);
  ui.open();assert.equal(ui.banner.open,true);ui.choose('necessary');assert.equal(f.privacy.state(),false);
 });
