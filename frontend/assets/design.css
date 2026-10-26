@@ -141,6 +141,12 @@ dialog.wide{width:min(890px,calc(100vw - 32px))}
 .scope-hint .text-link{font-size:12px}
 .field input:not([type=checkbox]):not([type=radio]),.field select,.field textarea{width:100%;min-width:0;padding:var(--control-padding-block) var(--control-padding-inline);min-height:var(--field-height);font-size:var(--input-font-size);line-height:1.5;background:var(--field-surface);border:1px solid var(--field-border);border-radius:var(--field-radius);color:var(--ink);box-shadow:var(--field-shadow);transition:border-color var(--motion-fast),box-shadow var(--motion-fast)}
 .field :is(input:not([type=checkbox]):not([type=radio]):not([type=file]),select:not([multiple]):not([size])){height:var(--field-height)}
+/* Avoid native iOS date-box metrics widening padded fields (WebKit 301648). */
+.field input[type]:is([type=date],[type=time],[type=datetime-local],[type=month],[type=week]){-webkit-appearance:none;appearance:none;display:block;box-sizing:border-box;inline-size:100%;min-inline-size:0;max-inline-size:100%;block-size:var(--field-height);padding:0;text-align:start}
+.field input:is([type=date],[type=time],[type=datetime-local],[type=month],[type=week])::-webkit-date-and-time-value{display:block;box-sizing:border-box;max-inline-size:100%;min-block-size:1.5em;padding-inline:var(--control-padding-inline);line-height:calc(var(--field-height) - 2px);text-align:start}
+.field input:is([type=date],[type=time],[type=datetime-local],[type=month],[type=week])::-webkit-datetime-edit{min-width:0;padding:0 var(--control-padding-inline)}
+.field input:is([type=date],[type=time],[type=datetime-local],[type=month],[type=week])::-webkit-calendar-picker-indicator{margin-inline-end:var(--control-padding-inline)}
+
 .grouped-form{padding-top:26px}
 .form-section:last-of-type{margin-bottom:0}
 .form-section .form-grid{gap:20px}

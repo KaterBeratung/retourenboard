@@ -147,7 +147,7 @@
 .comment-empty{display:flex;align-items:center;gap:14px;padding:18px;border:1px dashed var(--line);border-radius:var(--control-radius);background:var(--design-head);color:var(--muted)}
 .comment-empty>.icon{width:22px;height:22px;flex-shrink:0;color:var(--design-accent)}
 .comment-empty p{margin:0;font-size:13px;line-height:1.7}
-.return-comments .message-composer{padding:20px 0 0}
+.return-comments .message-composer{padding:16px 0 0;background:transparent}
 .return-comments .message-composer .field{display:flex;flex-direction:column;gap:9px;margin:0 0 14px}
 .return-comments .message-composer textarea{width:100%;font-size:14px;min-height:88px}
 .return-comments .composer-footer{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 16px;align-items:center}

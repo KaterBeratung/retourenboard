@@ -3,9 +3,9 @@
  color-scheme:light;
  --font-sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Inter,Arial,sans-serif;
  --font-mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
- --menu-tint:#f8faffeb;--menu-surface:var(--surface-raised);--menu-border:var(--line-strong);--menu-backdrop:none;--menu-item-radius:12px;--menu-padding:6px;--menu-gap:2px;--menu-item-height:36px;--menu-item-padding-block:7px;--menu-item-padding-inline:10px;--menu-font-size:13px;--menu-icon-size:18px;--menu-max-width:360px;--menu-max-height:280px;--menu-hover:color-mix(in srgb,var(--ink) 7%,transparent);--menu-selected:color-mix(in srgb,var(--ink) 11%,transparent);--menu-group:color-mix(in srgb,var(--ink) 4%,transparent);
+ --menu-tint:#f8faffeb;--menu-surface:var(--surface-raised);--menu-border:var(--line-strong);--menu-backdrop:none;--menu-item-radius:10px;--menu-padding:5px;--menu-gap:2px;--menu-item-height:32px;--menu-item-padding-block:6px;--menu-item-padding-inline:10px;--menu-font-size:13px;--menu-icon-size:18px;--menu-max-width:360px;--menu-max-height:280px;--menu-hover:color-mix(in srgb,var(--ink) 7%,transparent);--menu-selected:color-mix(in srgb,var(--ink) 11%,transparent);--menu-group:color-mix(in srgb,var(--ink) 4%,transparent);
  /* Sheets and fields share the menu material without blurring form text. */
- --dialog-surface:var(--sheet-surface);--dialog-header-surface:var(--control-surface);--dialog-footer-surface:var(--menu-group);--field-height:44px;--field-radius:16px;--field-surface:linear-gradient(165deg,#ffffff,#f7f9fc);--field-border:#cfd8e3;--field-shadow:inset 0 1px 0 #ffffffcc,0 1px 3px #19263c06;
+ --dialog-surface:var(--sheet-surface);--dialog-header-surface:var(--control-surface);--dialog-footer-surface:var(--menu-group);--field-height:var(--control-height);--field-radius:14px;--field-surface:linear-gradient(165deg,#ffffff,#f7f9fc);--field-border:#cfd8e3;--field-shadow:inset 0 1px 0 #ffffffcc,0 1px 3px #19263c06;
  --icon-stroke:1.85;--icon-tone-opacity:.14;
  --text-xs:12px;--text-sm:13px;--text-base:14px;--text-lg:16px;--text-xl:20px;--text-title:34px;--text-metric:36px;
  --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;
@@ -24,7 +24,7 @@
  --warning:#956210;--warning-bg:#fff7e8;--warning-line:#f1dfb6;
  --danger:#b33b3b;--danger-bg:#fff0f0;--danger-line:#f0cdcd;
  --progress:#a05a16;--progress-bg:#fff2e5;--progress-line:#f4d4ad;
- --icon-button-size:36px;--control-height:40px;--control-height-large:48px;--control-font-size:13px;--input-font-size:13px;--control-padding-block:8px;--control-padding-inline:14px;--dialog-padding:24px;--control-radius:18px;--radius-control:var(--control-radius);--button-radius:999px;--panel-radius:28px;--dialog-radius:32px;--menu-radius:20px;--radius-small:14px;
+ --icon-button-size:36px;--control-height:40px;--control-height-large:48px;--control-font-size:13px;--input-font-size:13px;--control-padding-block:8px;--control-padding-inline:14px;--dialog-padding:24px;--control-radius:18px;--radius-control:var(--control-radius);--button-radius:999px;--panel-radius:28px;--dialog-radius:32px;--menu-radius:16px;--radius-small:14px;
  --space-panel:20px;--space-card:20px;--space-section:24px;
  --table-font-size:13px;--table-cell-block:14px;--table-cell-inline:16px;--table-heading-height:48px;
  --status-font-size:12px;--status-padding-block:4px;--status-padding-inline:9px;--status-radius:999px;
@@ -62,8 +62,8 @@
 @supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
  :root{--menu-surface:linear-gradient(145deg,var(--glass-glint),transparent 55%),var(--menu-tint);--menu-border:var(--glass-edge);--menu-backdrop:blur(28px) saturate(1.5);--chrome-surface:var(--glass-tint);--chrome-border:var(--glass-edge);--chrome-backdrop:blur(var(--glass-blur)) saturate(1.4)}
 }
-@media(max-width:760px){:root{--glass-blur:18px;--dialog-radius:28px;--field-height:48px}}
-@media(max-width:760px),(pointer:coarse){:root{--menu-item-height:44px;--menu-item-padding-block:10px;--menu-font-size:14px}}
+@media(max-width:760px){:root{--glass-blur:18px;--dialog-radius:28px}}
+@media(max-width:760px),(pointer:coarse){:root{--menu-item-height:44px;--menu-item-padding-block:8px;--menu-font-size:14px}}
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more),(forced-colors:active){
  :root,:root[data-theme]{--menu-surface:var(--surface-raised);--menu-border:var(--line-strong);--menu-backdrop:none;--chrome-surface:var(--surface-raised);--chrome-border:var(--line-strong);--chrome-backdrop:none;--glass-glint:transparent;--control-surface:var(--surface);--segment-surface:var(--surface-subtle);--segment-selected:var(--surface-raised);--sheet-surface:var(--surface);--field-surface:var(--surface-input);--field-border:var(--line-strong);--field-shadow:none;--page-wash:none;--page-pattern:none}
 }
