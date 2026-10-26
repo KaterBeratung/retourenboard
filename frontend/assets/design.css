@@ -259,7 +259,7 @@ p.form-error{padding:12px 14px;border:1px solid color-mix(in srgb,var(--danger-l
 .recent-product{align-self:flex-start;text-align:start;font-size:12px;line-height:1.5;margin-top:3px;overflow-wrap:anywhere}
 .recent-product .icon{flex:none}
 .record-actions{display:flex;align-items:center;gap:4px;white-space:nowrap}
-.record-actions>[data-detail="returns"]{margin-inline-start:auto}
+.record-actions>:is([data-detail="returns"],[data-disposal-open]){margin-inline-start:auto}
 .record-actions .icon-btn:disabled{opacity:.4;cursor:not-allowed}
 .table-scroll table:has([data-copy-serial]){--record-actions-width:240px}
 .table-scroll :is(.record-actions-cell,.record-actions-heading){padding-inline:10px;box-sizing:border-box;width:var(--record-actions-width,148px);min-width:var(--record-actions-width,148px)}
@@ -269,7 +269,7 @@ p.form-error{padding:12px 14px;border:1px solid color-mix(in srgb,var(--danger-l
 .table-scroll [data-column=ean]{min-width:144px;white-space:nowrap}
 .table-scroll [data-column=category]{min-width:128px}
 .table-scroll [data-column=price]{min-width:112px}
-.table-scroll :is(.record-actions-heading,.record-status-heading){z-index:4;background:var(--surface-subtle)}
+.table-scroll :is(.record-actions-heading,.record-status-heading){z-index:4;background:var(--table-head-surface,var(--surface-subtle))}
 .record-status-cell .status{max-width:min(100%,140px)}
 .record-card>.record-actions{justify-content:flex-end;border-top:1px solid var(--line);padding-top:8px;margin-top:4px}
 .record-card>.record-actions .icon-btn{width:44px;height:44px;border-color:var(--line)}
@@ -360,7 +360,7 @@ th{position:sticky;top:0;z-index:1}
 .table-scroll table:has(.master-notes) .status{max-width:none;white-space:nowrap;overflow-wrap:normal}
 .table-scroll :is(.record-status-cell,.record-status-heading){min-width:140px;width:140px;padding-inline:14px;border-inline-start:0}
 @media screen and (max-width:1100px){
-[data-ui="board"] :is(.table-scroll[data-responsive-cards],.settings-table[data-responsive-cards],.table-scroll:has(>.disposal-table),.trend-table-scroll){overflow:visible;max-height:none!important;min-width:0}
+[data-ui="board"] :is(.table-scroll[data-responsive-cards],.settings-table[data-responsive-cards],.trend-table-scroll){overflow:visible;max-height:none!important;min-width:0}
 [data-ui="board"] :is(.table-scroll,.settings-table)>table[data-responsive-cards]{display:block;width:100%;min-width:0!important;max-width:100%;table-layout:auto}
 [data-ui="board"] table[data-responsive-cards]>thead{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden;white-space:nowrap}
 [data-ui="board"] table[data-responsive-cards]>tbody{display:grid;gap:var(--list-card-gap);padding:8px 12px}
@@ -373,7 +373,7 @@ th{position:sticky;top:0;z-index:1}
 [data-ui="board"] table[data-responsive-cards] :is(.row-actions,.record-actions){display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
 [data-ui="board"] table[data-responsive-cards] :is(.row-actions,.record-actions) .icon-btn{min-width:44px;min-height:44px}
 [data-ui="board"] table[data-responsive-cards] .status{max-width:100%;white-space:normal;overflow-wrap:normal}
-.list-panel #table-content>.table-scroll,.recent-panel>.table-scroll{display:none}
+.list-panel #table-content>.table-scroll,.list-panel [data-disposal-table]>.table-scroll,.recent-panel>.table-scroll{display:none}
 .mobile-records{display:grid;gap:var(--list-card-gap);padding:0 12px 12px}
 .record-card{padding:var(--list-card-padding);border:1px solid var(--line);border-radius:var(--list-card-radius);background:var(--design-surface)}
 .record-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}

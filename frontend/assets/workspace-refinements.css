@@ -68,6 +68,22 @@
 [data-ui="board"] .record-workspace>.workspace-view-tools :is([data-scan-search],[data-disposal-search-scan]){flex:none;width:var(--control-height);padding:0;justify-content:center;font-size:0}
 [data-ui="board"] .record-workspace>.page-heading .heading-actions>.primary{flex-basis:100%;justify-content:center}
 }
+/* Shared inventory tables: calm headers, compact rows and persistent actions. */
+[data-ui="board"] .inventory-table{border-collapse:separate;border-spacing:0}
+[data-ui="board"] .inventory-table th{background:var(--table-head-surface);font-size:12px;font-weight:600}
+[data-ui="board"] .inventory-table tbody tr{transition:background-color var(--motion-fast) ease}
+[data-ui="board"] .inventory-table tbody tr:is(:hover,:focus-within):not(.is-selected){--table-row-surface:var(--table-row-hover)}
+[data-ui="board"] .inventory-table .product-cell{min-width:200px;gap:10px}
+[data-ui="board"] .inventory-table .product-cell small{font-size:11px;line-height:1.5}
+[data-ui="board"] .inventory-table .row-link{font-weight:600;letter-spacing:-.1px}
+[data-ui="board"] .inventory-table .category-tag{max-width:100%;padding:3px 8px;border:1px solid var(--line);border-radius:999px;font-size:11px;line-height:1.5;white-space:normal}
+[data-ui="board"] .inventory-table .record-actions-cell{position:sticky;inset-inline-end:0;z-index:2;background:var(--table-row-surface,var(--surface));box-shadow:-1px 0 0 var(--line);transition:background-color var(--motion-fast) ease}
+[data-ui="board"] .inventory-table .record-actions-heading{inset-inline-end:0;z-index:5;box-shadow:-1px 0 0 var(--line)}
+[data-ui="board"] .inventory-table .record-next-step{display:block;margin-top:5px;color:var(--muted);font-size:11px;line-height:1.5;max-width:24ch}
+[data-ui="board"] .inventory-table .record-actions{justify-content:flex-end}
+[data-ui="board"] .record-card .record-title-copy{min-width:0;flex:1}
+[data-ui="board"] .record-card .record-title-copy .record-title{margin:0}
+[data-ui="board"] .record-card .record-sku{display:block;margin-top:3px;font-size:11px;line-height:1.5;color:var(--muted);overflow-wrap:anywhere}
 [data-ui="board"] .table-preferences{position:relative;font-size:12px;z-index:6}
 [data-ui="board"] .table-preferences summary{display:flex;align-items:center;gap:8px;list-style:none;cursor:pointer;padding:10px 13px;min-height:var(--control-height);border:1px solid var(--line);border-radius:var(--button-radius);background:var(--control-surface)}
 [data-ui="board"] .table-preferences summary::-webkit-details-marker{display:none}

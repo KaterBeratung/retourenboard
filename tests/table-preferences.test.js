@@ -43,3 +43,14 @@ test('table settings close by touch and restore focus without changing saved pre
  assert.equal(menu.open,false);assert.equal(summary.focused,true);
  assert.deepEqual([...memory.data],saved);
 });
+
+
+test('disposal preferences remain separate from existing returns and cannot hide identity or actions',()=>{
+ const memory=storage(),owner=preferences.tablePreferenceStore(memory,7);
+ owner.save('returns',{hidden:['supplier'],density:'comfortable'});
+ owner.save('disposals',{hidden:['serial','mode','identity','actions'],density:'compact'});
+ assert.deepEqual(owner.read('disposals'),{hidden:['serial','mode'],density:'compact'});
+ assert.deepEqual(owner.read('returns'),{hidden:['supplier'],density:'comfortable'});
+ assert.deepEqual(preferences.tablePreferenceStore(memory,8).read('disposals'),{hidden:[],density:'comfortable'});
+ owner.reset('disposals');assert.deepEqual(owner.read('returns'),{hidden:['supplier'],density:'comfortable'});
+});

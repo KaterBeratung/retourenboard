@@ -26,7 +26,7 @@
  --progress:#a05a16;--progress-bg:#fff2e5;--progress-line:#f4d4ad;
  --icon-button-size:36px;--control-height:40px;--control-height-large:48px;--control-font-size:13px;--input-font-size:13px;--control-padding-block:8px;--control-padding-inline:14px;--dialog-padding:24px;--control-radius:18px;--radius-control:var(--control-radius);--button-radius:999px;--panel-radius:28px;--dialog-radius:32px;--menu-radius:16px;--radius-small:14px;
  --space-panel:20px;--space-card:20px;--space-section:24px;
- --table-font-size:13px;--table-cell-block:14px;--table-cell-inline:16px;--table-heading-height:48px;
+ --table-font-size:13px;--table-cell-block:12px;--table-cell-inline:16px;--table-heading-height:44px;--table-head-surface:color-mix(in srgb,var(--surface-subtle) 85%,var(--surface));--table-row-hover:color-mix(in srgb,var(--surface-hover) 70%,var(--surface));
  --status-font-size:12px;--status-padding-block:4px;--status-padding-inline:9px;--status-radius:999px;
  --shadow-card:inset 0 1px 0 #ffffffa6,0 2px 5px #19263c04,0 12px 32px #19263c04;--shadow-hover:inset 0 1px 0 #ffffffa6,0 6px 24px #19263c0d;--shadow-control:inset 0 1px 0 #ffffff38,0 2px 5px #14213d14;--shadow-menu:inset 0 1px 0 #ffffffa6,0 12px 36px #18253c1c,0 2px 8px #18253c08;--shadow-dialog:inset 0 1px 0 #ffffffa6,0 24px 80px #10182730;
  /* Liquid Glass for chrome; grouped content uses opaque, softly layered sheets. */

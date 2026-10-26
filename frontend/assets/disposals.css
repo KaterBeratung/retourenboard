@@ -2,13 +2,8 @@
 [data-ui="board"] .disposal-guide>span{display:inline-flex;align-items:center;gap:8px}
 .disposal-guide .icon{width:16px;height:16px}
 .disposal-guide>span>.icon{color:var(--design-accent)}
-.disposal-table td{white-space:normal;min-width:130px}
-.disposal-table td:first-child{min-width:210px}
-.disposal-table td:last-child{min-width:96px}
-.disposal-table td>small{display:block;margin-top:6px;color:var(--muted);font-size:11px}
-.disposal-table .mono{overflow-wrap:anywhere}
-.disposal-table .row-link{font-size:13px}
-.disposal-table td:nth-child(4){min-width:205px}
+.disposal-table :is(.record-status-cell,.record-status-heading){min-width:180px;width:180px}
+.disposal-table [data-column=mode]{min-width:160px}
 .disposal-intro{color:var(--muted);font-size:13px;line-height:1.65;margin:0}
 .disposal-catalog{padding:0 0 24px;border-bottom:1px solid var(--line)}
 .disposal-catalog h3{font-size:14px;line-height:1.5;margin:0 0 14px}
@@ -67,7 +62,6 @@
 .disposal-scan-line>.btn{width:100%;min-height:var(--control-height)}
 .disposal-facts{gap:18px 14px}
 .disposal-detail-actions>.btn{flex:1}
-.disposal-table td{font-size:12px}
 }
 @media(max-width:400px){
 .disposal-facts{grid-template-columns:1fr}
@@ -82,22 +76,4 @@
 .disposal-form-footer>.btn{min-width:0;width:100%;padding-inline:10px}
 .disposal-scan-line{flex-wrap:nowrap}
 .disposal-scan-line>.btn{width:auto;flex:none}
-}
-@media(max-width:1100px){
-.disposal-table{width:100%;table-layout:fixed}
-.disposal-table thead{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden}
-.disposal-table tbody{display:block}
-.disposal-table tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"device status" "serial serial" "mode actions" "created created";gap:var(--list-card-gap);padding:var(--list-card-padding);border-top:1px solid var(--line)}
-[data-ui="board"] .disposal-table td{display:block;min-width:0;padding:0!important;border:0;overflow-wrap:anywhere}
-.disposal-table td:nth-child(1){grid-area:device}
-.disposal-table td:nth-child(2){grid-area:serial}
-.disposal-table td:nth-child(3){grid-area:mode;align-self:center;color:var(--muted);font-size:11px}
-.disposal-table td:nth-child(4){grid-area:status;text-align:right}
-.disposal-table td:nth-child(5){grid-area:created;color:var(--muted);font-size:10px}
-.disposal-table td:nth-child(6){grid-area:actions;justify-self:end}
-.disposal-table td[data-label]::before{content:attr(data-label);font-size:10px;color:var(--muted);margin-right:8px}
-.disposal-table td:nth-child(2)::before{display:block;margin:0 0 5px}
-.disposal-table .row-link{max-width:100%}
-.disposal-table .record-actions{gap:8px}
-.disposal-table .record-actions button{min-width:44px;min-height:44px}
 }
