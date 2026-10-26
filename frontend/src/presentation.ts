@@ -48,6 +48,18 @@ export function bindResponsiveTables(doc:Document=document){
     }).observe(doc.body,{childList:true,subtree:true,characterData:true});
 }
 
+// One document listener also handles menus mounted by later view renders.
+const workspaceMenuBindings=new WeakSet<Document>();
+export function bindWorkspaceMenuDismissal(doc:Document=document){
+    if(workspaceMenuBindings.has(doc))return;
+    workspaceMenuBindings.add(doc);
+    doc.addEventListener('click',event=>{
+        for(const menu of doc.querySelectorAll<HTMLDetailsElement>('[data-table-settings][open],[data-saved-filters][open]')){
+            if(!menu.contains(event.target as Node))menu.open=false;
+        }
+    });
+}
+
 export function tooltipPosition(anchor:any,tip:any,viewport:any){
     const left=Math.max(12,Math.min((anchor.left+anchor.right-tip.width)/2,viewport.width-tip.width-12));
     const above=anchor.top-tip.height-8;

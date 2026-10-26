@@ -29,7 +29,7 @@ import {signOut} from './auth-context.js';
 import {createSectionTransition} from './section-transition.js';
 import {bindSelectMenus} from './selects.js';
 import {loginPathFor} from '../shared/auth-navigation.js';
-import {bindActionTooltips,bindResponsiveTables,mobileActions,loadingSkeleton,prepareLoading} from './presentation.js';
+import {bindActionTooltips,bindResponsiveTables,bindWorkspaceMenuDismissal,mobileActions,loadingSkeleton,prepareLoading} from './presentation.js';
 import {WORKSPACE_TRANSLATIONS,openWorkspaceSearch,renderSavedFilters,bindSavedFilters} from './workspace-tools.js';
 import {renderTableControls,bindTableControls,applyTablePreferences,readTablePreferences} from './table-preferences.js';
 import {renderWorkspaceActions,renderWorkspaceAnalytics,workspaceCalendarDay} from './workspace-insights.js';
@@ -47,6 +47,7 @@ addTranslations({'Verantwortliche Person':'Responsible person','Alle Zuständigk
 bindSwitchAnimations();
 bindSelectMenus();
 bindResponsiveTables();
+bindWorkspaceMenuDismissal();
 const actionTooltips=bindActionTooltips();
 const mobileToolbar=document.createElement('div');mobileToolbar.id='mobile-actions';document.querySelector('.app-shell').append(mobileToolbar);
 let mobileToolbarMarkup='';
@@ -78,7 +79,7 @@ const statusClass = (value) => state.masterdata.statuses?.find(s => s.name === v
 const badge = (value) => html`<span class="status ${statusClass(value)}"><span></span>${h(statusName(value))}</span>`;
 function isInteracting(): boolean {
     const active = document.activeElement;
-    return document.querySelector('#dialog').open || document.querySelector<HTMLDetailsElement>('#currency-control')?.open || !!document.querySelector('.header-menu[open],[data-table-settings][open],[data-overview-settings][open],[data-record-menu][data-menu-open]') || !!document.querySelector('form[data-dirty=true]') ||
+    return document.querySelector('#dialog').open || document.querySelector<HTMLDetailsElement>('#currency-control')?.open || !!document.querySelector('.header-menu[open],[data-table-settings][open],[data-saved-filters][open],[data-overview-settings][open],[data-record-menu][data-menu-open]') || !!document.querySelector('form[data-dirty=true]') ||
         document.body.classList.contains('nav-open') || !!active?.matches('input,select,textarea') ||
         (!!active?.closest('#content') && !!active?.matches('button,a'));
 }
