@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {html,t} from '../dist/public/i18n.js';
-import {h,icon} from '../dist/public/ui.js';
+import {h,icon,statusTabLayout} from '../dist/public/ui.js';
 import {masterName,masterValue,workflowStatuses} from '../dist/public/inventory-display.js';
 import {renderTableControls,applyTablePreferences,readTablePreferences} from '../dist/public/table-preferences.js';
 import {workspaceCalendarDay} from '../dist/public/workspace-insights.js';
@@ -19,10 +19,10 @@ function list(initial={}){
  const counterNodes=['','Eingegangen','In Prüfung','In Bearbeitung','Abgeschlossen'].map((name,i)=>({dataset:{statusCount:name},textContent:String([3,0,0,2,1][i])}));
  const doc={querySelectorAll:()=>counterNodes,querySelector:()=>({innerHTML:''})};
  const segment=source.slice(source.indexOf('function listPage()'),source.indexOf('function currentFilter()'));
- const funcs=new Function('document','state','ctx','html','t','h','icon','labels','createButton','renderSavedFilters','currentFilter','statuses','statusName','masterName','masterValue','matchesReturnScope','filteredTable','assigneeFilter','renderTableControls','workspaceCalendarDay','serialKey','inventoryFilterOptions',segment+';return {listPage,filteredItems,refreshStatusCounts:typeof refreshStatusCounts==="function"?refreshStatusCounts:undefined};')(doc,state,ctx,html,t,h,icon,{returns:t('Retouren')},()=>'',()=>'',()=>({view:'returns'}),()=>workflowStatuses(state.masterdata.statuses,state.returns),value=>masterName(state.masterdata,'statuses',value),masterName,masterValue,matchesReturnScope,()=>'',()=> '',renderTableControls,workspaceCalendarDay,serialKey,inventoryFilterOptions);
+ const funcs=new Function('document','state','ctx','html','t','h','icon','statusTabLayout','labels','createButton','renderSavedFilters','currentFilter','statuses','statusName','masterName','masterValue','matchesReturnScope','filteredTable','assigneeFilter','renderTableControls','workspaceCalendarDay','serialKey','inventoryFilterOptions',segment+';return {listPage,filteredItems,refreshStatusCounts:typeof refreshStatusCounts==="function"?refreshStatusCounts:undefined};')(doc,state,ctx,html,t,h,icon,statusTabLayout,{returns:t('Retouren')},()=>'',()=>'',()=>({view:'returns'}),()=>workflowStatuses(state.masterdata.statuses,state.returns),value=>masterName(state.masterdata,'statuses',value),masterName,masterValue,matchesReturnScope,()=>'',()=> '',renderTableControls,workspaceCalendarDay,serialKey,inventoryFilterOptions);
  const refreshSource=source.slice(source.indexOf('function refreshRows('),source.indexOf('function bindContent()'));
  const refreshRows=new Function('document','state','t','filteredTable','bindActions','bindViews','setText','filteredItems','refreshStatusCounts','applyTablePreferences','readTablePreferences','ctx','closeRecordMenus','preserveListScroll',refreshSource+';return refreshRows;')(doc,state,t,()=>'',()=>{},()=>{},()=>{},funcs.filteredItems,funcs.refreshStatusCounts,()=>{},readTablePreferences,ctx,()=>{},preserveListScroll);
- function counts(){const page=String(funcs.listPage()),group=page.slice(page.indexOf('class="status-tabs"'),page.indexOf('<section class="panel list-panel"'));return [...group.matchAll(/<button\b[^>]*data-status="([^"]*)"[^>]*>[\s\S]*?<span[^>]*>(\d+)<\/span>/g)].map(match=>[match[1],Number(match[2])]);}
+ function counts(){const page=String(funcs.listPage()),group=page.slice(page.indexOf('class="status-tabs'),page.indexOf('<section class="panel list-panel"'));return [...group.matchAll(/<button\b[^>]*data-status="([^"]*)"[^>]*>[\s\S]*?<span[^>]*>(\d+)<\/span>/g)].map(match=>[match[1],Number(match[2])]);}
  return {state,...funcs,counts,refreshRows,counterNodes};
 }
 const zeros=[['',0],['Eingegangen',0],['In Prüfung',0],['In Bearbeitung',0],['Abgeschlossen',0]];

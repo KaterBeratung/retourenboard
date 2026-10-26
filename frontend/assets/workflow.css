@@ -1,6 +1,5 @@
 [data-ui="board"]{--workflow-error:var(--danger)}
 :root[data-theme="dark"] [data-ui="board"]{--workflow-error:var(--danger)}
-[data-ui="board"] .workspace-view-tools{display:flex;justify-content:flex-end;gap:10px;margin:-8px 0 18px;position:relative;z-index:5}
 [data-ui="board"] .sidebar-search{display:none}
 [data-ui="board"] .workspace-search-trigger{height:40px;min-height:40px;white-space:nowrap}
 [data-ui="board"] .record-select{display:inline-flex;align-items:center;justify-content:center;width:32px;min-height:36px;cursor:pointer;margin:0}
@@ -50,7 +49,6 @@ body[data-ui="board"] .field :is(input,select,textarea)[aria-invalid="true"]:not
 [data-ui="board"] .sidebar-search{display:flex;width:100%;justify-content:flex-start;gap:10px;padding:10px 12px;margin:0 0 16px;min-height:44px}
 [data-ui="board"] .sidebar-search>span{display:inline;font-size:13px}
 [data-ui="board"] .sidebar-search kbd{display:none}
-[data-ui="board"] .workspace-view-tools{margin:0 0 16px}
 [data-ui="board"] .workspace-saved-filters{width:100%}
 [data-ui="board"] .table-toolbar>.toolbar-right{width:100%;display:flex;gap:8px}
 [data-ui="board"] .toolbar-right>:is(.filter-label,.select-menu){flex:1;min-width:0}

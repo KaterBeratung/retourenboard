@@ -1,6 +1,12 @@
 import {escapedText,html} from './i18n.js';
 import {canLeaveForms,observeForm,refreshFormState,readFormState,acceptFormState} from './unsaved.js';
 export const h = (value) => escapedText(value, input => String(input ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char])));
+// Keep status rows balanced when a workspace has extra or archived statuses.
+export function statusTabLayout(count:number){
+    const total=Math.max(1,count),columns=(limit:number)=>Math.ceil(total/Math.ceil(total/limit));
+    const leading=(limit:number)=>1+(columns(limit)-total%columns(limit))%columns(limit);
+    return `status-cols-${columns(5)} status-medium-cols-${columns(3)} status-leading-${leading(5)} status-medium-leading-${leading(3)}`;
+}
 const renderedMarkup=new WeakMap<HTMLElement,string>();
 // Stable shell controls keep focus, icon timelines and menu state during polling.
 export function updateMarkup(element:HTMLElement,value:unknown){

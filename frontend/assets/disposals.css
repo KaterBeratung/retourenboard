@@ -2,8 +2,6 @@
 [data-ui="board"] .disposal-guide>span{display:inline-flex;align-items:center;gap:8px}
 .disposal-guide .icon{width:16px;height:16px}
 .disposal-guide>span>.icon{color:var(--design-accent)}
-[data-ui="board"] .disposal-status-tabs{margin:16px var(--space-panel) 20px;padding:4px;gap:4px;max-width:calc(100% - var(--space-panel) - var(--space-panel))}
-.disposal-list .table-toolbar{padding-block:20px}
 .disposal-table td{white-space:normal;min-width:130px}
 .disposal-table td:first-child{min-width:210px}
 .disposal-table td:last-child{min-width:96px}
@@ -29,11 +27,6 @@
 [data-ui="board"] .disposal-form-footer{display:flex;justify-content:flex-end;gap:12px}
 .disposal-form-footer>.btn{min-height:var(--control-height);min-width:120px;justify-content:center}
 .disposal-form-footer>.primary{min-width:140px}
-[data-ui="board"] .disposal-workspace .heading-actions{align-items:center;gap:10px}
-.disposal-workspace .heading-actions>.btn{min-height:var(--control-height);justify-content:center}
-.disposal-list .toolbar-right{gap:10px;align-items:stretch}
-.disposal-list .toolbar-right>.btn{min-height:var(--control-height)}
-.disposal-list .toolbar-right select{min-height:var(--control-height)}
 .disposal-detail-lead{display:flex;gap:18px;align-items:flex-start;margin-bottom:26px}
 .disposal-detail-lead h3{margin:0 0 6px;font-size:21px;line-height:1.4;overflow-wrap:anywhere}
 .disposal-detail-lead .mono{margin:0 0 12px;overflow-wrap:anywhere}
@@ -69,11 +62,7 @@
 .disposal-history li>small{flex:none}
 }
 @media(max-width:760px){
-.disposal-workspace .heading-actions{display:flex;flex-wrap:wrap;gap:8px}
-.disposal-workspace .heading-actions>.btn{flex:1}
 .disposal-guide{gap:9px!important;font-size:11px!important}
-.disposal-list .table-toolbar{align-items:stretch}
-.disposal-list .toolbar-right{margin:0;width:100%;justify-content:space-between}
 .disposal-scan-line{flex-wrap:wrap}
 .disposal-scan-line>.btn{width:100%;min-height:var(--control-height)}
 .disposal-facts{gap:18px 14px}
@@ -93,13 +82,6 @@
 .disposal-form-footer>.btn{min-width:0;width:100%;padding-inline:10px}
 .disposal-scan-line{flex-wrap:nowrap}
 .disposal-scan-line>.btn{width:auto;flex:none}
-.disposal-workspace .heading-actions>[data-disposal-create]{flex-basis:100%}
-}
-@media(max-width:760px){
-.disposal-status-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;overflow:visible}
-.disposal-status-tabs>button:first-child{grid-column:1/-1}
-.disposal-status-tabs>button{min-width:0;min-height:var(--control-height);display:flex;justify-content:center;align-items:center;gap:6px;padding:9px 6px;font-size:11px}
-.disposal-status-tabs>button>span{margin-left:0}
 }
 @media(max-width:1100px){
 .disposal-table{width:100%;table-layout:fixed}

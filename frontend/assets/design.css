@@ -64,8 +64,6 @@ main:focus{outline:none}
 .empty-icon .icon{width:28px;height:28px}
 .empty-state .btn{margin-top:8px;font-size:10px;padding:9px 13px}
 .footer-divider{margin:0 10px;color:var(--muted)}
-.status-tabs button.selected{background:var(--segment-selected);border-color:var(--glass-edge);color:var(--ink);box-shadow:var(--shadow-control)}
-.status-tabs button>span{display:inline-block;margin-left:8px;padding:2px 5px;background:var(--surface-subtle);color:var(--muted);border-radius:4px;font-size:10px}
 .search-field .icon{width:16px;height:16px}
 .search-field input::placeholder{color:var(--muted)}
 .toolbar-right select{font-size:10px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px 10px;color:var(--ink);max-width:170px}
@@ -134,8 +132,6 @@ dialog.wide{width:min(890px,calc(100vw - 32px))}
 .product-card-title{display:flex;align-items:center;gap:12px;margin:14px 0}
 .product-card-title .record-title{margin:0}
 .detail-summary>.product-avatar{width:64px;height:64px;flex-shrink:0}
-.status-tabs{display:flex;margin:0 0 20px;overflow-x:auto;padding-bottom:3px;gap:4px;flex-wrap:wrap;margin-bottom:20px;padding:5px;border:1px solid var(--line);border-radius:20px;background:var(--segment-surface);width:fit-content;max-width:100%}
-.status-tabs button{white-space:nowrap;min-height:36px;padding:7px 12px;border:1px solid transparent;border-radius:16px;font-size:12px;color:var(--muted);background:transparent}
 .scope-hint{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 16px;border:1px solid var(--line);border-radius:var(--control-radius);background:var(--design-tint);font-size:13px;margin-bottom:20px}
 .scope-hint>span{display:flex;align-items:center;gap:8px}
 .scope-hint .text-link{font-size:12px}
@@ -679,8 +675,6 @@ main{padding:26px 18px 20px}
 .empty-state p{font-size:10px}
 .empty-state h3{font-size:13px}
 .page-footer{font-size:8px;padding:14px 18px;flex-direction:column;gap:7px}
-.status-tabs{gap:3px;margin-bottom:14px}
-.status-tabs button{font-size:10px;padding:8px}
 .table-toolbar{display:block;padding:13px}
 .search-field{margin-bottom:12px}
 .search-field input{font-size:10px}
@@ -786,8 +780,6 @@ h1{font-size:28px}
 .toolbar-right{display:flex;flex-wrap:wrap;gap:8px}
 .toolbar-right select{flex:1;max-width:100%;min-width:0}
 .scope-hint{align-items:flex-start;flex-direction:column;gap:10px;border-radius:var(--control-radius)}
-.status-tabs{flex-wrap:nowrap;overflow-x:auto;padding:2px 2px 9px}
-.status-tabs button{flex-shrink:0;white-space:nowrap;border-radius:16px}
 .table-footer{flex-wrap:wrap;gap:8px}
 .form-section{padding:16px 14px;margin-bottom:22px;border-radius:var(--control-radius)}
 .form-section .form-grid{grid-template-columns:1fr}
@@ -801,9 +793,7 @@ h1{font-size:28px}
 dialog.detail-drawer{animation:none}
 }
 @media(hover:hover){
-.status-tabs button:not(:disabled):hover{background:var(--design-hover);border-color:var(--design-accent);color:var(--design-accent)}
 .admin-tabs button:not(:disabled):hover{background:var(--surface-hover);border-color:var(--line);color:var(--ink)}
-.status-tabs button.selected:not(:disabled):hover{background:var(--segment-selected);border-color:var(--glass-edge);color:var(--ink)}
 .admin-tabs button.selected:not(:disabled):hover{background:var(--accent-background);border-color:var(--accent);color:var(--ink)}
 .btn.secondary:not(:disabled):hover{background:var(--design-hover);border-color:var(--design-accent);color:var(--design-accent)}
 .btn.danger:not(:disabled):hover{background:color-mix(in srgb,var(--danger,var(--danger-bg)) 14%,var(--design-surface));border-color:var(--danger,var(--danger-line))}
@@ -1029,8 +1019,6 @@ select optgroup{font-size:12px;color:var(--muted);padding:6px;font-weight:600}
 .dashboard-grid{grid-template-columns:minmax(0,1fr);gap:16px}
 .panel-heading{padding:16px}
 .panel-heading h2{font-size:14px}
-.status-tabs{padding:4px;gap:4px;width:100%;flex-wrap:wrap;overflow:visible}
-.status-tabs button{min-height:36px;flex:1 1 auto;padding:7px 9px;font-size:11px}
 .search-field{width:100%;min-width:0;max-width:none}
 .search-field input{font-size:16px}
 .table-toolbar,.list-panel>.table-toolbar{padding:16px}
