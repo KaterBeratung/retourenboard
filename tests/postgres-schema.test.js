@@ -8,7 +8,7 @@ test('PostgreSQL schema initialization is concurrent-safe and seeds original mas
  await Promise.all([migratePostgres(db),migratePostgres(db)]);await migratePostgres(db);
  assert.deepEqual((await db.query('SELECT id,name,builtinKey FROM masterdata WHERE id=12')).rows,[{id:12,name:'Eingegangen',builtinKey:'statuses.received'}]);
  assert.equal((await db.query('SELECT COUNT(*) AS n FROM masterdata')).rows[0].n,20);
- assert.equal((await db.query('SELECT COUNT(*) AS n FROM schema_migrations')).rows[0].n,5);
+ assert.equal((await db.query('SELECT COUNT(*) AS n FROM schema_migrations')).rows[0].n,8);
  assert.equal((await db.query('SELECT COUNT(*) AS n FROM legacy_migrations')).rows[0].n,0);
 });
 

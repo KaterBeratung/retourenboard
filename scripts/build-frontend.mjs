@@ -19,7 +19,7 @@ writeFileSync(ocrManifestPath,JSON.stringify(ocrManifest,null,2)+'\n');
 for (const file of ['styles.css','theme.css','favicon.svg','kofi.avif']) copyFileSync(join(root,'public',file),join(output,file));
 cpSync(join(root,'public/vendor'),join(output,'vendor'),{recursive:true});
 execFileSync(process.execPath, [compiler, '-p', join(root, 'frontend/tsconfig.json')], { cwd: root, stdio: 'inherit' });
-for (const file of ['index.html', 'admin.html','account.html','login.html','settings.css', 'design.css', 'motion.css','chat.css','switches.css','workspace-tools.css','workflow.css','workspace-refinements.css','workspace-insights.css','scan-labels.css','return-labels.css','return-drafts.css','workspace-personalization.css','scan-intake.css','inventory-polish.css','disposals.css']) {
+for (const file of ['customer-status.html','customer-status.css','index.html', 'admin.html','account.html','login.html','settings.css', 'design.css', 'motion.css','chat.css','switches.css','workspace-tools.css','workflow.css','workspace-refinements.css','workspace-insights.css','scan-labels.css','return-labels.css','return-drafts.css','workspace-personalization.css','scan-intake.css','inventory-polish.css','disposals.css']) {
   copyFileSync(join(root, 'frontend/assets', file), join(output, file));
 }
 // Scanner dependencies are bundled locally; application state stays in its

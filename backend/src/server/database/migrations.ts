@@ -1,3 +1,5 @@
+import {COMMUNICATION_MIGRATION} from './communication-schema.js';
+import {CUSTOMER_STATUS_MIGRATION,CUSTOMER_STATUS_OPTIONS_MIGRATION} from './customer-status-schema.js';
 import {DISPOSAL_TABLES,DISPOSAL_INDEXES} from './disposal-schema.js';
 import {createHash} from 'node:crypto';
 import {BUILTIN_MASTERDATA} from '../../shared/model.js';
@@ -6,12 +8,15 @@ import type {SqlDatabase} from './types.js';
 import {RETURN_SEARCH_MIGRATION,rebuildReturnSerialSearch} from './serial-search.js';
 import {RECORD_METADATA_TABLES,backfillRecordMetadata} from './record-metadata.js';
 import {SSO_TABLES} from './sso-schema.js';
-export const POSTGRES_SCHEMA_VERSION=5;
+export const POSTGRES_SCHEMA_VERSION=8;
 const statements=[...BASELINE_TABLE_CONTRACTS.map(t=>t.createSql),...INDEX_STATEMENTS];
 const checksum=createHash('sha256').update(JSON.stringify(statements)).digest('hex');
 const additions=[...DISPOSAL_TABLES.map(t=>t.createSql),...DISPOSAL_INDEXES],additionChecksum=createHash('sha256').update(JSON.stringify(additions)).digest('hex');
 const searchChecksum=createHash('sha256').update(JSON.stringify(RETURN_SEARCH_MIGRATION)).digest('hex');
 const metadataStatements=RECORD_METADATA_TABLES.map(t=>t.createSql),metadataChecksum=createHash('sha256').update(JSON.stringify(metadataStatements)).digest('hex');
+const customerStatusChecksum=createHash('sha256').update(JSON.stringify(CUSTOMER_STATUS_MIGRATION)).digest('hex');
+const customerOptionsChecksum=createHash('sha256').update(JSON.stringify(CUSTOMER_STATUS_OPTIONS_MIGRATION)).digest('hex');
+const communicationChecksum=createHash('sha256').update(JSON.stringify(COMMUNICATION_MIGRATION)).digest('hex');
 const ssoStatements=SSO_TABLES.map(t=>t.createSql),ssoChecksum=createHash('sha256').update(JSON.stringify(ssoStatements)).digest('hex');
 export async function resetIdentitySequences(db:SqlDatabase,highWater:Record<string,number>={}){
  for(const table of TABLE_CONTRACTS){if(!table.identity)continue;const column=table.identity.toLowerCase(),max=(await db.query<{n:number}>('SELECT COALESCE(MAX('+column+'),0) AS n FROM '+table.name)).rows[0].n,value=Math.max(max,highWater[table.sourceName]??highWater[table.name]??0);if(!Number.isSafeInteger(value)||value<0)throw new Error('Ungültiger Identitätssequenzstand.');await db.query('SELECT setval(pg_get_serial_sequence($1,$2),$3,$4)',[db.schema+'.'+table.name,column,Math.max(value,1),value>0]);}
@@ -25,7 +30,7 @@ export async function migratePostgres(db:SqlDatabase,{seedDefaults=true}:{seedDe
   await db.query('CREATE SCHEMA IF NOT EXISTS "'+db.schema+'"');
   await db.query('CREATE TABLE IF NOT EXISTS schema_migrations(version INTEGER PRIMARY KEY,name TEXT NOT NULL,checksum TEXT NOT NULL,appliedAt TEXT NOT NULL)');
   const applied=(await db.query<{version:number;checksum:string}>('SELECT version,checksum FROM schema_migrations ORDER BY version')).rows;
-  if(applied.some((row,i)=>row.version!==i+1||row.checksum!==({1:checksum,2:additionChecksum,3:searchChecksum,4:metadataChecksum,5:ssoChecksum} as Record<number,string>)[row.version]))throw new Error('Unbekannter oder abweichender PostgreSQL-Schemastand. Anwendung und Datenbankversion prüfen.');
+  if(applied.some((row,i)=>row.version!==i+1||row.checksum!==({1:checksum,2:additionChecksum,3:searchChecksum,4:metadataChecksum,5:ssoChecksum,6:customerStatusChecksum,7:customerOptionsChecksum,8:communicationChecksum} as Record<number,string>)[row.version]))throw new Error('Unbekannter oder abweichender PostgreSQL-Schemastand. Anwendung und Datenbankversion prüfen.');
   if(!applied.length){
   if((await db.query("SELECT 1 FROM information_schema.tables WHERE table_schema=current_schema() AND table_name<>'schema_migrations' LIMIT 1")).rowCount)throw Error('PostgreSQL-Anwendungsschema ist bereits belegt. Keine Tabellen werden überschrieben.');
   for(const sql of statements)await db.query(sql);
@@ -37,5 +42,8 @@ export async function migratePostgres(db:SqlDatabase,{seedDefaults=true}:{seedDe
   if(!applied.some(row=>row.version===3)){for(const sql of RETURN_SEARCH_MIGRATION)await db.query(sql);await rebuildReturnSerialSearch(db);await db.query('INSERT INTO schema_migrations(version,name,checksum,appliedAt) VALUES($1,$2,$3,$4)',[3,'return-search-indexes',searchChecksum,new Date().toISOString()]);}
   if(!applied.some(row=>row.version===4)){for(const sql of metadataStatements)await db.query(sql);await backfillRecordMetadata(db);await db.query('INSERT INTO schema_migrations(version,name,checksum,appliedAt) VALUES($1,$2,$3,$4)',[4,'record-revisions-and-price-snapshots',metadataChecksum,new Date().toISOString()]);}
   if(!applied.some(row=>row.version===5)){for(const sql of ssoStatements)await db.query(sql);await db.query('INSERT INTO schema_migrations(version,name,checksum,appliedAt) VALUES($1,$2,$3,$4)',[5,'optional-oidc-sign-in',ssoChecksum,new Date().toISOString()]);}
+  if(!applied.some(row=>row.version===6)){for(const sql of CUSTOMER_STATUS_MIGRATION)await db.query(sql);await db.query('INSERT INTO schema_migrations(version,name,checksum,appliedAt) VALUES($1,$2,$3,$4)',[6,'customer-status-sharing',customerStatusChecksum,new Date().toISOString()]);}
+  if(!applied.some(row=>row.version===7)){for(const sql of CUSTOMER_STATUS_OPTIONS_MIGRATION)await db.query(sql);await db.query('INSERT INTO schema_migrations(version,name,checksum,appliedAt) VALUES($1,$2,$3,$4)',[7,'customer-status-options',customerOptionsChecksum,new Date().toISOString()]);}
+  if(!applied.some(row=>row.version===8)){for(const sql of COMMUNICATION_MIGRATION)await db.query(sql);await db.query('INSERT INTO schema_migrations(version,name,checksum,appliedAt) VALUES($1,$2,$3,$4)',[8,'record-communication',communicationChecksum,new Date().toISOString()]);}
  });
 }

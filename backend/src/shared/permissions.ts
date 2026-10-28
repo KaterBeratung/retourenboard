@@ -1,12 +1,12 @@
 import type {Role} from './types.js';
 
 export const PERMISSION_GROUPS = [
-  {label:'Entsorgung',description:'Einzelgeräte erfassen und die Durchführung nachvollziehbar dokumentieren.',entries:[['disposalsRead','Geräteaufträge ansehen'],['disposalsCreate','Geräteaufträge anlegen'],['disposalsEdit','Geräteaufträge bearbeiten / stornieren'],['disposalsApprove','Vernichtung / Entsorgung freigeben'],['disposalsComplete','Durchführung bestätigen und korrigieren'],['disposalsExport','Etiketten / Nachweise drucken und exportieren'],['disposalsImport','Geräteaufträge importieren']]},
+  {label:'Entsorgung',description:'Einzelgeräte erfassen und die Durchführung nachvollziehbar dokumentieren.',entries:[['disposalsRead','Geräteaufträge ansehen'],['disposalsCreate','Geräteaufträge anlegen'],['disposalsEdit','Geräteaufträge bearbeiten / stornieren'],['disposalsApprove','Vernichtung / Entsorgung freigeben'],['disposalsComplete','Durchführung bestätigen und korrigieren'],['disposalsExport','Etiketten / Nachweise drucken und exportieren'],['disposalsImport','Geräteaufträge importieren'],['disposalsCommentsCreate','Geräteaufträge kommentieren und eigene Kommentare bearbeiten'],['disposalsCommentsModerate','Gerätekommentare anderer Personen moderieren'],['disposalsShare','Geräte-Kundenstatus teilen']]},
   {label:'Produkte',description:'Produktdaten und den Produktbestand verwalten.',entries:[
     ['productsCreate','Produkte anlegen'],['productsEdit','Produkte bearbeiten'],['productsDelete','Produkte archivieren / löschen'],['productsImport','Produkte per CSV importieren'],['productsExport','Produkte als CSV exportieren']
   ]},
   {label:'Retouren',description:'Vorgänge erfassen und unabhängig davon weiterbearbeiten.',entries:[
-    ['returnsCreate','Retouren anlegen'],['returnsEdit','Retourendaten bearbeiten'],['returnsStatus','Retourenstatus ändern'],['returnsDelete','Retouren löschen'],['returnsImport','Retouren per CSV importieren'],['returnsExport','Retouren als CSV exportieren']
+    ['returnsCreate','Retouren anlegen'],['returnsEdit','Retourendaten bearbeiten'],['returnsStatus','Retourenstatus ändern'],['returnsDelete','Retouren löschen'],['returnsImport','Retouren per CSV importieren'],['returnsExport','Retouren als CSV exportieren'],['returnsShare','Kundenstatus teilen']
   ]},
   {label:'Dateianhänge',description:'Vorschau und Download gelten gemeinsam. Dateien gehören zum jeweiligen Vorgang.',entries:[
     ['attachmentsView','Dateien ansehen und herunterladen'],['attachmentsUpload','Dateien hochladen'],['attachmentsDelete','Dateien löschen']
@@ -28,7 +28,7 @@ export type PermissionUser={role:Role;canDelete?:number|boolean;canImport?:numbe
 
 export function defaultPermissions(role:Role,legacy:Partial<Record<'delete'|'import'|'export',boolean>>={}):Permissions{
   const member=role==='member';
-  const result=Object.fromEntries(PERMISSION_KEYS.map(key=>[key,role==='admin'||key==='attachmentsView'||key==='chatRead'||key==='disposalsRead'||member&&!['chatModerate','commentsModerate','disposalsApprove','disposalsComplete','disposalsImport'].includes(key)&&!Object.values(ADMIN_SECTION_PERMISSIONS).includes(key as any)])) as Permissions;
+  const result=Object.fromEntries(PERMISSION_KEYS.map(key=>[key,role==='admin'||key==='attachmentsView'||key==='chatRead'||key==='disposalsRead'||member&&!['returnsShare','disposalsShare','disposalsCommentsModerate','chatModerate','commentsModerate','disposalsApprove','disposalsComplete','disposalsImport'].includes(key)&&!Object.values(ADMIN_SECTION_PERMISSIONS).includes(key as any)])) as Permissions;
   if(role!=='admin')for(const [alias,keys] of Object.entries(LEGACY_PERMISSION_GROUPS)){
     const allowed=legacy[alias as keyof typeof legacy]??member;
     for(const key of keys)result[key]=allowed&&(member||alias==='export');

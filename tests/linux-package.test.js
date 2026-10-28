@@ -31,9 +31,10 @@ test('the Linux TAR contains the application without local accounts or secrets',
       assert.equal(script.includes(Buffer.from('\r\n')),false,`Packaged Linux shell script cannot run with CRLF: ${file}`);
     }
     assert.deepEqual(readFileSync(join(projectDir,'scripts/install-linux.sh')),sourceScript,'Packaging must not edit the working tree');
-    for (const required of ['package.json', 'README.md', '.env.example', 'server/index.js', 'server/users.js', 'public/accounts.js', 'public/theme.js', 'public/theme.css', 'scripts/install-linux.sh', 'scripts/install-network.sh', 'deploy/retourenboard.service', 'public/vendor/pdfjs/pdf.min.mjs', 'public/vendor/pdfjs/pdf.worker.min.mjs', 'scripts/design-preview.mjs', 'previews/design/public/preview-info.js', 'frontend/src/app.ts', 'dist/public/design.js', 'dist/public/design.css', 'dist/public/motion.css']) {
+    for (const required of ['docs/readme/LICENSE', 'package.json', 'README.md', '.env.example', 'server/index.js', 'server/users.js', 'public/accounts.js', 'public/theme.js', 'public/theme.css', 'scripts/install-linux.sh', 'scripts/install-network.sh', 'deploy/retourenboard.service', 'public/vendor/pdfjs/pdf.min.mjs', 'public/vendor/pdfjs/pdf.worker.min.mjs', 'scripts/design-preview.mjs', 'previews/design/public/preview-info.js', 'frontend/src/app.ts', 'dist/public/design.js', 'dist/public/design.css', 'dist/public/motion.css']) {
       assert.ok(files.includes(required), `Required application file missing: ${required}`);
     }
+    assert.deepEqual(execFileSync('tar',['-xOzf',archivePath,'docs/readme/LICENSE']),readFileSync(join(projectDir,'LICENSE')),'The complete project license must accompany distributed binaries');
     assert.equal(files.some(file => /(^|\/)(\.env|data|\.qa|node_modules)(\/|$)|\.(sqlite|sqlite-shm|sqlite-wal)$/.test(file)), false, 'Local secrets and accounts must not be shipped.');
     for(const file of ['website/dist/index.html','website/dist/site.css','website/dist/site.js','website/dist/favicon.svg','scripts/website-preview.mjs'])assert.ok(files.includes(file),`Product page file missing: ${file}`);
     for(const file of ['deploy/docker/compose.yml','dist/server/legacy-sqlite/schema-expressions.js'])assert.ok(files.includes(file),`Deployment or security runtime missing: ${file}`);

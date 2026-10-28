@@ -183,3 +183,8 @@ test('cached assignees avoid another request, failed loading keeps the historica
   finish([{id:11,username:'late',displayName:'Late'}]);await pending;
   assert.deepEqual(d.controls.assignedUserId.options.map(option=>option.value),before);
 });
+
+test('required handover assignment does not describe the field as optional',async t=>{
+ const d=fixture(t,{assignedUserId:''}),hint=initialAssignee(d,7,'Historic');d.controls.assignedUserId.required=true;
+ await feedback.bindReturnAssignees(d.form,{returnAssignees:[{id:9,displayName:'Active'}]},{});assert.doesNotMatch(hint.textContent,/optional/i);assert.match(hint.textContent,/auswählen/);
+});

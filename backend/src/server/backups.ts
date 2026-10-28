@@ -140,7 +140,7 @@ export async function createBackups({ store, dataDir, coordinator, clock, prefer
                 const fileMetadata = [];
                 for (const p of files)
                     fileMetadata.push({ path: p, size: statSync(join(work, p)).size, sha256: await sha256File(join(work, p)) });
-                const manifest = { format: 2, engine:'postgresql',payload:'tables-v1',schema:4,tables, version, createdAt: new Date(clock.now()).toISOString(), database: 'data.jsonl', mfaKeyRequired: Number((await store.db.query("SELECT COUNT(*) AS n FROM user_mfa WHERE secretEnc IS NOT NULL", [])).rows[0].n) > 0, files: fileMetadata };
+                const manifest = { format: 2, engine:'postgresql',payload:'tables-v1',schema:5,tables, version, createdAt: new Date(clock.now()).toISOString(), database: 'data.jsonl', mfaKeyRequired: Number((await store.db.query("SELECT COUNT(*) AS n FROM user_mfa WHERE secretEnc IS NOT NULL", [])).rows[0].n) > 0, files: fileMetadata };
                 const { writeFileSync } = await import('node:fs');
                 writeFileSync(join(work, 'manifest.json'), JSON.stringify(manifest, null, 2));
                 checkBackupSizes([...sizes, statSync(join(work, 'manifest.json')).size], { ...limits, maxFiles: limits.maxFiles + 1 });

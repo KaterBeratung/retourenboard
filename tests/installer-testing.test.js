@@ -69,7 +69,7 @@ test('an incomplete compiled build is rejected by packaging, check, test and sta
   const {buildLinuxPackages}=await import('../scripts/build-linux-installer.mjs');
   const dir=mkdtempSync(join(tmpdir(),'retouren-incomplete-'));
   try{
-    for(const entry of ['package.json','README.md','.env.example','.dockerignore','Dockerfile','server','shared','public','scripts','deploy','tests','dist'])cpSync(join(project,entry),join(dir,entry),{recursive:true});
+    for(const entry of ['LICENSE','package.json','README.md','.env.example','.dockerignore','Dockerfile','server','shared','public','scripts','deploy','tests','dist'])cpSync(join(project,entry),join(dir,entry),{recursive:true});
     rmSync(join(dir,'dist/server/app.js'));
     assert.throws(()=>buildLinuxPackages({sourceDir:dir,outputDir:join(dir,'output')}),/dist[\\/]server[\\/]app\.js/,'Packaging must reject missing compiled app');
     for(const args of [['scripts/install-linux.sh','--dry-run'],['scripts/install-linux.sh','--test','--once']]){

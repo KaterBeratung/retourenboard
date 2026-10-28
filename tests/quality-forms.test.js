@@ -1,7 +1,9 @@
+import {returnTransition} from '../dist/public/return-transitions.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 const {productForm,returnForm,showDetails,bindDeviceScan}=await import(process.env.FORMS_MODULE || '../dist/public/forms.js');
 import {setLanguage} from '../dist/public/i18n.js';
+import {openDisposalAction} from '../dist/public/disposal-forms.js';
 import {bindAdmin} from '../dist/public/admin.js';
 import {bindUsers} from '../dist/public/accounts.js';
 import {bindAccount,enrollmentView,recoveryView,wireForm} from '../dist/public/account.js';
@@ -25,7 +27,7 @@ function form(values={}){
   for(const [name,value]of Object.entries(values)){const field=element();field.querySelector=()=>null;node.elements[name]={...element(),name,value:String(value),checked:value===true,insertAdjacentHTML(){},closest:()=>field};}
   for(const key of PERMISSION_KEYS)node.elements['permission-'+key]={...element(),checked:true};
   const permissionNodes={};
-  node.querySelector=selector=>selector.startsWith('[name=')?node.elements[selector.slice(6,-1)]??null:selector==='.dialog-body'?body:selector==='#admin-mfa-reset'?reset:selector==='[type=submit]'?button:selector==='.form-error'||selector==='[role=alert]'?error:selector==='.unsaved-status'?node.status:selector.startsWith('#permission-')||selector.startsWith('[data-permission-count=')?permissionNodes[selector]??=element():null;
+  node.querySelector=selector=>selector.startsWith('[name=')?node.elements[selector.slice(6,-1)]??null:(selector==='.dialog-body'||selector==='[data-account-security-actions]')?body:selector==='#admin-mfa-reset'?reset:selector==='[type=submit]'?button:selector==='.form-error'||selector==='[role=alert]'?error:selector==='.unsaved-status'?node.status:selector.startsWith('#permission-')||selector.startsWith('[data-permission-count=')?permissionNodes[selector]??=element():null;
   node.prepend=status=>node.status=status;
   node.querySelectorAll=()=>[];
   return node;
@@ -35,6 +37,7 @@ function boundary(t){
   const dialog=element();dialog.open=false;dialog.nextValues={};dialog.nodes={};
   Object.defineProperty(dialog,'innerHTML',{set(value){this.html=value;this.form=/<form\b/.test(value)?form(this.nextValues):null;this.nodes={};}});
   dialog.querySelector=selector=>{
+    if(selector==='#return-communication')return dialog.nodes[selector]??=document.createElement('section');
     if(selector==='#return-timeline'){
       const root=dialog.nodes[selector]??={...element(),isConnected:false,closest:()=>null};root.controls??={};
       root.querySelector=key=>root.controls[key]??=element();return root;
@@ -47,7 +50,7 @@ function boundary(t){
   };
   dialog.querySelectorAll=()=>[];dialog.showModal=()=>dialog.open=true;
   dialog.close=()=>{dialog.dirtyAtClose=dialog.form?.dataset.dirty;dialog.open=false;};
-  globalThis.document={querySelector:selector=>{assert.equal(selector,'#dialog');return dialog;},createElement:tag=>{const node=element();if(tag==='section'){node.isConnected=false;node.querySelector=selector=>selector==='form'?null:element();node.closest=()=>null;}return node;}};
+  globalThis.document={querySelector:selector=>{assert.equal(selector,'#dialog');return dialog;},createElement:tag=>{const node=element();node.querySelector=()=>element();if(tag==='section'){node.isConnected=false;const passive=()=>({...element(),isConnected:false,closest:()=>null,querySelector:selector=>selector==='form'||selector==='[data-customer-share]'?null:passive()});node.querySelector=selector=>selector==='form'||selector==='[data-customer-share]'?null:passive();node.closest=()=>null;}return node;}};
   globalThis.FormData=class extends Map{constructor(node){super(Object.entries(node.values));}};
   globalThis.location={hash:''};
   t.after(()=>{for(const [name,value]of Object.entries(originals)){if(value===undefined)delete globalThis[name];else globalThis[name]=value;}});
@@ -249,7 +252,7 @@ for(const [label,open,values,path]of [
     await open(context({api:async(request,options)=>{requests.push([request,options.method]);return requests.length===1?new Promise(resolve=>finish=resolve):{id:73};}}),dialog);
     const savedForm=dialog.form;markForm(savedForm,true);const saving=savedForm.onsubmit(event);savedForm.values.name='Newer input';savedForm.oninput?.();finish({id:73});await saving;
     assert.equal(dialog.open,true);await savedForm.onsubmit(event);
-    assert.deepEqual(requests,[[path,'POST'],[label==='master data'?'/api/masterdata/73':path+'/73','PUT']]);assert.equal(savedForm.dataset.dirty,'false');assert.equal(dialog.open,false);
+    assert.deepEqual(requests,[[path,'POST'],[label==='master data'?'/api/masterdata/73':path+'/73','PUT']]);assert.equal(savedForm.dataset.dirty,'false');assert.equal(dialog.open,label==='return');if(label==='return')assert.match(dialog.html,/Retourendetails/);
   });
 }
 test('CSV profile create retry updates the persisted profile after retaining newer input',async t=>{
@@ -306,7 +309,7 @@ for(const [kind,id,want]of [['products',17,'/admin#audit?entity=products&entityI
     const dialog=boundary(t),ctx=context({api:async path=>path==='/api/config'?{uploadMaxMb:2,maxFilesPerReturn:5}:[]});
     dialog.querySelector('#return-attachments').isConnected=false;
     showDetails(ctx,kind,{id,name:'Produkt',returnNumber:'RET-42',priceCents:1200,active:true});
-    const link=dialog.querySelector('.dialog-body').children.find(child=>child.textContent==='Änderungsverlauf öffnen');
+    const link=dialog.querySelector(kind==='returns'?'[data-detail-panel=history]':'.dialog-body').children.find(child=>child.textContent==='Änderungsverlauf öffnen');
     assert.ok(link);assert.equal(link.href,want);
   });
 }
@@ -482,3 +485,51 @@ for(const [label,bind,selector,path]of [
     if(selector==='dialog')assert.equal(dialog.dirtyAtClose,'false');
   });
 }
+
+for(const discard of [false,true])test(`disposal action protects inline comment/share drafts; discard=${discard}`,async t=>{
+ const dialog=boundary(t);dialog.open=true;dialog.innerHTML='Original details';const draft=form({text:'Private draft'});markForm(draft,true);dialog.querySelectorAll=selector=>selector==='form[data-dirty=true]'?[draft]:[];
+ let prompt;const create=document.createElement;document.body={append(node){prompt=node;}};
+ document.createElement=tag=>{if(tag!=='dialog')return create(tag);const controls={};return {setAttribute(){},querySelector:selector=>controls[selector]??={focus(){}},showModal(){},close(){},remove(){}};};
+ const pending=openDisposalAction(context(),{id:2,disposalNumber:'DIS-2',mode:'destroy',details:{}},'approve',()=>{});
+ assert.ok(prompt,'switching to an action must ask about the inline draft');assert.equal(dialog.html,'Original details');
+ prompt.querySelector(discard?'[data-discard]':'[data-stay]').onclick();await pending;
+ if(discard){assert.match(dialog.html,/disposal-action-form/);assert.equal(draft.dataset.dirty,'false');}else{assert.equal(dialog.html,'Original details');assert.equal(draft.dataset.dirty,'true');assert.equal(draft.values.text,'Private draft');}
+});
+
+test('normal return creation continues in the saved details after refreshing inventory',async t=>{
+ const dialog=boundary(t);dialog.nextValues={productId:'1',serialNumber:'SN-NORMAL'};
+ const saved={id:91,returnNumber:'RET-91',productName:'Device',revision:1};let refreshes=0;
+ const ctx=context({returns:[],api:async(path,options)=>options?saved:[],reload:async()=>{refreshes++;ctx.returns=[saved];}});
+ returnForm(ctx);await dialog.form.onsubmit(event);assert.equal(refreshes,1);assert.equal(dialog.open,true);assert.match(dialog.html,/Retourendetails/);assert.match(dialog.html,/RET-91/);
+});
+test('a successful return remains usable when the subsequent inventory refresh fails',async t=>{
+ const dialog=boundary(t);dialog.nextValues={productId:'1',serialNumber:'SN-REFRESH'};const messages=[];
+ const ctx=context({returns:[],api:async(path,options)=>options?{id:92,returnNumber:'RET-92',productName:'Device',revision:1}:[],reload:async()=>{throw Error('offline');},toast:message=>messages.push(String(message))});
+ returnForm(ctx);await dialog.form.onsubmit(event);assert.equal(dialog.open,true);assert.match(dialog.html,/Retourendetails/);assert.ok(messages.some(message=>/gespeichert.*aktualisiert/i.test(message)),'successful persistence must be explained even if refreshing fails');
+});
+test('normal create completion cannot replace a newer dialog during inventory refresh',async t=>{
+ const dialog=boundary(t);dialog.nextValues={productId:'1',serialNumber:'SN-NORMAL'};let finish;
+ const ctx=context({returns:[],api:async()=>({id:91,returnNumber:'RET-91'}),reload:()=>new Promise(resolve=>finish=resolve)});
+ returnForm(ctx);const previous=dialog.form,pending=previous.onsubmit(event);await new Promise(setImmediate);
+ dialog.nextValues={name:'Newer editor',sku:'NEW'};productForm(ctx);const newer=dialog.form;markForm(newer,true);finish();await pending;
+ assert.equal(dialog.form,newer);assert.equal(newer.dataset.dirty,'true');assert.equal(dialog.open,true);
+});
+
+test('return transition completion cannot displace a newer editor during inventory refresh',async t=>{
+ const dialog=boundary(t);dialog.nextValues={statusId:'1',reason:'Recheck'};let finish,opened=0;
+ const ctx=context({masterdata:{statuses:[{id:1,active:true,isClosed:false,name:'Received'}]},api:async()=>({id:91}),reload:()=>new Promise(resolve=>finish=resolve)});
+ returnTransition(ctx,{id:91,revision:1,isClosed:true},'reopen',()=>opened++);const pending=dialog.form.onsubmit(event);await new Promise(setImmediate);
+ dialog.nextValues={name:'Newer editor',sku:'NEW'};productForm(ctx);const newer=dialog.form;markForm(newer,true);finish();await pending;
+ assert.equal(opened,0,'the saved transition must not reopen old details over a new editor');assert.equal(dialog.form,newer);assert.equal(newer.dataset.dirty,'true');
+});
+
+test('normal create does not reopen details after the user navigates during inventory refresh',async t=>{
+ const dialog=boundary(t);dialog.nextValues={productId:'1',serialNumber:'NAVIGATION'};let finish;
+ const ctx=context({returns:[],api:async()=>({id:91,returnNumber:'RET-91'}),reload:()=>new Promise(resolve=>finish=resolve)});
+ returnForm(ctx);const pending=dialog.form.onsubmit(event);await new Promise(setImmediate);location.hash='#products';finish();await pending;assert.equal(dialog.open,false,'the new route must remain in control');
+});
+test('product details use the confirmed saved revision if refreshing inventory fails',async t=>{
+ const dialog=boundary(t),old={id:73,name:'Old product name',sku:'SKU',active:true,revision:1};dialog.nextValues={name:'New product name',sku:'SKU',active:'true'};
+ const ctx=context({products:[old],api:async(path,options)=>options?{...old,name:'New product name',revision:2}:[],reload:async()=>{throw Error('offline');}});
+ productForm(ctx,old);await dialog.form.onsubmit(event);assert.equal(dialog.open,true);assert.match(dialog.html,/New product name/);assert.doesNotMatch(dialog.html,/Old product name/);
+});

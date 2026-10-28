@@ -17,6 +17,7 @@ export function redactLog(value:unknown):string {
   .replace(/(["']?recoveryCodes?["']?\s*[:=]\s*)\[[^\]\r\n]*\]/gi,'$1[ausgeblendet]')
   .replace(/((?:"|')?(?:password(?:Hash|Salt)?|passwort|smtpPassword|apiKey|secret(?:Enc)?|csrfToken|token|sessionToken|factor|recoveryCodes?)(?:"|')?\s*[:=]\s*)("(?:\\.|[^"\\])*"|'[^']*'|[^\s,;]+)/gi,'$1[ausgeblendet]')
   .replace(/(https?:\/\/)[^\s/@]+:[^\s/@]+@/gi,'$1[ausgeblendet]@')
+  .replace(/(\/[sd]\/|\/api\/public\/(?:return|disposal)-status\/)[A-Za-z0-9_-]+/g,'$1[ausgeblendet]')
   .replace(/\b[a-f0-9]{48,}\b/gi,'[ausgeblendet]').slice(0,2000);
 }
 export function boundedEntries(entries:LogEntry[]):LogEntry[]{let bytes=0;const result:LogEntry[]=[];for(const entry of entries.slice(-200).reverse()){bytes+=Buffer.byteLength(JSON.stringify(entry));if(bytes>128*1024)break;result.unshift(entry);}return result;}

@@ -29,7 +29,8 @@
 .disposal-device-icon>.icon{width:24px;height:24px}
 .disposal-next-step{padding:20px;border-radius:12px;background:var(--design-tint);margin-bottom:26px;display:flex;align-items:flex-start;flex-direction:column;gap:12px}
 .disposal-next-step .eyebrow{margin:0}
-.disposal-next-step>strong{font-size:15px}
+.disposal-next-step>strong{font-size:15px;max-width:100%;overflow-wrap:anywhere}
+.disposal-next-step>.btn{max-width:100%;white-space:normal;text-align:center}
 .disposal-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin:0 0 26px}
 .disposal-facts dt{font-size:11px;color:var(--muted);margin-bottom:6px}
 .disposal-facts dd{margin:0;font-size:13px;line-height:1.6;overflow-wrap:anywhere;white-space:pre-wrap}
@@ -77,3 +78,5 @@
 .disposal-scan-line{flex-wrap:nowrap}
 .disposal-scan-line>.btn{width:auto;flex:none}
 }
+
+@media(max-width:380px){.disposal-detail-actions>.btn{flex-basis:100%;white-space:normal}}

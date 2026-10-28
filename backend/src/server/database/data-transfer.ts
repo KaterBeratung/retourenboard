@@ -2,7 +2,7 @@ import {createHash} from 'node:crypto';
 
 import {openSync,writeSync,closeSync,createReadStream} from 'node:fs';
 
-import {TABLE_CONTRACTS,BASELINE_TABLE_CONTRACTS,SCHEMA2_TABLE_CONTRACTS,SCHEMA3_TABLE_CONTRACTS,type TableContract} from './schema.js';
+import {TABLE_CONTRACTS,BASELINE_TABLE_CONTRACTS,SCHEMA2_TABLE_CONTRACTS,SCHEMA3_TABLE_CONTRACTS,SCHEMA4_TABLE_CONTRACTS,type TableContract} from './schema.js';
 import {backfillRecordMetadata} from './record-metadata.js';
 
 import {migratePostgres,resetIdentitySequences} from './migrations.js';
@@ -28,7 +28,7 @@ export async function postgresDigests(db:SqlDatabase){const result:TableDigest[]
 
 export async function insertRows(db:SqlDatabase,t:TableContract,rows:Iterable<Record<string,any>>){for(const row of rows){const values=decodedRow(t,encodedRow(t,row));await db.query('INSERT INTO '+t.name+'('+t.columns.map(c=>c.sqlName).join(',')+') VALUES('+values.map((_,i)=>'$'+(i+1)).join(',')+')',values);}}
 
-export async function exportData(db:SqlDatabase,path:string){const fd=openSync(path,'wx',0o600);const write=(value:unknown)=>{const line=JSON.stringify(value)+'\n';if(Buffer.byteLength(line)>MAX_RECORD_BYTES)throw Error('Sicherungsdatensatz ist zu groß.');writeSync(fd,line);};let tables:TableDigest[]=[];try{await db.transaction(async()=>{await db.query('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY');const sequences:Record<string,number>={};for(const t of TABLE_CONTRACTS)if(t.identity){const result=(await db.query('SELECT last_value,is_called FROM '+t.name+'_'+t.identity.toLowerCase()+'_seq')).rows[0];sequences[t.name]=result.is_called?result.last_value:0;}write({format:2,schema:4,sequences});for(const t of TABLE_CONTRACTS){const hash=createHash('sha256');let count=0;await db.query('DECLARE rb_export NO SCROLL CURSOR FOR SELECT * FROM '+t.name+' ORDER BY '+orderBy(t));try{for(;;){const rows=(await db.query('FETCH FORWARD 20 FROM rb_export')).rows;if(!rows.length)break;for(const row of rows){const values=encodedRow(t,row);hash.update(JSON.stringify(values)+'\n');write({table:t.name,values});count++;}}}finally{await db.query('CLOSE rb_export');}tables.push({name:t.name,count,sha256:hash.digest('hex')});}write({end:true,tables});});}finally{closeSync(fd);}return tables;}
+export async function exportData(db:SqlDatabase,path:string){const fd=openSync(path,'wx',0o600);const write=(value:unknown)=>{const line=JSON.stringify(value)+'\n';if(Buffer.byteLength(line)>MAX_RECORD_BYTES)throw Error('Sicherungsdatensatz ist zu groß.');writeSync(fd,line);};let tables:TableDigest[]=[];try{await db.transaction(async()=>{await db.query('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY');const sequences:Record<string,number>={};for(const t of TABLE_CONTRACTS)if(t.identity){const result=(await db.query('SELECT last_value,is_called FROM '+t.name+'_'+t.identity.toLowerCase()+'_seq')).rows[0];sequences[t.name]=result.is_called?result.last_value:0;}write({format:2,schema:5,sequences});for(const t of TABLE_CONTRACTS){const hash=createHash('sha256');let count=0;await db.query('DECLARE rb_export NO SCROLL CURSOR FOR SELECT * FROM '+t.name+' ORDER BY '+orderBy(t));try{for(;;){const rows=(await db.query('FETCH FORWARD 20 FROM rb_export')).rows;if(!rows.length)break;for(const row of rows){const values=encodedRow(t,row);hash.update(JSON.stringify(values)+'\n');write({table:t.name,values});count++;}}}finally{await db.query('CLOSE rb_export');}tables.push({name:t.name,count,sha256:hash.digest('hex')});}write({end:true,tables});});}finally{closeSync(fd);}return tables;}
 
 // Bound each line before decoding JSON, including malicious input without newlines.
 
@@ -41,8 +41,8 @@ export async function importData(db:SqlDatabase,path:string){
   await migratePostgres(db,{seedDefaults:false});
   for await(const line of boundedLines(path)){
    const record=JSON.parse(line);
-   if(!header){header=record;source=header.schema===1?BASELINE_TABLE_CONTRACTS:header.schema===2?SCHEMA2_TABLE_CONTRACTS:header.schema===3?SCHEMA3_TABLE_CONTRACTS:TABLE_CONTRACTS;
-    if(header.format!==2||![1,2,3,4].includes(header.schema)||!header.sequences||typeof header.sequences!=='object'||Array.isArray(header.sequences)||Object.keys(header.sequences).sort().join(',')!==source.filter(t=>t.identity).map(t=>t.name).sort().join(',')||Object.keys(header).sort().join(',')!=='format,schema,sequences')throw Error('Ungültiges Datenformat.');
+   if(!header){header=record;source=header.schema===1?BASELINE_TABLE_CONTRACTS:header.schema===2?SCHEMA2_TABLE_CONTRACTS:header.schema===3?SCHEMA3_TABLE_CONTRACTS:header.schema===4?SCHEMA4_TABLE_CONTRACTS:TABLE_CONTRACTS;
+    if(header.format!==2||![1,2,3,4,5].includes(header.schema)||!header.sequences||typeof header.sequences!=='object'||Array.isArray(header.sequences)||Object.keys(header.sequences).sort().join(',')!==source.filter(t=>t.identity).map(t=>t.name).sort().join(',')||Object.keys(header).sort().join(',')!=='format,schema,sequences')throw Error('Ungültiges Datenformat.');
     digests=source.map(t=>({name:t.name,count:0,hash:createHash('sha256')}));continue;
    }
    if(footer)throw Error('Daten nach Sicherungsende.');

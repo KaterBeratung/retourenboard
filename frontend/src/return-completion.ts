@@ -1,6 +1,6 @@
 import {motionScrollBehavior} from './appearance.js';
 import {html,t,addTranslations,apiError} from './i18n.js';
-import {h,icon} from './ui.js';
+import {h,icon,focusFormControl} from './ui.js';
 import {captureAuthContext} from './auth-context.js';
 import {inspectCompletion} from '../shared/return-completion.js';
 addTranslations({
@@ -32,7 +32,7 @@ addTranslations({
 const states={planned:'Vorgemerkt',approved:'Freigegeben',completed:'Durchgeführt',cancelled:'Storniert'};
 export function disposalLinks(items:any[]=[]){return html`<ul class="completion-disposals">${items.map(row=>html`<li><a href="/#disposals?record=${encodeURIComponent(row.disposalNumber)}">${icon('trash')}${h(row.disposalNumber)}</a><span class="status disposal-${row.status}">${h(t(states[row.status]??row.status))}</span></li>`).join('')}</ul>`;}
 export function renderCompletion(state:any,disposals:any[]=[]){return html`<section class="completion-check ${state.ok?'is-ready':''}" aria-live="polite"><header>${icon(state.ok?'check':'clock')}<div><h3>Abschlussprüfung</h3><p>${t(state.ok?'Abschluss bereit':'Vor dem Abschluss ergänzen')}</p></div></header>${state.issues.length?html`<ul class="completion-issues">${state.issues.map(issue=>html`<li><button type="button" class="text-link" data-completion-field="${h(issue.field)}">${h(t(issue.message))}</button></li>`).join('')}</ul>`:''}${disposalLinks(disposals.filter(row=>row.disposalNumber))}</section>`;}
-export function bindCompletionFields(root:HTMLElement,form:HTMLFormElement){root.querySelectorAll<HTMLElement>('[data-completion-field]').forEach(button=>button.onclick=()=>{const field=form.elements.namedItem(button.dataset.completionField) as HTMLElement;field?.focus();field?.scrollIntoView({block:'center',behavior:motionScrollBehavior()});});}
+export function bindCompletionFields(root:HTMLElement,form:HTMLFormElement){root.querySelectorAll<HTMLElement>('[data-completion-field]').forEach(button=>button.onclick=()=>{const field=form.elements.namedItem(button.dataset.completionField) as HTMLElement;focusFormControl(form,field,{block:'center',behavior:motionScrollBehavior()});});}
 export function completionDisposals(result:any,item:any){
  if(result.disposals)return result.disposals;const check=result.completion?.disposalCheck;if(!check)return [];
  return [...(check.pending?[{status:'planned',serialNumber:item.serialNumber}]:[]),...(check.matchingCompleted?[{status:'completed',serialNumber:item.serialNumber}]:[]),...(check.mismatched?[{status:'completed',serialNumber:String(item.serialNumber)+'\u0000'}]:[])];

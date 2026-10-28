@@ -3,6 +3,7 @@ import {h,icon,openDialog,trackFormSave} from './ui.js';
 import {captureAuthContext} from './auth-context.js';
 import {masterLabel} from './inventory-display.js';
 addTranslations({
+ 'Exportieren':'Export',
  'Auswahl':'Selection','Auswahl auf dieser Seite':'Select this page','Auswahl aufheben':'Clear selection','Ausgewählte Retouren':'Selected returns',
  'Status für Auswahl ändern':'Change status for selection','Auswahl exportieren':'Export selection','Retouren gemeinsam bearbeiten':'Update selected returns',
  'Alle ausgewählten Retouren erhalten denselben Status.':'All selected returns will receive the same status.',
@@ -46,9 +47,14 @@ export function createReturnSelection(limit=200){
   all:(ids:number[])=>ids.length>0&&ids.every(id=>chosen.has(id))
  };
 }
+// Desktop table and mobile cards share native checked/indeterminate states.
+export function syncPageSelection(root:ParentNode,selection:ReturnType<typeof createReturnSelection>,ids:number[]){
+ const checked=selection.all(ids),indeterminate=!checked&&ids.some(id=>selection.has(id));
+ root.querySelectorAll<HTMLInputElement>('[data-select-page]').forEach(input=>{input.checked=checked;input.indeterminate=indeterminate;});
+}
 export function selectionToolbar(ctx:any,selection:ReturnType<typeof createReturnSelection>){
  const count=selection.ids().length;if(!count)return '';
- return html`<div class="selection-toolbar" role="region" aria-label="Ausgewählte Retouren"><strong aria-live="polite">${t`${count} Retouren ausgewählt`}</strong><div>${ctx.can('returnsStatus')?html`<button class="btn secondary small" type="button" data-bulk-status>${icon('refresh')}Status für Auswahl ändern</button>`:''}${ctx.can('returnsExport')?html`<a class="btn secondary small" data-bulk-export href="/api/export/returns?${new URLSearchParams({ids:selection.ids().join(',')})}">${icon('download')}Auswahl exportieren</a>`:''}<button type="button" class="icon-btn" data-selection-clear aria-label="Auswahl aufheben">${icon('close')}</button></div></div>`;
+ return html`<div class="selection-toolbar" role="region" aria-label="Ausgewählte Retouren"><strong aria-live="polite">${icon('check')}<span>${t`${count} Retouren ausgewählt`}</span></strong><div>${ctx.can('returnsStatus')?html`<button class="btn secondary small" type="button" data-bulk-status aria-label="${h(t('Status für Auswahl ändern'))}">${icon('refresh')}<span class="selection-label-full">Status für Auswahl ändern</span><span class="selection-label-compact" aria-hidden="true">Status ändern</span></button>`:''}${ctx.can('returnsExport')?html`<a class="btn secondary small" data-bulk-export aria-label="${h(t('Auswahl exportieren'))}" href="/api/export/returns?${new URLSearchParams({ids:selection.ids().join(',')})}">${icon('download')}<span class="selection-label-full">Auswahl exportieren</span><span class="selection-label-compact" aria-hidden="true">${t('Exportieren')}</span></a>`:''}<button type="button" class="icon-btn" data-selection-clear aria-label="Auswahl aufheben">${icon('close')}</button></div></div>`;
 }
 export function offerStatusUndo(ctx:any,result:any,message:string){
  const current=captureAuthContext(ctx),undo=result?.undo,expires=Date.parse(undo?.expiresAt),remaining=expires-Date.now();

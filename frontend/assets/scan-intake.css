@@ -11,7 +11,7 @@
 [data-ui="board"] .intake-fields .field>small{display:block;margin-top:0;line-height:1.6;color:var(--muted);font-size:12px;overflow-wrap:anywhere}
 [data-ui="board"] .intake-fields:disabled{opacity:.6}
 [data-ui="board"] .intake-scan{width:100%;white-space:normal;line-height:1.6;justify-content:center;min-height:56px;border-style:solid;background:var(--info-bg);color:var(--info);border-color:var(--info-line);margin-bottom:20px;border-radius:var(--control-radius);box-shadow:inset 0 1px 0 var(--glass-glint)}
-[data-ui="board"] .intake-scan:is(:hover,:focus-visible){background:color-mix(in srgb,var(--info-bg) 75%,var(--surface));color:var(--info);border-color:var(--info)}
+[data-ui="board"] .intake-scan:is(:hover,:focus-visible){background-color:color-mix(in srgb,var(--info-bg) 75%,var(--surface));color:var(--info);border-color:var(--info)}
 [data-ui="board"] .intake-single-line{display:flex;gap:8px;align-items:center;min-width:0}
 [data-ui="board"] .intake-single-line>input{min-width:0;flex:1}
 [data-ui="board"] .intake-single-line>button{flex:none}

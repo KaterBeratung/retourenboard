@@ -1,7 +1,7 @@
 import {html,t,addTranslations,apiError,setText} from './i18n.js';
 import {h,icon,openDialog} from './ui.js';
 import {productPicker,bindProductPicker} from './product-picker.js';
-import {masterLabel} from './inventory-display.js';
+import {masterLabel,workflowStatuses} from './inventory-display.js';
 import {duplicateSerials,bindFormFeedback} from './form-feedback.js';
 import {captureAuthContext} from './auth-context.js';
 import {markForm} from './unsaved.js';
@@ -73,7 +73,7 @@ export function createSerialQueue(){
 }
 type SharedFields=Record<string,any>;
 const kinds={supplier:['suppliers','supplierId','Bitte einen aktiven Lieferanten auswählen.'],reason:['reasons','reasonId','Bitte einen aktiven Retourengrund auswählen.'],condition:['conditions','conditionId','Bitte einen aktiven Zustand auswählen.'],status:['statuses','statusId','Bitte einen aktiven Status auswählen.'],resolution:['resolutions','resolutionId','Bitte eine aktive Lösung auswählen.']};
-function defaultMaster(ctx:any,kind:string){const active=(ctx.masterdata?.[kind]??[]).filter(row=>row.active);return active.find(row=>row.isDefault)??active[0];}
+function defaultMaster(ctx:any,kind:string){const active=activeMasterChoices(ctx,kind);return active.find(row=>row.isDefault)??active[0];}
 function sharedDefaults(ctx:any,productId?:number):SharedFields{
  const product=ctx.products?.find(row=>row.id===productId&&row.active),supplier=ctx.masterdata?.suppliers?.find(row=>row.id===product?.supplierId&&row.active);
  return {productId:productId??'',supplierId:supplier?.id??'',reasonId:defaultMaster(ctx,'reasons')?.id??'',conditionId:defaultMaster(ctx,'conditions')?.id??'',statusId:defaultMaster(ctx,'statuses')?.id??'',resolutionId:defaultMaster(ctx,'resolutions')?.id??'',receiptDate:workspaceCalendarDay(Date.now(),ctx.config?.rules?.timezone),orderNumber:'',customerReference:'',trackingNumber:'',notes:''};
@@ -129,8 +129,9 @@ function sessionFor(ctx:any){
  const signature=JSON.stringify([ctx.authGeneration??0,ctx.session?.user?.id,ctx.session?.csrfToken]);let session=sessions.get(ctx);
  if(!session||session.signature!==signature){session={signature,queue:createSerialQueue(),fields:sharedDefaults(ctx)};sessions.set(ctx,session);}return session;
 }
+function activeMasterChoices(ctx:any,kind:string){const rows=(ctx.masterdata?.[kind]??[]).filter(row=>row.active);return kind==='statuses'?workflowStatuses(rows):rows;}
 function masterField(ctx:any,kind:string,name:string,label:string,value:any,required=true){
- return html`<label class="field"><span>${t(label)}${required?html` <b>*</b>`:''}</span><select name="${name}"${required?' required':''}>${required?'':html`<option value="">Keine Zuordnung</option>`}${(ctx.masterdata?.[kind]??[]).filter(row=>row.active).map(row=>html`<option value="${row.id}"${String(row.id)===String(value)?' selected':''}>${h(masterLabel(row))}</option>`).join('')}</select></label>`;
+ return html`<label class="field"><span>${t(label)}${required?html` <b>*</b>`:''}</span><select name="${name}"${required?' required':''}>${required?'':html`<option value="">Keine Zuordnung</option>`}${activeMasterChoices(ctx,kind).map(row=>html`<option value="${row.id}"${String(row.id)===String(value)?' selected':''}>${h(masterLabel(row))}</option>`).join('')}</select></label>`;
 }
 function textField(name:string,label:string,value:any,max=250,type='text',required=false){return html`<label class="field"><span>${t(label)}${required?html` <b>*</b>`:''}</span><input name="${name}" type="${type}" value="${h(value)}" maxlength="${max}"${required?' required':''}></label>`;}
 export function renderScanIntake(ctx:any){
@@ -163,7 +164,7 @@ export function bindScanIntake(ctx:any,root:any,bindings:IntakeBindings){
   const values=readFields();
   for(const [kind,key,message]of Object.values(kinds)){
    const select=form.querySelector(`[name=${key}]`);if(!select)continue;
-   const value=String(values[key]??''),active=(ctx.masterdata?.[kind]??[]).filter(row=>row.active),oldLabel=Array.from(select.options??[]).find((option:any)=>option.value===value) as any;
+   const value=String(values[key]??''),active=activeMasterChoices(ctx,kind),oldLabel=Array.from(select.options??[]).find((option:any)=>option.value===value) as any;
    const option=(value:string,label:any,disabled=false)=>{const node=document.createElement('option');node.value=value;setText(node,label);node.disabled=disabled;node.selected=value===String(values[key]??'');return node;};
    const choices=[];
    if(key==='supplierId')choices.push(option('',t('Keine Zuordnung')));

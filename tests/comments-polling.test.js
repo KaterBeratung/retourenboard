@@ -34,3 +34,14 @@ test('a delayed comment poll cannot revert a confirmed deletion',async t=>{
  await button.onclick();assert.match(log.innerHTML,/Nachricht gelöscht/);
  resolveIds({items:[original],hasMore:false,total:1});await polling;assert.match(log.innerHTML,/Nachricht gelöscht/);assert.doesNotMatch(log.innerHTML,/Original vor Löschung/);
 });
+
+test('a remote comment update restores keyboard focus on the same visibility control',async t=>{
+ const previous={document:globalThis.document,setTimeout:globalThis.setTimeout},timers=[];let input,card;
+ const doc={visibilityState:'visible',activeElement:null};
+ const log={value:'',contains:node=>node===input,querySelector:selector=>selector==='[data-message="7"]'?card:null,querySelectorAll:()=>[],get innerHTML(){return this.value;},set innerHTML(value){this.value=value;doc.activeElement=null;}};
+ const root={isConnected:true,closest:()=>null,querySelector:selector=>selector==='.comment-log'?log:selector==='#comments-older'?{}:selector==='#comment-count'?{setAttribute(){},removeAttribute(){}}:null};
+ const original={id:7,text:'First comment',author:{id:2,displayName:'Person'},createdAt:'2026-10-12T08:00:00Z',mentions:[],canEdit:false,canDelete:false};let rows=[original];
+ globalThis.document=doc;globalThis.setTimeout=fn=>timers.push(fn);t.after(()=>{root.isConnected=false;for(const [key,value]of Object.entries(previous)){if(value===undefined)delete globalThis[key];else globalThis[key]=value;}});
+ renderComments({unlocked:true,session:{user:{id:1}},can:()=>false,api:async()=>({items:rows,hasMore:false,total:rows.length})},1,root,{onPaint(){card={dataset:{message:'7'},querySelector:()=>input,focus(){doc.activeElement=this;}};input={disabled:false,closest:selector=>selector==='[data-message]'?card:{},matches:selector=>selector==='input.switch-input',focus(){doc.activeElement=this;}};}});
+ await new Promise(setImmediate);doc.activeElement=input;rows=[original,{...original,id:8,text:'A teammate replied'}];await timers.shift()();assert.equal(doc.activeElement,input,'remote changes must retain the visibility switch focus');
+});

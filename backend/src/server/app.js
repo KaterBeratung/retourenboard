@@ -1,3 +1,5 @@
+import {createCustomerStatus,customerStatusLimiter} from './customer-status.js';
+import {handleCustomerStatusPublic,handleCustomerStatusRoute} from './customer-status-routes.js';
 import {createDisposals} from './disposals.js';
 import {handleDisposalRoute} from './disposal-routes.js';
 import { resolve } from 'node:path';
@@ -137,7 +139,11 @@ for(const name of ['disposals','disposal-copy','disposal-forms','disposal-labels
 files.set('/disposals.css',['public/disposals.css','text/css']);
 // Only the dependency graph required for login, setup and 2FA is public.
 // New application assets are private by default.
-const publicScripts = new Set(['/theme.js', '/bootstrap.js', '/icon-motion.js', '/login.js', '/sso-login.js', '/auth-security.js', '/auth-context.js', '/ui.js', '/unsaved.js', '/i18n.js', '/notices.js', '/shared/auth-navigation.js']);
+files.set('/record-communication.js',['public/record-communication.js','text/javascript']);
+files.set('/customer-status.js',['public/customer-status.js','text/javascript']);
+files.set('/customer-status-public.js',['public/customer-status-public.js','text/javascript']);
+files.set('/customer-status.css',['public/customer-status.css','text/css']);
+const publicScripts = new Set(['/customer-status-public.js','/theme.js', '/bootstrap.js', '/icon-motion.js', '/login.js', '/sso-login.js', '/auth-security.js', '/auth-context.js', '/ui.js', '/unsaved.js', '/i18n.js', '/notices.js', '/shared/auth-navigation.js']);
 for (const name of ['tesseract.esm.min.js', 'worker.min.js'])
     files.set('/vendor/ocr/' + name, ['public/vendor/ocr/' + name, 'text/javascript']);
 for (const folder of ['core', 'lang'])
@@ -229,6 +235,7 @@ export async function createApp({ dbPath, databaseConfig, database, runtimeLease
         const mail = createMail({ store, secrets, dataDir, preferences, clock: { now }, coordinator }), notifications = createNotifications({ store, preferences, mail, clock: { now } });
         const collaboration = await createCollaboration({ store, users, preferences, now, dataDir, limits: async () => settings.get() });
         const returnWorkflow = createReturnWorkflow({ store, users, now });
+        const customerStatus=createCustomerStatus({store,users,secrets,now}),customerLimit=customerStatusLimiter(now),disposalCustomerStatus=createCustomerStatus({store,users,secrets,now,kind:'disposals'});
         const disposals=createDisposals({store,now,timezone:async()=>(await preferences.get('rules')).timezone});
         const jobs = createJobs({ store, preferences, backups, coordinator, clock: { now }, startImmediately: !initialMaintenance, onTick: async () => { await coordinator.run(async () => {await ssoAccounts.prune();await notifications.checkOverdue();}); await mail.tick(); } });
         const diagnostics = createDiagnostics({ dbPath: dataDir, dataDir, version, network, backups, jobs, store, settings, mail, now });
@@ -267,6 +274,8 @@ export async function createApp({ dbPath, databaseConfig, database, runtimeLease
                 }
                 if (startupMaintenance)
                     throw new InputError('Datenbankumstellung wird geprüft. Bitte kurz warten.', 503);
+                if(await handleCustomerStatusPublic({path,method,res,json,readPage:()=>readFile(fileURLToPath(new URL('public/customer-status.html',root))),service:customerStatus,limit:customerLimit,ip:clientAddress(req)}))return;
+                if(await handleCustomerStatusPublic({path,method,res,json,readPage:()=>readFile(fileURLToPath(new URL('public/customer-status.html',root))),kind:'disposals',service:disposalCustomerStatus,limit:customerLimit,ip:clientAddress(req)}))return;
                 const token = String(req.headers.cookie ?? '').split(';').map(c => c.trim()).find(c => c.startsWith(cookieName + '='))?.slice(cookieName.length + 1);
                 const currentSession = async () => auth.getSession(token, true, access.scope);
                 if (!path.startsWith('/api/')) {
@@ -347,7 +356,8 @@ export async function createApp({ dbPath, databaseConfig, database, runtimeLease
                         if (kind)
                             requirePermission(current.user, kind + (method === 'DELETE' ? 'Delete' : method === 'POST' ? 'Create' : 'Edit'));
                     }
-                    if(path.startsWith('/api/disposals')){requirePermission(current.user,'disposalsRead');const action=path.split('/')[4],key=path.startsWith('/api/disposals/import/')?'disposalsImport':path==='/api/disposals/export'?'disposalsExport':method==='GET'?(action==='label'?'disposalsExport':'disposalsRead'):method==='PUT'?'disposalsEdit':action==='approve'?'disposalsApprove':action==='complete'||action==='correct'?'disposalsComplete':action==='cancel'?'disposalsEdit':'disposalsCreate';requirePermission(current.user,key);if(action==='correct')requirePermission(current.user,'disposalsEdit');}
+                    if(/^\/api\/returns\/[1-9]\d*\/customer-status$/.test(path))requirePermission(current.user,'returnsShare');
+                    if(path.startsWith('/api/disposals')){requirePermission(current.user,'disposalsRead');if(/^\/api\/disposals\/[1-9]\d*\/customer-status(?:\/comments)?$/.test(path)){requirePermission(current.user,'disposalsShare');}else if(/^\/api\/disposals\/[1-9]\d*\/comments(?:\/[1-9]\d*)?$/.test(path)){if(method==='POST'||method==='PUT')requirePermission(current.user,'disposalsCommentsCreate');}else{const action=path.split('/')[4],key=path.startsWith('/api/disposals/import/')?'disposalsImport':path==='/api/disposals/export'?'disposalsExport':method==='GET'?(action==='label'?'disposalsExport':'disposalsRead'):method==='PUT'?'disposalsEdit':action==='approve'?'disposalsApprove':action==='complete'||action==='correct'?'disposalsComplete':action==='cancel'?'disposalsEdit':'disposalsCreate';requirePermission(current.user,key);if(action==='correct')requirePermission(current.user,'disposalsEdit');}}
                     return current;
                 }
                 const withAuthorizedMutation = createMutationGuard(store.db, requireAccess);
@@ -389,6 +399,8 @@ export async function createApp({ dbPath, databaseConfig, database, runtimeLease
                 if(await handleDisposalRoute({path,method,query:Object.fromEntries(new URL(req.url,'http://localhost').searchParams),body,json,user:async()=>(await requireAccess()).user,mutate,disposals,store,now}))return;
                 if (await handleReturnLabelRoute({ path, method, json, user: async () => (await requireAccess()).user, store }))
                     return;
+                if(await handleCustomerStatusRoute({path,method,query:new URL(req.url,'http://localhost').searchParams,body,json,user:async()=>(await requireAccess()).user,mutate,service:customerStatus,publicOrigin}))return;
+                if(await handleCustomerStatusRoute({path,method,query:new URL(req.url,'http://localhost').searchParams,body,json,user:async()=>(await requireAccess()).user,mutate,kind:'disposals',service:disposalCustomerStatus,publicOrigin}))return;
                 if (await handleReturnWorkflowRoute({ path, method, query: new URL(req.url, 'http://localhost').searchParams, body, json, user: async () => (await requireAccess()).user, mutate, workflow: returnWorkflow }))
                     return;
                 if (method === 'POST' && path === '/api/setup') {

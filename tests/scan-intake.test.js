@@ -243,3 +243,8 @@ test('inventory refresh exposes new active reference choices while preserving a 
     assert.equal(boundary.controls.statusId.customValidity, '');
     assert.equal(intake.prepareIntakeBatch(ctx, bound.queue, { productId: '1', statusId: '7' }).items[0].body.statusId, 7);
 });
+
+test('scan status choices follow the same process order as a single return',()=>{
+ const ctx=context();ctx.masterdata.statuses=[{id:8,name:'Closed',active:true,isClosed:true,statusTone:'done',tone:'done'},{id:7,name:'Working',active:true,isClosed:false,tone:'working'},{id:5,name:'Received',active:true,isDefault:true,isClosed:false,tone:'received'},{id:6,name:'Checking',active:true,isClosed:false,tone:'checking'}];
+ const markup=String(intake.renderScanIntake(ctx)),options=markup.match(/<select name="statusId"[\s\S]*?<\/select>/)[0];assert.ok(options.indexOf('Received')<options.indexOf('Checking'));assert.ok(options.indexOf('Checking')<options.indexOf('Working'));assert.ok(options.indexOf('Working')<options.indexOf('Closed'));
+});

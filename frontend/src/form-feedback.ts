@@ -1,3 +1,4 @@
+import {focusFormControl} from './ui.js';
 import {addTranslations,apiError,setText,t} from './i18n.js';
 import {serialKey} from '../shared/serial-number.js';
 
@@ -15,6 +16,7 @@ export const FORM_FEEDBACK_TRANSLATIONS={
     'Person':'Person',
     'Bestehende Zuordnung':'Existing assignment',
     'Aktive Personen können die Bearbeitung übernehmen. Die Zuordnung ist optional.':'Active people can take responsibility for processing. Assignment is optional.',
+    'Eine verantwortliche Person auswählen.':'Choose a responsible person.',
     'Personen konnten nicht geladen werden. Die bestehende Zuordnung bleibt erhalten.':'People could not be loaded. The existing assignment is retained.',
     'Nächster Schritt (optional)':'Next step (optional)',
     'Nächster Schritt':'Next step',
@@ -93,9 +95,8 @@ function describe(control:any,id:string,include:boolean){
     if(include)tokens.push(id);
     if(tokens.length)control.setAttribute?.('aria-describedby',tokens.join(' '));else control.removeAttribute?.('aria-describedby');
 }
-function focusError(control:any){
-    control.scrollIntoView?.({block:'center',behavior:'auto'});
-    control.focus?.({preventScroll:true});
+function focusError(control:any,form:any){
+    focusFormControl(form,control,{block:'center',behavior:'auto'});
 }
 export function bindFormFeedback(form:any,options:FeedbackOptions={}){
     const document=form.ownerDocument??globalThis.document,prefix=`form-feedback-${++nextFeedbackId}`;
@@ -118,7 +119,7 @@ export function bindFormFeedback(form:any,options:FeedbackOptions={}){
     form.addEventListener('invalid',event=>{
         const control=event.target;if(!showError(control,nativeMessage(control)))return;
         event.preventDefault();
-        if(!firstInvalid){firstInvalid=control;queueMicrotask(()=>{const first=firstInvalid;firstInvalid=null;if(form.isConnected!==false&&first?.validity?.valid!==true)focusError(first);});}
+        if(!firstInvalid){firstInvalid=control;queueMicrotask(()=>{const first=firstInvalid;firstInvalid=null;if(form.isConnected!==false&&first?.validity?.valid!==true)focusError(first,form);});}
     },true);
 
     const serial=options.kind==='returns'?controlFor('serialNumber'):null,sku=options.kind==='products'?controlFor('sku'):null;
@@ -165,7 +166,7 @@ export function bindFormFeedback(form:any,options:FeedbackOptions={}){
             if(typeof message!=='string')return false;
             const name=explicitServerField(message,options.kind),control=name?controlFor(name):null;
             if(!showError(control,apiError(message)))return false;
-            focusError(control);return true;
+            focusError(control,form);return true;
         }
     };
 }
@@ -195,7 +196,7 @@ export async function bindReturnAssignees(form:any,ctx:any,item:any={},isCurrent
             choices.push(option(id,label));ids.add(id);
         }
         select.replaceChildren(...choices);select.value=value;
-        setText(hint,t('Aktive Personen können die Bearbeitung übernehmen. Die Zuordnung ist optional.'));
+        setText(hint,t(select.required?'Eine verantwortliche Person auswählen.':'Aktive Personen können die Bearbeitung übernehmen. Die Zuordnung ist optional.'));
     }catch{
         if(current())setText(hint,t('Personen konnten nicht geladen werden. Die bestehende Zuordnung bleibt erhalten.'));
     }

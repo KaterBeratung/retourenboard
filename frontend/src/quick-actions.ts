@@ -15,10 +15,10 @@ export function returnQuickActions(ctx,row:any){
 export function productQuickActions(ctx,row:any){
     return html`<div class="record-actions" role="group" aria-label="Schnellaktionen">${recordActionMenu(row.name,html`${ctx.can('disposalsCreate')?html`<button type="button" role="menuitem" tabindex="-1" class="record-menu-item" data-disposal-product="${row.id}">${icon('trash')}<span>Vernichtung / Entsorgung erfassen</span></button>`:''}${row.active&&ctx.can('returnsCreate')?html`<button type="button" role="menuitem" tabindex="-1" class="record-menu-item" data-return-product="${row.id}">${icon('return')}<span>Retoure für dieses Produkt anlegen</span></button>`:''}<button type="button" role="menuitem" tabindex="-1" class="record-menu-item" data-detail="products" data-id="${row.id}" aria-label="Details zu ${h(row.name)}">${icon('chevron')}<span>Details ansehen</span></button>`)}</div>`;
 }
-export async function copyText(value:string){
+export async function copyText(value:string,root?:HTMLElement){
     try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(value);return;}}catch{}
     const focused=document.activeElement as HTMLElement,area=document.createElement('textarea');
-    area.value=value;area.setAttribute('readonly','');area.style.cssText='position:fixed;left:-9999px;top:0;';document.body.append(area);
+    area.value=value;area.setAttribute('readonly','');area.style.cssText='position:fixed;left:-9999px;top:0;';(root??document.body).append(area);
     try{area.focus();area.select();if(!document.execCommand('copy'))throw new Error(t('Kopieren nicht möglich. Bitte den Wert manuell kopieren.'));}
     finally{area.remove();focused?.focus();}
 }

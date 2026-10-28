@@ -70,6 +70,12 @@ export async function handleCollaborationRoute({ req, res, path, method, query, 
         json(await mutate(async () => c.changeMessage(await user(), Number(message[1]), input, method === 'DELETE')));
         return true;
     }
+    const disposalComment=path.match(/^\/api\/disposals\/([1-9]\d*)\/comments(?:\/([1-9]\d*))?$/);
+    if(disposalComment){const recordId=Number(disposalComment[1]),commentId=disposalComment[2]?Number(disposalComment[2]):null;
+        if(method==='GET'&&!commentId){json(await c.disposalComments(await user(),recordId,query));return true;}
+        if(method==='POST'&&!commentId){const input=await body();json(await mutate(async()=>c.postDisposalComment(await user(),recordId,input)),201);return true;}
+        if(commentId&&['PUT','DELETE'].includes(method)){const input=method==='PUT'?await body():{};json(await mutate(async()=>c.changeDisposalComment(await user(),recordId,commentId,input,method==='DELETE')));return true;}
+    }
     const comment = path.match(/^\/api\/returns\/([1-9]\d*)\/comments(?:\/([1-9]\d*))?$/);
     if (comment) {
         const n = Number(comment[1]), commentId = comment[2] ? Number(comment[2]) : null;

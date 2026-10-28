@@ -1,3 +1,4 @@
+import {DISPOSAL_COMMENT_TABLE} from './communication-schema.js';
 import {DISPOSAL_TABLES} from './disposal-schema.js';
 import {RECORD_METADATA_TABLES} from './record-metadata.js';
 import {SSO_TABLES} from './sso-schema.js';
@@ -1803,4 +1804,5 @@ export const INDEX_STATEMENTS:readonly string[]=[
 // Positional portable contracts are immutable once released.
 export const SCHEMA2_TABLE_CONTRACTS:readonly TableContract[]=[...BASELINE_TABLE_CONTRACTS,...DISPOSAL_TABLES];
 export const SCHEMA3_TABLE_CONTRACTS:readonly TableContract[]=[...SCHEMA2_TABLE_CONTRACTS,...RECORD_METADATA_TABLES];
-export const TABLE_CONTRACTS:readonly TableContract[]=[...SCHEMA3_TABLE_CONTRACTS,...SSO_TABLES];
+export const SCHEMA4_TABLE_CONTRACTS:readonly TableContract[]=[...SCHEMA3_TABLE_CONTRACTS,...SSO_TABLES];
+export const TABLE_CONTRACTS:readonly TableContract[]=[...SCHEMA4_TABLE_CONTRACTS,DISPOSAL_COMMENT_TABLE];

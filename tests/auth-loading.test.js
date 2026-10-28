@@ -37,6 +37,7 @@ test('application modules reject direct anonymous GET and HEAD, and revoked or e
     let now = Date.now();
     const { request, setup, login } = await runtimeFixture(t, { now: () => now });
     const publicScripts = await scriptsFrom(request, '/');
+    for(const path of await scriptsFrom(request,'/s/'+'a'.repeat(22)))publicScripts.add(path);
     const manifest = ['runtime-files.txt', 'compiled-runtime-files.txt'].map(file => readFileSync(new URL('../deploy/' + file, import.meta.url), 'utf8')).join('\n');
     const privateScripts = manifest.split(/\r?\n/).filter(path => /^public\/[^/]+\.js$/.test(path)).map(path => path.replace('public', '')).filter(path => !publicScripts.has(path));
     assert.ok(privateScripts.includes('/app.js'));

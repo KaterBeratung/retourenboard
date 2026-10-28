@@ -1,12 +1,12 @@
-.workspace-overview{display:grid;min-width:0;gap:var(--space-section)}
+.workspace-overview{display:grid;min-width:0;gap:clamp(20px,2.5vw,var(--space-section))}
 [data-ui="board"] .workspace-overview>:is(.page-heading,.kpi-grid,.onboarding,.workspace-actions,.dashboard-grid,.workspace-analytics,.overview-actions){margin:0;min-width:0}
 .workspace-actions,.workspace-analytics{min-width:0}
-.insights-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 16px}
-.insights-heading h2{margin:5px 0 0;overflow-wrap:anywhere;font-size:15px;font-weight:600;line-height:1.5}
+.insights-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px}
+.insights-heading h2{margin:5px 0 0;overflow-wrap:anywhere;font-size:16px;font-weight:600;line-height:1.5}
 .insights-heading p{font-size:12px;color:var(--muted);line-height:1.6;margin:6px 0 0}
 .action-queue-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-.action-queue{display:flex;flex-direction:column;min-width:0}
-.action-queue .panel-heading{gap:12px;align-items:center;padding:16px 20px;border-bottom:0}
+.action-queue{display:flex;flex-direction:column;min-width:0;container:queue / inline-size}
+.action-queue .panel-heading{gap:10px;align-items:center;padding:14px 16px;border-bottom:0}
 .action-queue h3{line-height:1.7;margin:0;min-width:0;font-size:13px;font-weight:600}
 .action-queue h3 a{color:var(--ink);text-decoration:none;overflow-wrap:anywhere}
 .action-queue h3 a:hover{color:var(--design-accent,var(--green))}
@@ -14,18 +14,21 @@
 .queue-symbol>.icon{width:16px;height:16px}
 .action-queue[data-overview-card=today] .queue-symbol{color:var(--warning);background:var(--warning-bg)}
 .action-queue[data-overview-card=unassigned] .queue-symbol{color:var(--info);background:var(--info-bg)}
-.action-queue-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:0;padding:0 18px;list-style:none;flex:1}
+.action-queue-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0;padding:0 16px;list-style:none;flex:1}
 .action-queue-list:has(>li:only-child){grid-template-columns:minmax(0,1fr)}
 .action-queue-list li+li{border-left:1px solid var(--line);padding-left:16px}
 .action-queue-item{position:relative;display:flex;flex-direction:column;gap:4px;padding:12px 24px 12px 0;color:var(--ink);text-decoration:none;min-width:0;overflow-wrap:anywhere}
+@media(hover:hover) and (pointer:fine){
 .action-queue-item:hover .action-queue-record>strong{color:var(--design-accent,var(--green))}
+.action-queue-all:hover{color:var(--accent);background-color:var(--menu-hover)}
+}
 .action-queue-record strong{display:block;font-size:13px;line-height:1.5}
 .action-queue-record small{display:block;color:var(--muted);font-size:11px;line-height:1.6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .action-queue-next{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;font-size:12px;line-height:1.6;white-space:pre-wrap}
-.action-queue-due{font-size:10px;color:var(--muted);line-height:1.6}
+.action-queue-due{font-size:11px;color:var(--muted);line-height:1.6}
 .action-queue-due.overdue{color:var(--danger)}
 .action-queue-item>.icon{position:absolute;right:0;top:17px;width:16px;height:16px;color:var(--design-accent,var(--green))}
-.action-queue-all{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 18px;border-top:1px solid var(--line);font-size:12px;line-height:1.6;margin-top:auto}
+.action-queue-all{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px;border-top:1px solid var(--line);font-size:12px;line-height:1.6;margin-top:auto}
 .queue-empty{display:flex;align-items:center;justify-content:center;text-align:center;padding:18px;margin:0;flex:1;color:var(--muted);font-size:12px;line-height:1.7}
 .analytics-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
 .analytics-grid>.panel{min-width:0;padding:20px}
@@ -113,4 +116,14 @@
 .month-label{font-size:var(--text-xs)}
 [data-ui="board"] .trend-table th,[data-ui="board"] .trend-table td{padding-inline:6px}
 .trend-values>summary{min-height:44px}
+}
+
+/* Keep record numbers readable inside narrow personalized overview cards. */
+@container queue (max-width:420px){
+.action-queue-list{display:grid;grid-template-columns:minmax(0,1fr);gap:0;align-content:start}
+.action-queue-list li+li{border-left:0;padding-left:0;border-top:1px solid var(--line)}
+.action-queue-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 8px;padding-block:10px}
+.action-queue-record{grid-column:1/-1}
+.action-queue-next{grid-column:1;-webkit-line-clamp:1;white-space:normal}
+.action-queue-due{grid-column:2;align-self:center;white-space:nowrap}
 }

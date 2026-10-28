@@ -21,6 +21,7 @@ function checkPackageEntry(sourceDir, entry) {
 }
 
 function programArchive(sourceDir){
+  checkPackageEntry(sourceDir,'LICENSE');
   const entries=[...packageEntries];
   for(const doc of ['IN-APP-UPDATES.md','POSTGRESQL.md','DISPOSAL.md','RETURN-WORKFLOW.md','SSO.md','BETRIEB.md','DOCKER.md','readme'])if(existsSync(join(sourceDir,'docs',doc)))entries.push('docs/'+doc);
   for(const entry of entries)checkPackageEntry(sourceDir,entry);
@@ -35,6 +36,10 @@ function programArchive(sourceDir){
     // the package without modifying the developer's working tree.
     function normalize(path){if(lstatSync(path).isDirectory()){for(const name of readdirSync(path))normalize(join(path,name));}else if(path.endsWith('.sh'))writeFileSync(path,readFileSync(path,'utf8').replace(/\r\n/g,'\n'));}
     for(const entry of entries){const destination=join(staging,entry);mkdirSync(dirname(destination),{recursive:true});cpSync(join(sourceDir,entry),destination,{recursive:true});normalize(destination);}
+    // Keep the license under an archive root accepted by existing updaters.
+    const license='docs/readme/LICENSE',licenseTarget=join(staging,license);
+    mkdirSync(dirname(licenseTarget),{recursive:true});cpSync(join(sourceDir,'LICENSE'),licenseTarget);
+    if(!entries.includes('docs/readme'))entries.push(license);
     const path=join(temporaryDir,'package.tar.gz');execFileSync('tar',['-czf',path,'-C',staging,'--',...entries],{stdio:'pipe'});return {archive:readFileSync(path),version};
   }
   finally{rmSync(temporaryDir,{recursive:true,force:true});}
@@ -69,5 +74,5 @@ export function buildLinuxPackages({sourceDir=projectDir,outputDir=join(projectD
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   if (process.argv.length > 3) throw new Error('Usage: node scripts/build-linux-installer.mjs [output-file]');
   if(process.argv[2])console.log(`Installationsdatei erstellt: ${buildLinuxInstaller({outputPath:process.argv[2]})}`);
-  else{const manifest=buildLinuxPackages();console.log(`Linuxpakete ${manifest.version} erstellt: ${manifest.files.map(file=>'releases/'+file.path).join(', ')}. Prüfsummen und releases/release-manifest.json aktualisiert.`);}
+  else{const manifest=buildLinuxPackages();console.log(`Linuxpakete ${manifest.version} erstellt: ${manifest.files.map(file=>'releases/'+file.path).join(', ')}. PrÃƒÂ¼fsummen und releases/release-manifest.json aktualisiert.`);}
 }

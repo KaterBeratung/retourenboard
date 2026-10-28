@@ -107,8 +107,12 @@ export async function createCollaboration({ store, users, preferences, now = Dat
     async function notify(eventKey: string, userId: number, kind: string, href: string) {
         if (!(await preferences.get('notifications')).inApp)
             return;
-        const title = kind === 'returnMention' ? 'In einem Kommentar erwähnt' : kind === 'chatMention' ? 'Im Chat erwähnt' : 'Neue Chatnachricht';
-        await db.query("INSERT INTO notifications(eventKey,userId,kind,title,message,href,createdAt) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT DO NOTHING RETURNING id", [eventKey, userId, kind, title, kind === 'returnMention' ? 'Ein Kommentar zu einer Retoure wartet auf dich.' : 'Öffne die Unterhaltung, um die Nachricht zu lesen.', href, at()]);
+        const title = ['returnMention','disposalMention'].includes(kind) ? 'In einem Kommentar erwähnt' : kind === 'chatMention' ? 'Im Chat erwähnt' : 'Neue Chatnachricht';
+        await db.query("INSERT INTO notifications(eventKey,userId,kind,title,message,href,createdAt) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT DO NOTHING RETURNING id", [eventKey, userId, kind, title, kind==='disposalMention'?'Ein Kommentar zu einem Geräteauftrag wartet auf dich.':kind === 'returnMention' ? 'Ein Kommentar zu einer Retoure wartet auf dich.' : 'Öffne die Unterhaltung, um die Nachricht zu lesen.', href, at()]);
+    }
+    async function notifyDisposal(user:User,disposalId:number,commentId:number,refs:any[]){
+        const row=(await db.query('SELECT disposalNumber FROM disposals WHERE id=$1',[disposalId])).rows[0];
+        for(const target of refs)if(target.id!==user.id)await notify(`disposal-comment:${disposalId}:${commentId}:${target.id}`,target.id,'disposalMention','/#disposals?record='+encodeURIComponent(row.disposalNumber));
     }
     async function notifyChat(user: User, c: Channel, messageId: number, refs: any[], normal: boolean) {
         const targets = new Set<number>(normal && c.kind !== 'public' ? await memberIds(c.id) : []);
@@ -316,6 +320,29 @@ export async function createCollaboration({ store, users, preferences, now = Dat
             await db.query("INSERT INTO chat_members(channelId,userId,lastReadId,joined) VALUES($1,$2,$3,$4) ON CONFLICT(channelId,userId) DO UPDATE SET lastReadId=GREATEST(chat_members.lastReadId,excluded.lastReadId)", [c.id, user.id, target, c.kind === 'group' && c.visibility === 'public' ? 0 : 1]);
             return { ok: true };
         },
+        async disposalComments(user:User,disposalId:number,query:any={}){
+            right(user,'disposalsRead');if(!(await db.query('SELECT id FROM disposals WHERE id=$1',[id(disposalId)])).rowCount)throw new InputError('Geräteauftrag nicht gefunden.',404);
+            return history(user,'disposal_comments','disposalId',disposalId,query,hasPermission(user,'disposalsCommentsModerate'),'disposalsCommentsCreate');
+        },
+        async postDisposalComment(user:User,disposalId:number,input:any){
+            return store.transaction(async()=>{right(user,'disposalsRead');right(user,'disposalsCommentsCreate');
+                if(!(await db.query('SELECT id FROM disposals WHERE id=$1',[id(disposalId)])).rowCount)throw new InputError('Geräteauftrag nicht gefunden.',404);
+                const value=text(input.text),refs=await mentions(value,u=>hasPermission(u,'disposalsRead'));limit(user);
+                const n=(await db.query('INSERT INTO disposal_comments(disposalId,authorId,text,mentions,createdAt) VALUES($1,$2,$3,$4,$5) RETURNING id',[disposalId,user.id,value,JSON.stringify(refs),at()])).rows[0].id;
+                await notifyDisposal(user,disposalId,n,refs);
+                return messageView(user,(await db.query('SELECT * FROM disposal_comments WHERE id=$1',[n])).rows[0],hasPermission(user,'disposalsCommentsModerate'),'disposalsCommentsCreate');
+            });
+        },
+        async changeDisposalComment(user:User,disposalId:number,commentId:number,input:any,remove=false){
+            return store.transaction(async()=>{right(user,'disposalsRead');
+                if(!(await db.query('SELECT id FROM disposals WHERE id=$1',[id(disposalId)])).rowCount)throw new InputError('Geräteauftrag nicht gefunden.',404);
+                const row=(await db.query('SELECT * FROM disposal_comments WHERE id=$1 AND disposalId=$2',[id(commentId),disposalId])).rows[0];if(!row)throw new InputError('Kommentar nicht gefunden.',404);
+                const own=row.authorId===user.id&&hasPermission(user,'disposalsCommentsCreate'),moderate=hasPermission(user,'disposalsCommentsModerate');if(!own&&!(remove&&moderate))throw new InputError('Du darfst diesen Kommentar nicht ändern.',403);if(row.deleted)throw new InputError('Kommentar wurde bereits gelöscht.',409);
+                if(remove)await db.query('UPDATE disposal_comments SET deleted=1,editedAt=$1 WHERE id=$2',[at(),row.id]);
+                else{const value=text(input.text),refs=await mentions(value,u=>hasPermission(u,'disposalsRead'));await db.query('UPDATE disposal_comments SET text=$1,mentions=$2,editedAt=$3 WHERE id=$4',[value,JSON.stringify(refs),at(),row.id]);await notifyDisposal(user,disposalId,row.id,refs);}
+                return messageView(user,(await db.query('SELECT * FROM disposal_comments WHERE id=$1',[row.id])).rows[0],moderate,'disposalsCommentsCreate');
+            });
+        },
         async comments(user: User, returnId: number, query: any = {}) { await existingReturn(returnId); return history(user, 'return_comments', 'returnId', returnId, query, hasPermission(user, 'commentsModerate'), 'commentsCreate'); },
         async postComment(user: User, returnId: number, input: any) {
             return store.transaction(async () => {
@@ -354,15 +381,16 @@ export async function createCollaboration({ store, users, preferences, now = Dat
             });
         },
         async pruneNotifications(user: User) {
-            for (const item of (await db.query("SELECT id,href FROM notifications WHERE userId=$1 AND kind IN ('chatMessage','chatMention','returnMention')", [user.id])).rows) {
+            for (const item of (await db.query("SELECT id,href FROM notifications WHERE userId=$1 AND kind IN ('chatMessage','chatMention','returnMention','disposalMention')", [user.id])).rows) {
                 let allowed = false;
-                const chat = item.href.match(/^\/chat#channel-(\d+)$/), ret = item.href.match(/^\/#returns\?detail=(\d+)$/);
+                const chat = item.href.match(/^\/chat#channel-(\d+)$/), ret = item.href.match(/^\/#returns\?detail=(\d+)$/),disposal=item.href.match(/^\/#disposals\?record=([^&]+)$/);
                 if (chat) {
                     const c = (await db.query("SELECT * FROM chat_channels WHERE id=$1", [Number(chat[1])])).rows[0];
                     allowed = !!c && await accessible(user, c);
                 }
                 else if (ret)
                     allowed = !!(await db.query("SELECT 1 FROM returns WHERE id=$1", [Number(ret[1])])).rows[0];
+                else if(disposal&&hasPermission(user,'disposalsRead')){let number='';try{number=decodeURIComponent(disposal[1]);}catch{}allowed=!!(await db.query('SELECT 1 FROM disposals WHERE disposalNumber=$1',[number])).rowCount;}
                 if (!allowed)
                     await db.query("DELETE FROM notifications WHERE id=$1", [item.id]);
             }

@@ -1,5 +1,7 @@
 // Exact source-text translations for the English application interface.
 export const english = {
+ "Kundenstatus teilen":"Share customer status",
+ "Kurzlink":"Short link",
  "Anmeldung":"Sign-in",
  "Anbieter":"Providers",
  "OAuth-/OpenID-Schlüssel wiederherstellen":"Recover OAuth / OpenID key",

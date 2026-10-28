@@ -202,3 +202,14 @@ server/database/sso-schema.js
 vendor/oidc.js
 public/sso-login.js
 public/admin-sso.js
+
+server/customer-status.js
+server/customer-status-routes.js
+server/database/customer-status-schema.js
+public/customer-status.js
+public/customer-status-public.js
+public/customer-status.html
+public/customer-status.css
+
+server/database/communication-schema.js
+public/record-communication.js
