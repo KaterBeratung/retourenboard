@@ -1,3 +1,7 @@
+<div align="center">
+
+<img src="../../public/favicon.svg" width="64" height="64" alt="retourenboard. Logo">
+
 # retourenboard.
 
 **Ein Ort für alle Rückläufer.** · Projektstand 4.0.71
