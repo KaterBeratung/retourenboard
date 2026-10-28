@@ -10,7 +10,7 @@ Manage products. Process returns. Keep your team in sync.
 
 [Deutsch](README.md) · [Installation](#installation) · [Try the demo](#try-it-locally) · [Documentation](#documentation) · [Downloads](https://github.com/KaterBeratung/retourenboard/releases/latest)
 
-**Local version 4.0.71** · Self-hosted · Node.js 24 · PostgreSQL · German / English
+**Local version 4.0.72** · Self-hosted · Node.js 24 · PostgreSQL · German / English
 
 </div>
 

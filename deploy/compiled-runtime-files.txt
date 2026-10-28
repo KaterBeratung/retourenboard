@@ -213,3 +213,4 @@ public/customer-status.css
 
 server/database/communication-schema.js
 public/record-communication.js
+server/static-assets.js

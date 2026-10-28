@@ -63,6 +63,20 @@ function attachPreview(app) {
             return originalHandler(req, res);
         // Let the production handler enforce login redirects before decorating HTML.
         if (asset.type.startsWith('text/html')) {
+            // The preview substitutes decorated identity HTML for the production body.
+            // Keep its length and encoding consistent, including authenticated HEAD.
+            const writeHead = res.writeHead;
+            res.writeHead = function (statusCode, statusMessage, headers) {
+                const values = typeof statusMessage === 'string' ? headers : statusMessage;
+                if (statusCode === 200 && String(values?.['Content-Type'] ?? res.getHeader('Content-Type')).startsWith('text/html')) {
+                    const previewHeaders = { ...values, 'Content-Length': asset.data.length };
+                    delete previewHeaders['Content-Encoding'];
+                    return typeof statusMessage === 'string'
+                        ? writeHead.call(this, statusCode, statusMessage, previewHeaders)
+                        : writeHead.call(this, statusCode, previewHeaders);
+                }
+                return writeHead.call(this, statusCode, statusMessage, headers);
+            };
             const end = res.end;
             res.end = function (body, ...args) {
                 if (req.method === 'GET' && res.statusCode === 200 && String(res.getHeader('Content-Type')).startsWith('text/html'))

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
+import { request } from 'node:http';
 import { fileURLToPath } from 'node:url';
 
 test('dashboard links select the corresponding return scope and active products', async () => {
@@ -45,6 +46,13 @@ test('the design preview uses disposable seeded data and retains authentication 
     assert.equal(session.setupRequired, false);
     assert.equal(session.version, JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version);
     assert.equal((await fetch(base + '/api/products')).status, 401);
+    const previewResponse = await new Promise((resolve,reject)=>request(base+'/login',{headers:{'Accept-Encoding':'gzip'}},res=>{const chunks=[];res.on('error',reject);res.on('data',chunk=>chunks.push(chunk));res.on('end',()=>resolve({headers:res.headers,body:Buffer.concat(chunks)}));}).on('error',reject).end());
+    assert.equal(previewResponse.headers['content-encoding'],undefined,'Decorated preview HTML must use identity bytes');
+    assert.equal(Number(previewResponse.headers['content-length']),previewResponse.body.length,'Preview injection must update its response length');
+    const head = await new Promise((resolve,reject)=>request(base+'/login',{method:'HEAD',headers:{'Accept-Encoding':'gzip'}},res=>{let bytes=0;res.on('error',reject);res.on('data',chunk=>bytes+=chunk.length);res.on('end',()=>resolve({headers:res.headers,bytes}));}).on('error',reject).end());
+    assert.equal(head.headers['content-encoding'],undefined);
+    assert.equal(Number(head.headers['content-length']),previewResponse.body.length);
+    assert.equal(head.bytes,0);
     const html = await (await fetch(base)).text();
     assert.match(html, /data-design-preview/);
     assert.match(html, /design\.css/);

@@ -73,7 +73,14 @@ let language='de';
 try{const saved=globalThis.localStorage?.getItem(preferenceKey);if(saved==='en'||saved==='de')language=saved;}catch{}
 export const getLanguage=()=>language;
 export const locale=()=>language==='en'?'en-GB':'de-DE';
-export function addTranslations(entries){Object.assign(dictionary,entries);if(typeof document!=='undefined')refreshTranslations(document);}
+function reverseTranslations(){
+ const index=new Map();
+ // Preserve Object.keys ordering, including duplicate English aliases.
+ for(const key of Object.keys(dictionary))if(!index.has(dictionary[key]))index.set(dictionary[key],key);
+ return index;
+}
+let reverseDictionary=reverseTranslations();
+export function addTranslations(entries){Object.assign(dictionary,entries);reverseDictionary=reverseTranslations();if(typeof document!=='undefined')refreshTranslations(document);}
 function translate(source){
  const string=String(source??''),key=string.trim();
  if(language==='de'||!Object.hasOwn(dictionary,key))return string;
@@ -94,7 +101,7 @@ export function t(source,...values){
   const previous=language;language='en';const en=source.reduce((s,part,i)=>s+translate(part)+(i<values.length?(values[i] instanceof LocalizedText?values[i].en:String(values[i]??'')):''),'');language=previous;
   return new LocalizedText(de,en);
  }
- const raw=String(source??''),de=Object.hasOwn(dictionary,raw.trim())?raw:(Object.keys(dictionary).find(key=>dictionary[key]===raw)??raw),previous=language;language='en';const en=translate(de);language=previous;
+ const raw=String(source??''),de=Object.hasOwn(dictionary,raw.trim())?raw:(reverseDictionary.get(raw)??raw),previous=language;language='en';const en=translate(de);language=previous;
  return new LocalizedText(de,en);
 }
 export function escapedText(value,escape){return value instanceof LocalizedText?new LocalizedText(escape(value.de),escape(value.en)):escape(value);}

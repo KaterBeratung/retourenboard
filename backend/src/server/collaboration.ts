@@ -381,19 +381,25 @@ export async function createCollaboration({ store, users, preferences, now = Dat
             });
         },
         async pruneNotifications(user: User) {
+            // The caller holds the mutation coordinator. Reuse only this call's
+            // access result; another request must observe revoked membership.
+            const accessByHref=new Map<string,boolean>(),remove:number[]=[];
             for (const item of (await db.query("SELECT id,href FROM notifications WHERE userId=$1 AND kind IN ('chatMessage','chatMention','returnMention','disposalMention')", [user.id])).rows) {
-                let allowed = false;
-                const chat = item.href.match(/^\/chat#channel-(\d+)$/), ret = item.href.match(/^\/#returns\?detail=(\d+)$/),disposal=item.href.match(/^\/#disposals\?record=([^&]+)$/);
-                if (chat) {
-                    const c = (await db.query("SELECT * FROM chat_channels WHERE id=$1", [Number(chat[1])])).rows[0];
-                    allowed = !!c && await accessible(user, c);
+                if(!accessByHref.has(item.href)){
+                    let allowed = false;
+                    const chat = item.href.match(/^\/chat#channel-(\d+)$/), ret = item.href.match(/^\/#returns\?detail=(\d+)$/),disposal=item.href.match(/^\/#disposals\?record=([^&]+)$/);
+                    if (chat) {
+                        const c = (await db.query("SELECT * FROM chat_channels WHERE id=$1", [Number(chat[1])])).rows[0];
+                        allowed = !!c && await accessible(user, c);
+                    }
+                    else if (ret)
+                        allowed = !!(await db.query("SELECT 1 FROM returns WHERE id=$1", [Number(ret[1])])).rows[0];
+                    else if(disposal&&hasPermission(user,'disposalsRead')){let number='';try{number=decodeURIComponent(disposal[1]);}catch{}allowed=!!(await db.query('SELECT 1 FROM disposals WHERE disposalNumber=$1',[number])).rowCount;}
+                    accessByHref.set(item.href,allowed);
                 }
-                else if (ret)
-                    allowed = !!(await db.query("SELECT 1 FROM returns WHERE id=$1", [Number(ret[1])])).rows[0];
-                else if(disposal&&hasPermission(user,'disposalsRead')){let number='';try{number=decodeURIComponent(disposal[1]);}catch{}allowed=!!(await db.query('SELECT 1 FROM disposals WHERE disposalNumber=$1',[number])).rowCount;}
-                if (!allowed)
-                    await db.query("DELETE FROM notifications WHERE id=$1", [item.id]);
+                if(!accessByHref.get(item.href))remove.push(item.id);
             }
+            if(remove.length)await db.query('DELETE FROM notifications WHERE userId=$1 AND id=ANY($2::bigint[])',[user.id,remove]);
         }
     };
     return api;

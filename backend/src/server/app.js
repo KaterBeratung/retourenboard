@@ -1,3 +1,4 @@
+import {createStaticAssetReader,acceptsGzip} from './static-assets.js';
 import {createCustomerStatus,customerStatusLimiter} from './customer-status.js';
 import {handleCustomerStatusPublic,handleCustomerStatusRoute} from './customer-status-routes.js';
 import {createDisposals} from './disposals.js';
@@ -62,6 +63,7 @@ import { createReturnWorkflow } from './return-workflow.js';
 import { handleReturnWorkflowRoute } from './return-workflow-routes.js';
 import { handleReturnLabelRoute } from './return-labels.js';
 const root = new URL('../', import.meta.url);
+const staticAssets=createStaticAssetReader();
 const { version } = JSON.parse(readFileSync(new URL('package.json', root), 'utf8'));
 const files = new Map([
     ['/bootstrap.js', ['public/bootstrap.js', 'text/javascript']],
@@ -289,12 +291,14 @@ export async function createApp({ dbPath, databaseConfig, database, runtimeLease
                     const privateAsset = !['text/html', 'text/css', 'image/svg+xml'].includes(asset[1]) && path !== '/kofi.avif' && !publicScripts.has(path);
                     if (privateAsset && !await currentSession())
                         throw new InputError('Bitte zuerst anmelden.', 401);
-                    const content = await readFile(fileURLToPath(new URL(asset[0], root)));
+                    const compressible=asset[1].startsWith('text/')||['image/svg+xml','application/javascript','application/json','application/wasm'].includes(asset[1]);
+                    const {body:content,encoding}=await staticAssets.read(fileURLToPath(new URL(asset[0], root)),compressible&&acceptsGzip(req.headers['accept-encoding']));
                     if (privatePage && !await currentSession())
                         return toLogin();
                     if (privateAsset && !await currentSession())
                         throw new InputError('Bitte zuerst anmelden.', 401);
-                    res.writeHead(200, { 'Content-Type': `${asset[1]}; charset=utf-8`, 'Cache-Control': privateAsset || asset[1] === 'text/html' ? 'private, no-store' : 'no-cache', ...(privateAsset || privatePage ? { 'Vary': 'Cookie' } : {}) });
+                    const vary=[...(privateAsset||privatePage?['Cookie']:[]),...(compressible?['Accept-Encoding']:[])];
+                    res.writeHead(200, { 'Content-Type': `${asset[1]}; charset=utf-8`, 'Content-Length': content.length, 'Cache-Control': privateAsset || asset[1] === 'text/html' ? 'private, no-store' : 'no-cache', ...(vary.length?{'Vary':vary.join(', ')}:{}),...(encoding?{'Content-Encoding':encoding}:{}) });
                     return res.end(method === 'HEAD' ? undefined : content);
                 }
                 const session = await currentSession();
