@@ -191,6 +191,10 @@ body.return-label-printing dialog.return-label-dialog{display:block!important;po
 .return-print-label[data-label-size="103x164"]{page:rb-label-large}
 .return-print-label[data-label-size="62x29"]{page:rb-label-small}
 .return-print-label[data-label-size="auto"]{page:rb-label-auto}
+/* Fixed-size labels stay a little below the paper height: a printer driver that rounds the page down to whole device dots would otherwise push a hair-thin remainder onto an extra, blank page. A4 and the general layout follow their content and never exceed the printable width. */
+.return-print-label[data-label-size="a4"],.return-print-label[data-label-size="auto"]{height:auto!important;min-height:0!important;max-width:100%!important}
+.return-print-label[data-label-size="103x164"]{height:163.4mm!important}
+.return-print-label[data-label-size="62x29"]{height:28.4mm!important}
 .return-label-dialog[data-label-print-state="blocked"] .return-label-paper{display:none!important}
 .return-label-dialog[data-label-print-state="blocked"] .label-blocked-print{display:block!important;page:rb-label-a4;margin:12mm;font:12pt/1.5 system-ui;color:#111}
 }

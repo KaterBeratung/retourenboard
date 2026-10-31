@@ -61,6 +61,17 @@ test('printing still uses the real paper sizes at 100 % without the screen contr
     assert.ok(print.includes('print-color-adjust:exact'));
 });
 
+test('printed labels never fill the whole page height, so rounding in the printer driver cannot add a blank page', () => {
+    const print = css.slice(css.indexOf('@media print{'));
+    const height = size => Number(print.match(new RegExp(`\\n${escape(`.return-print-label[data-label-size="${size}"]`)}\\{height:([\\d.]+)mm!important\\}`))?.[1]);
+    // Every fixed height stays just below its page, so a label can never reach the page height.
+    for (const [size, page] of [['103x164', 164], ['62x29', 29]]) {
+        assert.ok(height(size) < page && page - height(size) <= 1, `${size}: ${height(size)} mm`);
+    }
+    // A4 and the general layout follow their content instead of claiming the exact sheet height.
+    assert.ok(print.includes('.return-print-label[data-label-size="a4"],.return-print-label[data-label-size="auto"]{height:auto!important;min-height:0!important;max-width:100%!important}'));
+});
+
 test('printing drops the page backdrop, which sits on the root element or on a fixed layer, and the status bars', () => {
     const print = css.slice(css.indexOf('@media print{'));
     assert.ok(print.includes('html:has(body.return-label-printing){background:#fff!important;color-scheme:light!important}'));

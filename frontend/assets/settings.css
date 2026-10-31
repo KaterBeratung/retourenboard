@@ -472,8 +472,13 @@ html[data-theme=dark] .unsaved-dialog{background:var(--surface);color:var(--ink)
 }
 .language-switch-auth{position:fixed;top:20px;right:74px;z-index:20}
 body:not(.auth-screen)>.language-switch-auth{display:none}
+/* Language and colour switch share one top edge and height at every width; only the right offset differs (theme button 16px from the edge plus its width plus the gap). */
+@media(max-width:760px){
+.language-switch-auth,.theme-switch-auth{top:16px}
+.language-switch-auth{right:66px}
+}
 @media(max-width:620px){
-.language-switch-auth{top:12px;right:58px}
+.language-switch-auth{right:58px}
 }
 @media(max-width:400px){
 [data-ui="board"] #header-access{width:39px;min-width:39px;max-width:39px;padding:8px;justify-content:center;gap:0}
