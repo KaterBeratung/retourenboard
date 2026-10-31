@@ -31,3 +31,16 @@ test('compact masterdata cards identify only genuinely empty optional values',t=
  assert.equal((rows[0].match(/data-mobile-empty/g)||[]).length,2);
  assert.doesNotMatch(rows[1],/data-mobile-empty/);assert.match(rows[1],/ABC/);assert.match(rows[1],/class="master-notes">—/);
 });
+
+test('masterdata category tabs use the same segmented layout as the return status tabs',t=>{
+ const ctx=context(t);ctx.masterdata.suppliers=[{id:1,name:'active',active:true},{id:2,name:'old',active:false}];
+ const markup=String(renderAdmin(ctx)).replace(/<!--[\s\S]*?-->/g,''),bar=markup.match(/<div class="admin-tabs status-tabs ([^"]*)"[\s\S]*?<\/div>/);
+ assert.ok(bar,'tab bar uses the shared status-tabs classes');
+ assert.match(bar[1],/status-cols-4/);assert.match(bar[1],/status-leading-2/);
+ const buttons=bar[0].match(/<button\b[\s\S]*?<\/button>/g);
+ assert.equal(buttons.length,Object.keys(MASTER_KINDS).length);
+ assert.match(buttons[0],/data-master-kind="suppliers"[^>]*class="selected"[^>]*aria-pressed="true"/);
+ assert.match(buttons[0],/Lieferanten<span class="master-kind-count">1<\/span>/);
+ assert.match(buttons[1],/aria-pressed="false"/);
+ assert.doesNotMatch(bar[0],/master-kind-icon|<svg/,'tabs carry no symbols, like the return status tabs');
+});

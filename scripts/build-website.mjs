@@ -17,7 +17,7 @@ for(const name of ['index.html','datenschutz.html','impressum.html']){
 copyFileSync(join(source,'site.css'),join(output,'site.css'));
 copyFileSync(join(root,'public/favicon.svg'),join(output,'favicon.svg'));
 copyFileSync(join(root,'public/kofi.avif'),join(output,'kofi.avif'));
-const assets=join(source,'assets'),images=readdirSync(assets).filter(name=>/^[a-z][a-z0-9-]*\.webp$/.test(name)).sort();
+const assets=join(source,'assets'),images=readdirSync(assets).filter(name=>/^[a-z][a-z0-9-]*\.(webp|svg)$/.test(name)).sort();
 mkdirSync(join(output,'assets'),{recursive:true});
 for(const name of images){if(!lstatSync(join(assets,name)).isFile())throw Error('Website image must be a regular file: '+name);copyFileSync(join(assets,name),join(output,'assets',name));}
 writeFileSync(join(output,'assets/asset-manifest.json'),JSON.stringify(images));

@@ -35,6 +35,7 @@ const dictionary={
  'Mindestens 12 Zeichen.':'At least 12 characters.','Leer lassen, um das bisherige Passwort zu behalten. Mindestens 12 Zeichen für ein neues Passwort.':'Leave blank to keep the current password. Use at least 12 characters for a new password.',
  'Administrator anlegen':'Create administrator','Anmelden':'Sign in','Abmelden':'Sign out','Abbrechen':'Cancel','Schließen':'Close','Zurück':'Back','Bestätigen':'Confirm',
  'Dein gemeinsamer Retouren-Arbeitsplatz.':'Your shared returns workspace.',
+ 'Retouren mit Seriennummer erfassen':'Log returns with serial numbers','Scannen und Etiketten drucken':'Scan and print labels','Bearbeitungsstand mit Kundschaft teilen':'Share the processing status with customers',
  'Die Passwörter stimmen nicht überein.':'The passwords do not match.',
  'Zweiter Anmeldeschritt':'Second sign-in step','Gib deinen App-Code oder einen einmaligen Recoverycode ein.':'Enter your app code or a single-use recovery code.',
  '2FA- oder Recoverycode':'2FA or recovery code','Authenticator verbinden':'Connect an authenticator',

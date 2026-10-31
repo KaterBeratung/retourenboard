@@ -159,9 +159,12 @@ public/workspace-personalization.js
 public/workspace-personalization.css
 public/table-sort.js
 public/record-action-menu.js
+public/update-notice.js
 public/scan-intake.js
 public/scan-intake.css
 public/inventory-polish.css
+public/error.html
+public/error.css
 
 vendor/postgres.js
 server/database/config.js

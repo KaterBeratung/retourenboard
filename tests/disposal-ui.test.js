@@ -38,3 +38,14 @@ test('desktop and mobile disposal records preserve identifiers and permission-ga
   }
  }
 });
+test('disposal phone cards keep their actions behind a menu while the desktop table keeps the icon row',()=>{
+ const item={...row,status:'completed'};
+ const [table,cards]=String(renderDisposalRows(ctx,[item])).split('<div class="mobile-records">');
+ assert.match(table,/class="icon-btn" type="button" data-disposal-print="1"/);
+ assert.doesNotMatch(table,/data-record-menu/);
+ assert.match(cards,/data-record-menu-trigger/);assert.match(cards,/aria-label="Weitere Aktionen: DIS-2026-000001"/);
+ assert.match(cards,/role="menuitem"[^>]*data-disposal-print="1"/);assert.match(cards,/role="menuitem"[^>]*data-disposal-open="1"/);
+ assert.doesNotMatch(cards,/class="icon-btn" type="button" data-disposal-(print|open)/);
+ const restricted=String(renderDisposalRows({...ctx,can:key=>key==='disposalsRead'},[item])).split('<div class="mobile-records">')[1];
+ assert.doesNotMatch(restricted,/data-disposal-print/);assert.match(restricted,/data-disposal-open="1"/);
+});

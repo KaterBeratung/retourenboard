@@ -21,7 +21,7 @@
 .chat-channel{min-width:0;display:flex;align-items:flex-start;text-decoration:none;color:inherit;transition:background .15s ease;padding:12px 10px;gap:10px;border:1px solid transparent;border-radius:var(--control-radius);margin:3px 0;min-height:76px}
 @media(hover:hover) and (pointer:fine){
 .chat-channel:not(.selected):hover{background-color:var(--surface-hover);border-color:var(--line-strong)}
-[data-ui="board"] .chat-channel.selected:hover{border-color:var(--violet);box-shadow:inset 0 1px 0 var(--glass-glint)}
+[data-ui="board"] .chat-channel.selected:hover{border-color:var(--violet);box-shadow:none}
 .chat-pin-preview:not(:disabled):hover{color:var(--accent)}
 .chat-pin-preview:not(:disabled):hover>span{color:var(--ink)}
 }
@@ -57,8 +57,8 @@
 .message-empty p{margin:0}
 .mention-menu{position:absolute;z-index:3;bottom:72px;left:26px;width:min(var(--menu-max-width),calc(100% - 52px));padding:var(--menu-padding);max-height:var(--menu-max-height);overflow:auto}
 .mention-menu[hidden]{display:none}
-.mention-caption{display:block;color:var(--muted);font-size:10px;padding:6px 8px 10px}
-.mention-menu button:hover,.mention-menu button:focus-visible{background-color:var(--menu-hover)}
+.mention-caption{display:block;color:var(--muted);font-size:11px;padding:6px 8px 10px}
+.mention-menu button:focus-visible{background-color:var(--menu-hover)}@media(hover:hover){.mention-menu button:hover{background-color:var(--menu-hover)}}
 .chat-member-picker legend{font-size:13px;font-weight:600;padding:0 6px}
 .chat-member-picker .muted{font-size:11px;line-height:1.7;margin:0 0 14px}
 .chat-member-picker small{color:var(--muted)}
@@ -67,11 +67,11 @@
 .comments-heading p{font-size:12px;margin:0 0 22px}
 .comment-log{margin-top:16px}
 .return-comments .message-meta{gap:6px}
-.return-comments .message-meta>time{font-size:9px}
+.return-comments .message-meta>time{font-size:11px}
 .return-comments .composer-footer .btn{white-space:normal}
 .message-edit .message-composer{padding:0;border:0}
 .message-edit>[data-cancel-edit]{font-size:11px;margin-top:16px}
-.message-composer .unsaved-badge{position:static;margin-bottom:8px}
+
 @media(max-width:1150px){
 .chat-conversation-heading{padding:20px}
 .message-composer{padding:18px 20px}
@@ -85,13 +85,12 @@
 .message-composer{padding:18px}
 .composer-footer{gap:8px}
 .composer-footer>.btn[type=submit]{margin-left:auto}
-.message-meta>time{font-size:9px}
+.message-meta>time{font-size:11px}
 .message-card{padding:14px}
 .mention-menu{left:18px;width:calc(100% - 36px)}
 .return-comments .mention-menu{left:0;width:100%}
 }
-@media(prefers-reduced-motion:reduce){
-}
+
 .chat-connection-error{margin:0;padding:12px 24px;background:var(--design-head);color:var(--muted);font-size:12px;line-height:1.6;flex-shrink:0}
 .chat-conversation .unsaved-status{padding:8px 10px;margin-bottom:10px!important}
 .chat-conversation .message-composer{flex-shrink:0}
@@ -116,7 +115,7 @@
 .chat-pin-preview>strong{font-size:12px;line-height:1.5;overflow-wrap:anywhere}
 .chat-pin-preview>span{font-size:12px;line-height:1.6;color:var(--muted);overflow-wrap:anywhere}
 .chat-pin-item>.text-link{font-size:12px;min-height:36px;flex-shrink:0;max-width:38%;line-height:1.5;text-align:right}
-.message-pin-label{display:inline-block;margin-top:8px;font-size:10px;font-weight:650;color:var(--design-accent)}
+.message-pin-label{display:inline-block;margin-top:8px;font-size:11px;font-weight:650;color:var(--design-accent)}
 .message-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:6px 12px;margin-top:8px}
 .message-card:focus{outline:2px solid var(--design-accent);outline-offset:2px}
 @media(max-width:1150px){

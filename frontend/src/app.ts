@@ -2,7 +2,7 @@ import {serialKey} from '../shared/serial-number.js';
 import {updateMarkup,statusTabLayout} from './ui.js';
 import {renderDisposals,bindDisposals} from './disposals.js';
 import {html,t,locale,addTranslations,setText,formatDate,apiError} from './i18n.js';
-import {masterName,masterValue,money,returnTiming,returnTimestamp,workflowStatuses,renderReturnWorkflow} from './inventory-display.js';
+import {masterName,masterValue,masterLabel,money,returnTiming,returnTimestamp,workflowStatuses,renderReturnWorkflow} from './inventory-display.js';
 import {bindCurrencyControl} from './currency-control.js';
 import {english} from './i18n-catalog.js';
 import { parseDesignRoute, internalNavigationHash, internalNavigationUrl, createLocationChangeListener, matchesReturnScope, bindMobileNavigation, bindHeaderMenu, preserveListScroll, inventoryFilterOptions, createDebouncedTask, inventoryChanged, readWhenIdle, createNavigationLifecycle, createHashHistory } from './design.js';
@@ -26,13 +26,14 @@ import {navigationToolRights} from './navigation-tools.js';
 import {renderChat,bindChat} from './chat.js';
 import {bindSwitchAnimations} from './switches.js';
 import {signOut} from './auth-context.js';
+import {bindUpdateNotice} from './update-notice.js';
 import {createSectionTransition} from './section-transition.js';
 import {bindSelectMenus} from './selects.js';
 import {loginPathFor} from '../shared/auth-navigation.js';
 import {bindActionTooltips,bindResponsiveTables,bindWorkspaceMenuDismissal,mobileActions,loadingSkeleton,prepareLoading} from './presentation.js';
 import {WORKSPACE_TRANSLATIONS,openWorkspaceSearch,renderSavedFilters,bindSavedFilters} from './workspace-tools.js';
 import {renderTableControls,bindTableControls,applyTablePreferences,readTablePreferences} from './table-preferences.js';
-import {renderWorkspaceActions,renderWorkspaceAnalytics,workspaceCalendarDay} from './workspace-insights.js';
+import {renderWorkspaceActions,renderWorkspaceAnalytics,workspaceCalendarDay,overviewFigures} from './workspace-insights.js';
 import {renderOverviewControls,bindOverviewControls} from './workspace-personalization.js';
 import {readInventorySort,sortInventoryRows,sortableHeading,renderMobileSorting,bindInventorySorting} from './table-sort.js';
 import {closeRecordMenus} from './record-action-menu.js';
@@ -294,6 +295,7 @@ window.addEventListener('languagechange',()=>{
     void refreshNotifications(ctx);
     if(ctx.unlocked&&state.inventoryLoaded&&['products','returns'].includes(state.view)&&document.querySelector('#table-content'))refreshRows();
 });
+let updateNotice:ReturnType<typeof bindUpdateNotice>|undefined;
 function updateAccess() {
     const searchLabel=String(t('Bestand durchsuchen'));if(searchButton.getAttribute('aria-label')!==searchLabel){searchButton.setAttribute('aria-label',searchLabel);sidebarSearch.setAttribute('aria-label',searchLabel);}
     searchButton.hidden=!ctx.unlocked;sidebarSearch.hidden=!ctx.unlocked;
@@ -315,6 +317,8 @@ function updateAccess() {
     updateMarkup(document.querySelector('#header-access'),html`${icon(unlocked ? 'user' : 'lock')}<span>${unlocked ? h(name) : state.session.setupRequired ? t('Ersteinrichtung') : t('Anmelden')}</span>`);
     document.querySelector('#header-access').classList.toggle('unlocked', unlocked);
     const signout=document.querySelector<HTMLButtonElement>('[data-header-signout]');if(signout)signout.hidden=!unlocked;
+    const sidebarSignout=document.querySelector<HTMLButtonElement>('#sidebar-signout');if(sidebarSignout)sidebarSignout.hidden=!unlocked;
+    (updateNotice??=bindUpdateNotice(ctx)).refresh();
     updateMarkup(document.querySelector('#access-button'),html`${icon(unlocked ? 'user' : 'lock')}<span><strong>${unlocked ? h(name) : t('Anmeldung erforderlich')}</strong><small>${unlocked ? (ctx.isAdmin ? t('Administrator') : state.session.user?.role==='viewer'?t('Nur lesen'):t('Mitarbeiter')) + t(' · Mein Konto') : state.session.setupRequired ? t('Ersten Administrator anlegen') : t('Mit persönlichem Konto anmelden')}</small></span>${icon('chevron')}`);
     const count = document.querySelector('#nav-count');
     if (count) {
@@ -340,8 +344,8 @@ function updateAreaSwitcher(){
 function updateSidebarNavigation(){
     updateAreaSwitcher();
     const mode=String(state.adminPage)+':'+locale();if(mode===sidebarMode)return;sidebarMode=mode;
-    const workspace=state.adminPage?'':html`<nav aria-label="${t('Hauptnavigation')}"><a href="#overview" data-nav="overview">${icon('dashboard')}${t('Übersicht')}</a><a href="#returns" data-nav="returns">${icon('return')}${t('Retouren')}<span id="nav-count" class="nav-count">0</span></a><a href="#products" data-nav="products">${icon('box')}${t('Produkte')}</a><a href="#disposals" data-nav="disposals" data-disposal-nav hidden>${icon('trash')}${t('Entsorgung')}</a><a href="#scan-intake" data-nav="scan-intake" data-scan-intake-nav hidden>${icon('barcode')}${t('Scan-Erfassung')}</a><a href="#chat" data-chat-link hidden>${icon('chat')}Chat</a></nav>`;
-    const groups=[['Bestandsverwaltung',[['masterdata','box'],['rules','return'],['data-tools','settings'],['csv-profiles','upload'],['audit','clock']]],['Konten & Nachrichten',[['users','unlock'],['sso','lock'],['notifications','info']]],['Serverbetrieb',[['backups','download'],['updates','arrow'],['diagnostics','info'],['settings','settings']]]] as const;
+    const workspace=state.adminPage?'':html`<nav aria-label="${t('Hauptnavigation')}"><a href="#overview" data-nav="overview">${icon('dashboard')}${t('Übersicht')}</a><a href="#returns" data-nav="returns">${icon('return')}${t('Retouren')}<span id="nav-count" class="nav-count">0</span></a><a href="#scan-intake" data-nav="scan-intake" data-scan-intake-nav hidden>${icon('barcode')}${t('Scan-Erfassung')}</a><a href="#disposals" data-nav="disposals" data-disposal-nav hidden>${icon('trash')}${t('Entsorgung')}</a><a href="#products" data-nav="products">${icon('box')}${t('Produkte')}</a><a href="#chat" data-chat-link hidden>${icon('chat')}Chat</a></nav>`;
+    const groups=[['Bestandsverwaltung',[['masterdata','box'],['rules','return'],['csv-profiles','upload'],['data-tools','settings'],['audit','clock']]],['Konten & Nachrichten',[['users','unlock'],['sso','lock'],['notifications','info']]],['Serverbetrieb',[['settings','settings'],['backups','download'],['updates','arrow'],['diagnostics','info']]]] as const;
     sidebarNavigation.innerHTML=(state.adminPage?groups.map(([label,items])=>html`<div class="nav-label admin-group-label">${t(label)}</div><nav aria-label="${t(label)}">${items.map(([section,shape])=>html`<a href="#admin?section=${section}" data-admin-nav="${section}">${icon(shape)}${adminLabels[section]}</a>`).join('')}</nav>`).join(''):html`<div class="nav-label">ARBEITSBEREICH</div>`)+workspace;
     sidebarNavigation.querySelectorAll<HTMLAnchorElement>('a[href]').forEach(normalizeLink);
     document.querySelector('.breadcrumb').innerHTML=html`<span>${state.adminPage?t('Administration'):t('Arbeitsbereich')}</span><span>/</span><strong id="breadcrumb-current"></strong>`;
@@ -448,15 +452,31 @@ function openLinkedReturn(){
         if(prepare&&view==='returns'&&!item.isClosed&&ctx.can('returnsEdit')&&ctx.can('returnsStatus')){const status=state.masterdata.statuses.find(row=>row.active&&row.isClosed),mapped=(ctx.config?.rules?.disposalResolutionIds??[]).filter(id=>state.masterdata.resolutions.some(row=>row.id===id&&row.active));returnForm(ctx,{...item,...(status?{statusId:status.id}:{}),...(mapped.length===1?{resolutionId:mapped[0]}:{})});}else showDetails(ctx,view,item);
     }).catch(error=>{if(generation===ctx.authGeneration&&location.hash===hash)ctx.toast(apiError(error.message));});
 }
+addTranslations({
+    'Überfällig':'Overdue','Offener Warenwert':'Open goods value','Abgeschlossen (30 Tage)':'Completed (30 days)','Alles im Plan':'All on schedule','Nichts überfällig':'Nothing overdue',
+    'Bis zu':'Up to','Tag':'day','überfällig':'overdue','davon':'of which','neu erfasst':'newly created','keine überfällig':'none overdue',
+    'offene Retoure':'open return','offene Retouren':'open returns','Keine offenen Retouren. Alles erledigt.':'No open returns. Everything is done.'
+});
 function overview() {
-    const open = state.returns.filter(r => !r.isClosed), checking = state.returns.filter(r => r.statusTone === 'checking'), done = state.returns.filter(r => r.isClosed), active = state.products.filter(p => p.active);
-    const cards = [['open',t('Offene Retouren'), open.length, 'clock', t('Offene ansehen'), 'orange', '#returns?scope=open'], ['checking',t('In Prüfung'), checking.length, 'search', t('Prüfungen ansehen'), 'blue', '#returns?scope=checking'], ['closed',t('Abgeschlossen'), done.length, 'check', t('Abschlüsse ansehen'), 'green', '#returns?scope=closed'], ['products',t('Aktive Produkte'), active.length, 'box', t('Produkte öffnen'), 'neutral', '#products?scope=active']];
-    return html`<div class="workspace-overview"><div class="page-heading"><div><div class="eyebrow">DEIN RETOUREN-ARBEITSPLATZ</div><h1>Alles im Blick<span class="heading-dot">.</span></h1><p>Produkte verwalten. Rückläufer erfassen. Gemeinsam weiterkommen.</p></div><div class="heading-actions">${renderOverviewControls()}<button class="btn secondary" type="button" data-scan-search>${icon('barcode')}Scannen</button>${createButton('returns', t('Neue Retoure'))}</div></div>
-  <div class="kpi-grid" data-overview-group="kpis">${cards.map(([key,label, num, ic, desc, color, href]) => html`<a class="kpi kpi-link" data-overview-card="${key}" data-overview-empty="${num===0}" href="${href}" aria-label="${label}: ${num} anzeigen"><div class="kpi-top"><span>${label}</span><span class="kpi-icon ${color}">${icon(ic)}</span></div><strong>${num}</strong><small>${desc}${icon('arrow')}</small></a>`).join('')}</div>
+    const figures=overviewFigures(state.returns,state.products,{timezone:ctx.config?.rules?.timezone,now:ctx.insightsNow}),open=figures.open;
+    const days=figures.oldestOverdueDays;
+    const cards:any[][]=[
+        ['open',t('Offene Retouren'),open,'clock','orange',figures.overdue?html`${t('davon')} ${figures.overdue} ${t('überfällig')}`:t('Alles im Plan'),'#returns?scope=open'],
+        ['overdue',t('Überfällig'),figures.overdue,'bell','red',days>0?html`${t('Bis zu')} ${days} ${t(days===1?'Tag':'Tage')} ${t('überfällig')}`:t('Nichts überfällig'),'#returns?scope=overdue'],
+        ['value',t('Offener Warenwert'),currency(figures.openValueCents),'dashboard','blue',html`${open} ${t(open===1?'Retoure':'Retouren')}`,'#returns?scope=open'],
+        ['closed',t('Abgeschlossen (30 Tage)'),figures.closed30,'check','green',html`${figures.created30} ${t('neu erfasst')}`,'#returns?scope=closed'],
+        ['products',t('Aktive Produkte'),figures.activeProducts,'box','neutral',t('Produkte öffnen'),'#products?scope=active']
+    ];
+    const summary=open===0?t('Keine offenen Retouren. Alles erledigt.'):html`${open} ${t(open===1?'offene Retoure':'offene Retouren')}${figures.overdue?html`, ${t('davon')} ${figures.overdue} ${t('überfällig')}.`:html`, ${t('keine überfällig')}.`}`;
+    const stages=workflowStatuses(state.masterdata.statuses??[],state.returns).filter(s=>!s.isClosed).map(s=>({name:masterLabel(s),tone:['received','checking','working'].includes(s.tone)?s.tone:'neutral',count:state.returns.filter(r=>!r.isClosed&&(r.statusId!=null?r.statusId===s.id:r.status===s.name)).length})).filter(s=>s.count>0);
+    let cursor=0;
+    const bar=open?html`<div class="workflow-balance"><div class="workflow-balance-head"><strong>${open}</strong><span>${t('offene Retouren')}</span></div><svg class="workflow-bar" viewBox="0 0 100 8" preserveAspectRatio="none" role="img" aria-label="${h(stages.map(s=>`${s.name}: ${s.count}`).join(', '))}" focusable="false">${stages.map(s=>{const width=s.count/open*100,x=cursor;cursor+=width;return html`<rect class="workflow-segment ${s.tone}" x="${x+(x>0?.4:0)}" y="0" width="${Math.max(0,width-(x>0?.4:0))}" height="8" rx="2"/>`;}).join('')}</svg></div>`:'';
+    return html`<div class="workspace-overview"><div class="page-heading"><div><div class="eyebrow">DEIN RETOUREN-ARBEITSPLATZ</div><h1>Alles im Blick<span class="heading-dot">.</span></h1><p>${summary}</p></div><div class="heading-actions">${renderOverviewControls()}<button class="btn secondary" type="button" data-scan-search>${icon('barcode')}Scannen</button>${createButton('returns', t('Neue Retoure'))}</div></div>
+  <div class="kpi-grid" data-overview-group="kpis">${cards.map(([key,label, num, ic, color, desc, href]) => html`<a class="kpi kpi-link" data-overview-card="${key}" data-overview-empty="${num===0}" href="${href}" aria-label="${label}: ${num} anzeigen"><div class="kpi-top"><span>${label}</span><span class="kpi-icon ${color}">${icon(ic)}</span></div><strong>${num}</strong><small>${desc}${icon('arrow')}</small></a>`).join('')}</div>
   ${!state.products.length ? html`<section class="onboarding"><div class="onboarding-art">${icon('box')}<span>${icon('check')}</span></div><div><span class="eyebrow">DEIN ERSTER SCHRITT</span><h2>Ein guter Überblick beginnt mit einem Produkt.</h2><p>Lege deinen Bestand an oder importiere bestehende Produktdaten als CSV.</p></div><div class="onboarding-buttons">${createButton('products', t('Produkt anlegen'))}<button class="btn secondary" data-import="products">${icon('upload')}CSV importieren</button></div></section>` : ''}
   ${renderWorkspaceActions(ctx)}
   <div class="dashboard-grid" data-overview-group="dashboard"><section class="panel recent-panel" data-overview-card="recent" data-overview-empty="${!state.returns.length}"><div class="panel-heading"><div><h2>Aktuelle Retouren <span class="count-pill">${state.returns.length}</span></h2><p>Die zuletzt erfassten Rückläufer.</p></div><a class="text-link" href="#returns">Alle ansehen ${icon('arrow')}</a></div>${returnTable(state.returns.slice(0, 5), true)}</section>
-  <section class="panel workflow" data-overview-card="workflow" data-overview-empty="${!state.returns.length}"><div class="panel-heading"><div><span class="eyebrow">DEIN ARBEITSABLAUF</span><h2>Schnellaktionen</h2><p>Häufig verwendete Schritte.</p></div></div><div class="dashboard-shortcuts">${createButton('returns',t('Neue Retoure'))}${ctx.can('returnsCreate')?html`<a class="btn secondary" href="#scan-intake">${icon('barcode')}Scan-Erfassung</a>`:''}<a class="btn secondary" href="#products">${icon('box')}Produkte</a></div><div class="workflow-subheading"><h3>Dein Retourenprozess</h3></div><div class="workflow-stages">${renderReturnWorkflow(state.masterdata.statuses??[],state.returns)}</div><div class="workflow-footer"><span>Warenwert offener Retouren</span><strong>${currency(open.reduce((sum, r) => sum + r.quantity * r.priceCents, 0))}</strong><small>Auf Basis der gespeicherten Retourenwerte</small></div></section></div>
+  <section class="panel workflow" data-overview-card="workflow" data-overview-empty="${!state.returns.length}"><div class="panel-heading"><div><span class="eyebrow">DEIN ARBEITSABLAUF</span><h2>Dein Retourenprozess</h2></div></div>${bar}<div class="workflow-stages">${renderReturnWorkflow(state.masterdata.statuses??[],state.returns)}</div></section></div>
   ${renderWorkspaceAnalytics(ctx)}
   <div class="overview-actions"><button class="text-link" data-unlock>${state.session.unlocked ? t('Mein Konto') : t('Anmelden')} ${icon('arrow')}</button></div></div>`;
 }
@@ -468,8 +488,8 @@ function listPage() {
     const {categories,reasons}=inventoryFilterOptions(state.products,state.returns);
     const scopeLabels = { open: t('Offene Retouren'), checking: t('In Prüfung'), closed: t('Abgeschlossen'),overdue:t('Überfällige Retouren'),today:t('Heute fällig') };
     const scopeHint = state.scope && !products ? html`<div class="scope-hint"><span>${icon('filter')}Ansicht: <strong>${scopeLabels[state.scope]}</strong></span><button class="text-link" id="clear-scope">Alle Retouren anzeigen ${icon('close')}</button></div>` : '';
-    return html`<section class="record-workspace inventory-workspace"><div class="page-heading"><div><div class="eyebrow">GEMEINSAMER BESTAND</div><h1>${labels[kind]}<span class="heading-dot">.</span></h1><p>${products ? t('Alle Produktdaten an einem Ort – von der EAN bis zum Lieferanten.') : t('Jeder Rückläufer mit Seriennummer, Grund und Bearbeitungsstatus.')}</p></div><div class="heading-actions"><button class="btn secondary" data-import="${kind}" aria-label="CSV importieren" title="CSV importieren">${icon('upload')}Import</button><button class="btn secondary" type="button" data-export="${kind}" aria-label="CSV exportieren" title="CSV exportieren">${icon('download')}Export</button>${createButton(kind, products ? t('Neues Produkt') : t('Neue Retoure'))}</div></div>
-  <div id="workspace-view-tools" class="workspace-view-tools"><div>${renderTableControls(ctx,kind)}<button class="btn secondary small" type="button" data-scan-search aria-label="Scannen">${icon('barcode')}Scannen</button></div>${renderSavedFilters(ctx,currentFilter())}</div>${scopeHint}
+    return html`<section class="record-workspace inventory-workspace"><div class="page-heading"><div><div class="eyebrow">GEMEINSAMER BESTAND</div><h1>${labels[kind]}<span class="heading-dot">.</span></h1><p>${products ? t('Alle Produktdaten an einem Ort – von der EAN bis zum Lieferanten.') : t('Jeder Rückläufer mit Seriennummer, Grund und Bearbeitungsstatus.')}</p></div><div class="heading-actions">${createButton(kind, products ? t('Neues Produkt') : t('Neue Retoure'))}</div></div>
+  <div id="workspace-view-tools" class="workspace-view-tools"><div>${renderTableControls(ctx,kind)}<button class="btn secondary small" type="button" data-scan-search aria-label="Scannen">${icon('barcode')}Scannen</button></div>${renderSavedFilters(ctx,currentFilter())}<div class="workspace-data-actions"><button class="btn secondary small" type="button" data-import="${kind}" aria-label="CSV importieren" title="CSV importieren">${icon('upload')}Import</button><button class="btn secondary small" type="button" data-export="${kind}" aria-label="CSV exportieren" title="CSV exportieren">${icon('download')}Export</button></div></div>${scopeHint}
   <section class="panel list-panel">${!products ? html`<div class="status-tabs ${statusTabLayout(statusItems.length+1)}" role="group" aria-label="Retourenstatus filtern"><button data-status="" class="${!state.status && !state.scope ? 'selected' : ''}">Alle Retouren <span data-status-count="">${counts.total}</span></button>${statusItems.map(({ name: s }) => html`<button data-status="${h(s)}" class="${state.status === s ? 'selected' : ''}">${h(statusName(s))}<span data-status-count="${h(s)}">${counts.byStatus.get(s)??0}</span></button>`).join('')}</div>` : ''}<div class="table-toolbar"><label class="search-field">${icon('search')}<input id="search" type="search" placeholder="${products ? t('Produkt, EAN oder Lieferant suchen …') : t('Retoure, Seriennummer, Sendungsnummer oder Kundenreferenz suchen …')}" aria-label="${products ? t('Produkte') : t('Retouren')} suchen" value="${h(state.search)}"></label><div class="toolbar-right">${products ? html`<select id="category-filter" aria-label="Kategorie filtern"><option value="">Alle Kategorien</option>${categories.map(c => html`<option${c === state.category ? ' selected' : ''}>${h(c)}</option>`).join('')}</select><select id="activity-filter" aria-label="Produktstatus filtern"><option value="active"${state.activity === 'active' ? ' selected' : ''}>Aktive Produkte</option><option value="all"${state.activity === 'all' ? ' selected' : ''}>Alle Produkte</option><option value="archived"${state.activity === 'archived' ? ' selected' : ''}>Archivierte Produkte</option></select>` : html`<label class="filter-label"><select id="reason-filter" aria-label="Retourengrund filtern"><option value="">Alle Gründe</option>${reasons.map(r => html`<option value="${h(r)}"${r === state.category ? ' selected' : ''}>${h(masterName(state.masterdata,'reasons',r))}</option>`).join('')}</select></label>${assigneeFilter()}`}</div></div><div id="selection-toolbar"></div><div id="table-content">${filteredTable()}</div><div class="table-footer"><span id="result-count" aria-live="polite" aria-atomic="true"></span><span>${csvHint}</span></div></section></section>`;
 }
 function filteredItems({ignoreStatusSelection=false}={}):any[] {
@@ -645,6 +665,8 @@ matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',cancelR
 ctx.openAccountPage=()=>navigationLifecycle.openAccount({isAccount:()=>ctx.isAccountView,canLeave:canLeaveForms,remember:hash=>state.accountReturnHash=hash,open:()=>{location.hash='account';},fallback:state.adminPage?'#admin':state.view==='chat'?'#chat':'#overview'});
 ctx.currencyUI=bindCurrencyControl(ctx,document.querySelector('.topbar-right'),()=>{if(!state.adminPage&&state.view!=='chat'&&state.view!=='scan-intake'&&state.view!=='disposals'&&!ctx.isAccountView)render();});
 bindHeaderMenu(document.querySelector('.topbar-right'),button=>signOut(ctx,()=>canLeaveForms(document),button).catch(error=>ctx.toast(apiError(error.message))));
+const sidebarSignoutButton=document.querySelector<HTMLButtonElement>('#sidebar-signout');
+if(sidebarSignoutButton)sidebarSignoutButton.onclick=()=>{signOut(ctx,()=>canLeaveForms(document),sidebarSignoutButton).catch(error=>ctx.toast(apiError(error.message)));};
 ctx.currencyUI.account(null);
 applyRoute();
 document.querySelector('#content').innerHTML=loadingSkeleton(state.view==='admin'?'settings':state.view==='account'?'account':state.view==='overview'?'overview':'list');

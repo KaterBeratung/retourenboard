@@ -7,8 +7,8 @@ export function createWebsiteServer(){
  const files=new Map([['/','index.html','text/html; charset=utf-8'],['/index.html','index.html','text/html; charset=utf-8'],['/site.css','site.css','text/css; charset=utf-8'],['/site.js','site.js','text/javascript; charset=utf-8'],['/favicon.svg','favicon.svg','image/svg+xml'],['/kofi.avif','kofi.avif','image/avif']].map(([url,file,type])=>[url,{file:join(output,file),type}]));
  const images=JSON.parse(readFileSync(join(output,'assets/asset-manifest.json'),'utf8'));
  for(const name of ['datenschutz.html','impressum.html'])files.set('/'+name,{file:join(output,name),type:'text/html; charset=utf-8'});
- if(!Array.isArray(images)||images.some(name=>typeof name!=='string'||!/^[a-z][a-z0-9-]*\.webp$/.test(name)))throw Error('Invalid website image manifest');
- for(const name of images)files.set('/assets/'+name,{file:join(output,'assets',name),type:'image/webp'});
+ if(!Array.isArray(images)||images.some(name=>typeof name!=='string'||!/^[a-z][a-z0-9-]*\.(webp|svg)$/.test(name)))throw Error('Invalid website image manifest');
+ for(const name of images)files.set('/assets/'+name,{file:join(output,'assets',name),type:name.endsWith('.svg')?'image/svg+xml':'image/webp'});
  return createServer((req,res)=>{
   const headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src https://api.github.com; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"};
   if(!['GET','HEAD'].includes(req.method)){res.writeHead(405,{...headers,Allow:'GET, HEAD'});return res.end();}

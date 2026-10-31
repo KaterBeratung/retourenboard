@@ -9,7 +9,7 @@
 .action-queue .panel-heading{gap:10px;align-items:center;padding:14px 16px;border-bottom:0}
 .action-queue h3{line-height:1.7;margin:0;min-width:0;font-size:13px;font-weight:600}
 .action-queue h3 a{color:var(--ink);text-decoration:none;overflow-wrap:anywhere}
-.action-queue h3 a:hover{color:var(--design-accent,var(--green))}
+@media(hover:hover){.action-queue h3 a:hover{color:var(--design-accent,var(--green))}}
 .queue-symbol{display:grid;place-items:center;flex:none;width:32px;height:32px;border-radius:var(--radius-small);color:var(--accent);background:var(--accent-background)}
 .queue-symbol>.icon{width:16px;height:16px}
 .action-queue[data-overview-card=today] .queue-symbol{color:var(--warning);background:var(--warning-bg)}
@@ -76,12 +76,12 @@
 .month-bar{opacity:.85}
 .month-bar.created-key{fill:var(--accent)}
 .month-bar.completed-key{fill:var(--info)}
-.month-column:hover .month-bar{opacity:1}
+@media(hover:hover){.month-column:hover .month-bar{opacity:1}}
 .month-label{padding-top:12px;text-align:center;color:var(--muted);font-size:var(--text-xs);line-height:1.5;overflow-wrap:anywhere}
 .chart-empty{margin-top:16px;text-align:center}
 .trend-values{margin-top:20px;border-top:1px solid var(--line);padding-top:8px}
 .trend-values>summary{width:fit-content;min-height:40px;padding:10px 0;box-sizing:border-box;font-size:var(--text-xs);line-height:1.6;color:var(--muted);cursor:pointer}
-.trend-values>summary:is(:hover,:focus-visible){color:var(--accent)}
+.trend-values>summary:focus-visible{color:var(--accent)}@media(hover:hover){.trend-values>summary:hover{color:var(--accent)}}
 .trend-table-scroll{max-width:100%;overflow:auto}
 .trend-table{width:100%;table-layout:fixed;border-collapse:collapse}
 .trend-table th:first-child{width:30%}
@@ -90,8 +90,8 @@
 .trend-table td{border-top:1px solid var(--line);min-width:0}
 .trend-table tbody th{border-top:1px solid var(--line)}
 @media(min-width:1400px){
-.analytics-grid{grid-template-columns:minmax(0,.8fr) minmax(0,1fr) minmax(0,1.5fr);align-items:stretch}
-.analytics-grid>.trend-metric{grid-column:auto}
+.analytics-grid{grid-template-columns:minmax(0,.8fr) minmax(0,1fr) minmax(0,1fr);align-items:stretch}
+.analytics-grid>.trend-metric{grid-column:1/-1}
 [data-ui="board"] .analytics-grid[data-visible-cards="2"]{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media(max-width:1100px){

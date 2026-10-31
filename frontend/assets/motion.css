@@ -5,6 +5,13 @@
 @keyframes board-backdrop{from{opacity:0}to{opacity:1}}
 @keyframes board-confirm{from{opacity:.5;scale:.85}to{opacity:1;scale:1}}
 @keyframes board-notice{from{opacity:0}to{opacity:1}}
+@keyframes board-fade{from{opacity:0}to{opacity:1}}
+@keyframes board-rise{from{opacity:0;translate:0 16px}to{opacity:1;translate:0 0}}
+@keyframes board-pop-in{from{opacity:0;scale:.55;rotate:-10deg}55%{opacity:1}to{opacity:1;scale:1;rotate:0deg}}
+@keyframes board-tip{from{opacity:0;translate:0 3px}to{opacity:1;translate:0 0}}
+@keyframes board-error{from{opacity:0;translate:0 -5px}to{opacity:1;translate:0 0}}
+@keyframes board-shake{0%,100%{translate:0 0}18%{translate:-6px 0}38%{translate:5px 0}58%{translate:-3px 0}78%{translate:2px 0}}
+@keyframes skeleton-sweep{from{translate:-100% 0}to{translate:100% 0}}
 @keyframes board-symbol-turn{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
 @keyframes board-symbol-lid{0%,100%{transform:none}40%,60%{transform:translateY(-.5px) rotate(-18deg)}82%{transform:rotate(-3deg)}}
 @keyframes board-symbol-scan{0%{opacity:0;transform:translateY(0)}18%{opacity:.9}78%{opacity:.9;transform:translateY(9px)}100%{opacity:0;transform:translateY(9px)}}
@@ -18,6 +25,8 @@
 @keyframes board-symbol-meridian{0%,100%{transform:none}45%,55%{transform:scaleX(.22)}}
 @keyframes board-symbol-quarter-turn{from{transform:rotate(0)}to{transform:rotate(90deg)}}
 /* Keep recognisable strokes visible throughout the sequence. */
+/* Box flaps hinge on their outer corners, hold open, then settle shut. */
+@keyframes board-symbol-flap{0%,100%{transform:none}34%,58%{transform:rotate(var(--symbol-angle,24deg))}80%{transform:rotate(calc(var(--symbol-angle,24deg) * -.1))}}
 @keyframes board-symbol-trace{0%,100%{opacity:1}42%{opacity:.6}74%{opacity:1}}
 @keyframes board-symbol-return{0%,100%{transform:none}44%{transform:rotate(-10deg)}76%{transform:rotate(-2deg)}}
 @keyframes board-symbol-check{0%,100%{transform:none}40%{transform:scale(.88)}72%{transform:scale(1.04)}}
@@ -46,12 +55,12 @@
 [data-ui="board"] .icon[data-symbol="file"]{--symbol-animation:board-symbol-tilt;--symbol-angle:-3deg}
 [data-ui="board"] .icon>.icon-eye-pupil{--symbol-animation:board-symbol-blink}
 [data-ui="board"] .icon:is([data-symbol="eyeOff"],[data-symbol="at"],[data-symbol="info"])>path:last-child,
-[data-ui="board"] .icon[data-symbol="calendar"]>path[pathLength],
 [data-ui="board"] .icon[data-symbol="return"]>path{--symbol-animation:board-symbol-return}
 [data-ui="board"] .icon[data-symbol="check"]>path{--symbol-animation:board-symbol-check}
 [data-ui="board"] .icon[data-symbol="paperclip"]>path{--symbol-animation:board-symbol-tilt;--symbol-angle:-5deg}
 [data-ui="board"] .icon[data-symbol="search"]>circle{--symbol-animation:board-symbol-search;transform-origin:10.5px 10.5px}
-[data-ui="board"] .icon[data-symbol="calendar"]>path:last-child{--symbol-delay:70ms}
+[data-ui="board"] .icon>.icon-calendar-days{--symbol-animation:board-symbol-tile;transform-box:fill-box;transform-origin:center}
+[data-ui="board"] .icon>.icon-calendar-days:last-child{--symbol-delay:70ms}
 [data-ui="board"] .icon:is([data-symbol="user"],[data-symbol="users"])>circle,[data-ui="board"] .icon>.icon-user-head{--symbol-animation:board-symbol-shift;--symbol-y:-.8px}
 [data-ui="board"] .icon>.icon-user-head{--symbol-delay:70ms}
 [data-ui="board"] .icon[data-symbol="globe"]>ellipse{--symbol-animation:board-symbol-meridian}
@@ -65,8 +74,8 @@
 [data-ui="board"] .icon[data-symbol="dashboard"]>rect:nth-child(2){--symbol-delay:35ms}
 [data-ui="board"] .icon[data-symbol="dashboard"]>rect:nth-child(3){--symbol-delay:70ms}
 [data-ui="board"] .icon[data-symbol="dashboard"]>rect:nth-child(4){--symbol-delay:105ms}
-[data-ui="board"] .icon>.icon-box-left{--symbol-animation:board-symbol-tilt;--symbol-angle:-6deg;transform-origin:12px 13px}
-[data-ui="board"] .icon>.icon-box-right{--symbol-animation:board-symbol-tilt;--symbol-angle:6deg;transform-origin:12px 13px}
+[data-ui="board"] .icon>.icon-box-left{--symbol-animation:board-symbol-flap;--symbol-angle:-26deg;--symbol-duration:var(--motion-symbol-detail);transform-origin:3.5px 8.25px}
+[data-ui="board"] .icon>.icon-box-right{--symbol-animation:board-symbol-flap;--symbol-angle:26deg;--symbol-duration:var(--motion-symbol-detail);transform-origin:20.5px 8.25px}
 [data-ui="board"] .icon>.icon-box-seam{--symbol-animation:board-symbol-trace}
 [data-ui="board"] .icon>.icon-transfer-arrow{--symbol-animation:board-symbol-shift;--symbol-y:-1.5px}
 [data-ui="board"] .icon[data-symbol="download"]>.icon-transfer-arrow{--symbol-y:1.5px}
@@ -97,11 +106,17 @@ html[data-motion="normal"] [data-ui="board"] dialog[open]::backdrop,html[data-mo
 html[data-motion="normal"] [data-ui="board"] :is(.header-menu[open]>.header-menu-panel,.currency-control[open] .currency-menu,.product-search-popover:not([hidden]),.mention-menu:not([hidden]),.record-menu-popup:not([hidden])){animation:board-menu var(--motion-enter) var(--motion-ease)}
 html[data-motion="normal"] [data-ui="board"] .chat-message-search:not([hidden]){animation:board-search-reveal var(--motion-enter) var(--motion-ease)}
 /* Press feedback does not move the pointer target or trigger layout. */
-html[data-motion="normal"] [data-ui="board"] .btn:active:not(:disabled){box-shadow:inset 0 2px 5px #0000001a;filter:brightness(.96)}
+html[data-motion="normal"] [data-ui="board"] .btn:active:not(:disabled){box-shadow:inset 0 2px 5px #0000001a,inset 0 0 0 999px #0000000a}
 /* Animate the artwork inside the fixed SVG viewport, never the click target. */
 html[data-motion="normal"] [data-ui="board"] :is(.btn,.icon-btn,.text-link,.record-menu-item):not(:disabled)>.icon,
 html[data-motion="normal"] [data-ui="board"] :is(.sidebar nav a>.icon,.nav-tool .icon,.kpi-icon,.kpi-link>small .icon,.workflow-symbol,.chat-channel-symbol){transition:opacity var(--motion-fast) ease,color var(--motion-fast) ease,background-color var(--motion-fast) ease}
 html[data-motion="normal"] [data-ui="board"] :is(.btn,.icon-btn):active:not(:disabled)>.icon{opacity:.7}
+/* Pressed icons dip slightly (scale is an independent property, so symbol keyframes and the click target stay untouched). */
+html[data-motion="normal"] [data-ui="board"] :is(.btn,.icon-btn,.text-link,.record-menu-item):not(:disabled)>.icon{transition-property:opacity,color,background-color,scale}
+html[data-motion="normal"] [data-ui="board"] :is(.btn,.icon-btn,.text-link,.record-menu-item):active:not(:disabled)>.icon{scale:.86}
+/* New unread messages: the counter pops once while the bell rings (see playIconSequence). */
+@keyframes board-badge-pop{0%{scale:.55;opacity:.4}58%{scale:1.2;opacity:1}100%{scale:1}}
+html[data-motion="normal"] [data-ui="board"] .inbox-count.count-pop{animation:board-badge-pop var(--motion-feedback) var(--motion-ease)}
 html[data-motion="normal"] [data-ui="board"] .kpi-link{transition:border-color var(--motion-fast) ease,box-shadow var(--motion-enter) ease}
 html[data-motion="normal"] [data-ui="board"] .icon-btn[data-copy-state="copied"]>.icon{animation:board-confirm 220ms var(--motion-ease)}
 html[data-motion="normal"] [data-ui="board"] .toast-region{transition:opacity var(--motion-enter) ease,translate var(--motion-enter) var(--motion-ease)}
@@ -117,7 +132,29 @@ html[data-motion="normal"] [data-ui="board"] .currency-caret{transition:transfor
 html[data-motion="normal"] [data-ui="board"] .switch-control{transition:background-color var(--motion-fast),border-color var(--motion-fast),box-shadow var(--motion-fast)}
 html[data-motion="normal"] [data-ui="board"] .switch-thumb{transition:translate var(--motion-switch) var(--motion-spring),background-color var(--motion-fast)}
 html[data-motion="normal"] [data-ui="board"] .product-search-option{transition:background-color var(--motion-fast)}
-html[data-motion="normal"] [data-ui="board"] .skeleton-line{animation:skeleton-breathe 2.2s ease-in-out .2s infinite}
+/* Loading placeholders: a soft band of light sweeps across each line (compositor only), the lines of one card in a wave. */
+html[data-motion="normal"] [data-ui="board"] .skeleton-line{position:relative;overflow:hidden}
+html[data-motion="normal"] [data-ui="board"] .skeleton-line::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--muted) 18%,transparent),transparent);animation:skeleton-sweep 1.6s ease-in-out infinite}
+html[data-motion="normal"] [data-ui="board"] .skeleton-line:nth-child(2)::after{animation-delay:.14s}
+html[data-motion="normal"] [data-ui="board"] .skeleton-line:nth-child(3)::after{animation-delay:.28s}
+html[data-motion="normal"] [data-ui="board"] .skeleton-line:nth-child(n+4)::after{animation-delay:.42s}
+/* Tooltips, error messages and the sign-in screen arrive with a short, soft settle instead of appearing at once. */
+html[data-motion="normal"] [data-ui="board"] .action-tooltip:not([hidden]){animation:board-tip var(--motion-fast) var(--motion-ease)}
+html[data-motion="normal"] [data-ui="board"] p.form-error:not([hidden]){animation:board-error var(--motion-enter) var(--motion-ease)}
+@media(prefers-reduced-motion:no-preference){
+ body.auth-screen>.auth-page>.loading{animation:board-fade 300ms ease-out 140ms backwards}
+ body.auth-screen[data-page="login"] .auth-hero .brand-mark{animation:board-pop-in 760ms var(--motion-spring) 60ms backwards}
+ body.auth-screen[data-page="login"] .auth-hero .auth-brand>span:not(.brand-mark){animation:board-rise 640ms var(--motion-ease) 150ms backwards}
+ body.auth-screen[data-page="login"] .auth-hero .auth-tagline{animation:board-rise 640ms var(--motion-ease) 230ms backwards}
+ body.auth-screen[data-page="login"] .auth-hero .auth-points li{animation:board-rise 600ms var(--motion-ease) 310ms backwards}
+ body.auth-screen[data-page="login"] .auth-hero .auth-points li:nth-child(2){animation-delay:390ms}
+ body.auth-screen[data-page="login"] .auth-hero .auth-points li:nth-child(3){animation-delay:470ms}
+ body.auth-screen[data-page="login"] .auth-card{animation:board-rise 680ms var(--motion-ease) 160ms backwards}
+ body.auth-screen[data-page="login"] .auth-caption{animation:board-fade 500ms ease-out 560ms backwards}
+ /* A failed attempt shakes the form once (the message itself arrives as a notice card, which fades in like it does in the app). */
+ body.auth-screen[data-page="login"] .auth-card:has(p.form-error:not([hidden])) form{animation:board-shake 420ms cubic-bezier(.36,.07,.19,.97)}
+ body.auth-screen[data-page="login"] .notice-card:not(.notice-leaving){animation:board-notice var(--motion-enter) var(--motion-ease)}
+}
 html[data-motion="normal"] [data-ui="board"] .table-preferences-menu{animation:board-menu var(--motion-fast) var(--motion-ease)}
 html[data-motion="normal"] [data-ui="board"] .density-options button{transition:background-color var(--motion-fast) ease,border-color var(--motion-fast) ease}
 html[data-motion="normal"] [data-ui="board"] .month-bar{transition:opacity var(--motion-fast)}

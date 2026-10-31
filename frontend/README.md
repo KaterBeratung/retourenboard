@@ -40,3 +40,7 @@ Darstellungsverwaltung mit Firmenname, Logo und Listenoptionen wurde entfernt.
 Theme und reduzierte Bewegung gehören zum persönlichen Konto; die
 Systemvorgabe für reduzierte Bewegung wird ebenfalls berücksichtigt.
 Dateianhänge benötigen eine Anmeldung und die entsprechenden Kontorechte.
+
+## Escaping in Markup
+
+`html`…`` setzt eingesetzte Werte unverändert ein. Nutzerdaten (Namen, Notizen, Dateinamen, Seriennummern …) werden deshalb immer mit `h(…)` ausgegeben; Beschriftungen mit `t(…)`. `tests/html-escaping.test.js` prüft das automatisch: Stellen, die nicht als sicher nachweisbar sind, stehen in `tests/fixtures/html-interpolation-baseline.json`; neue Stellen sowie Muster wie `document.write`, `eval`, Inline-Ereignisattribute und unquotierte Attribute lassen den Test fehlschlagen. Ist ein neuer Wert nachweislich kein Text (ID, Zähler), die Baseline mit `UPDATE_HTML_BASELINE=1 node --test tests/html-escaping.test.js` aktualisieren und die Änderung begründen.

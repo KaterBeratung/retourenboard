@@ -1,6 +1,7 @@
 import {html,locale,setText,t,apiError,LocalizedText,addTranslations} from './i18n.js';
 import {h,icon,openDialog} from './forms.js';
 import {captureAuthContext} from './auth-context.js';
+import {playIconSequence} from './icon-motion.js';
 
 addTranslations({'Ein Kommentar zu einem Geräteauftrag wartet auf dich.':'A comment on a device order is waiting for you.'});
 
@@ -24,6 +25,15 @@ export function notificationCopy(item){
 }
 
 const notificationStates=new WeakMap<HTMLButtonElement,{count:number;current:()=>boolean}>();
+// New unread items: ring the bell once and let the counter pop; silent without normal motion.
+export function announceUnread(button:HTMLElement,count:HTMLElement){
+  if(document.documentElement.dataset.motion!=='normal')return;
+  playIconSequence(button.querySelector('svg.icon'));
+  count.classList.remove('count-pop');void count.offsetWidth;count.classList.add('count-pop');
+  const done=()=>{clearTimeout(timer);count.classList.remove('count-pop');};
+  const timer=setTimeout(done,500);
+  count.addEventListener('animationend',done,{once:true});
+}
 export async function refreshNotifications(ctx){
   const existing=document.querySelector<HTMLButtonElement>('#inbox-button');
   if(!ctx.unlocked){if(existing){existing.hidden=true;notificationStates.delete(existing);}return;}
@@ -32,10 +42,12 @@ export async function refreshNotifications(ctx){
   const previous=notificationStates.get(button),state={count:previous?.current()?previous.count:0,current:captureAuthContext(ctx)};
   notificationStates.set(button,state);
   const render=(unread:number)=>{
+    const increased=unread>state.count;
     state.count=unread;
     const count=button.querySelector<HTMLElement>('.inbox-count'),label=button.querySelector<HTMLElement>('.inbox-button-label'),text=String(unread>99?'99+':unread);
     if(count.textContent!==text)setText(count,text);
     if(count.hidden!==(unread===0))count.hidden=unread===0;
+    if(increased)announceUnread(button,count);
     if(label.textContent!==String(t('Nachrichten')))setText(label,t('Nachrichten'));
     const description=String(t`Nachrichten · ${unread} ungelesen`);if(button.getAttribute('aria-label')!==description)button.setAttribute('aria-label',description);
   };

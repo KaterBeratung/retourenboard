@@ -2,6 +2,22 @@ const controls='button,a,summary,[role="button"],[role="menuitem"],[role="tab"],
 const unavailable=':disabled,[aria-disabled="true"],[data-copy-state="copied"]';
 const bindings=new WeakSet<Document>();
 
+// One-shot attention cue for programmatic events (e.g. a bell for new messages).
+// Uses the same CSS sequence as hover and stays silent unless motion is enabled.
+export function playIconSequence(icon:Element|null|undefined){
+ const svg=icon as SVGSVGElement|null|undefined;
+ if(!svg?.ownerDocument||svg.ownerDocument.documentElement.dataset.motion!=='normal'||!svg.closest('[data-ui="board"]')||svg.closest(unavailable)||svg.hasAttribute('data-icon-motion')||!svg.getAnimations)return;
+ svg.setAttribute('data-icon-motion','active');
+ const effects=svg.getAnimations({subtree:true}).filter(effect=>String((effect as CSSAnimation).animationName??'').startsWith('board-symbol-'));
+ if(!effects.length){svg.removeAttribute('data-icon-motion');return;}
+ // The timer is a safety net: if a browser never settles `finished` (for example while
+ // the page is not being painted), the attribute must not stay set and block later cues.
+ const end=Math.max(0,...effects.map(effect=>Number(effect.effect?.getComputedTiming?.().endTime)||0));
+ const release=()=>{clearTimeout(timer);svg.removeAttribute('data-icon-motion');};
+ const timer=setTimeout(release,(end||520)+150);
+ void Promise.allSettled(effects.map(effect=>effect.finished)).then(release);
+}
+
 // Keep each short CSS sequence alive after pointer exit. Neither the SVG's
 // viewport nor its control moves, and nested menus own their individual icons.
 export function bindIconMotion(root:Document){

@@ -8,7 +8,7 @@ export function bindThemeToggle(page:Document,system:MediaQueryList,storage:()=>
  function apply(){
   const theme=preference??(system.matches?'dark':'light');
   page.documentElement.dataset.theme=theme;page.documentElement.style.colorScheme=theme;
-  page.querySelector('meta[name="theme-color"]')?.setAttribute('content',theme==='dark'?'#080b10':'#edf1f5');
+  page.querySelector('meta[name="theme-color"]')?.setAttribute('content',theme==='dark'?'#0a131d':'#edf2f5');
   if(button){button.setAttribute('aria-pressed',String(theme==='dark'));button.hidden=false;}
  }
  button?.addEventListener('click',()=>{

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="{{lang}}" data-error-status="{{status}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+{{refresh}}
+<title>{{title}} · retourenboard.</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/theme.css">
+<link rel="stylesheet" href="/error.css">
+<script src="/theme.js"></script>
+</head>
+<body class="error-page">
+<main class="error-card" aria-labelledby="error-title">
+<a class="error-brand" href="/"><img src="/favicon.svg" alt="" width="40" height="40"><span>retourenboard<span class="brand-dot">.</span></span></a>
+<p class="error-code" aria-hidden="true">{{status}}</p>
+<h1 id="error-title"><span lang="de">{{titleDe}}</span><span lang="en">{{titleEn}}</span></h1>
+<p class="error-text"><span lang="de">{{textDe}}</span><span lang="en">{{textEn}}</span></p>
+<div class="error-actions">{{actions}}</div>
+</main>
+</body>
+</html>

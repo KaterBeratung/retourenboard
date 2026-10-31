@@ -4,10 +4,10 @@ import {switchField} from './switches.js';
 import {captureAuthContext} from './auth-context.js';
 
 const groups={
- kpis:{label:'Kennzahlen',symbol:'dashboard',cards:[['open','Offene Retouren'],['checking','In Prüfung'],['closed','Abgeschlossen'],['products','Aktive Produkte']]},
+ kpis:{label:'Kennzahlen',symbol:'dashboard',cards:[['open','Offene Retouren'],['overdue','Überfällig'],['value','Offener Warenwert'],['closed','Abgeschlossen (30 Tage)'],['products','Aktive Produkte']]},
  queues:{label:'Dein nächster Schritt',symbol:'arrow',cards:[['mine','Meine offenen Retouren'],['today','Heute fällig'],['unassigned','Nicht zugewiesen']]},
  dashboard:{label:'Bestand und Prozess',symbol:'box',cards:[['recent','Aktuelle Retouren'],['workflow','Dein Retourenprozess']]},
- analytics:{label:'Retouren-Kennzahlen',symbol:'clock',cards:[['completion','Durchschnittliche Bearbeitungszeit'],['reasons','Häufigste Retourengründe'],['trend','Letzte sechs Monate']]}
+ analytics:{label:'Retouren-Kennzahlen',symbol:'clock',cards:[['completion','Durchschnittliche Bearbeitungszeit'],['reasons','Häufigste Retourengründe'],['suppliers','Offene Retouren nach Lieferant'],['trend','Letzte sechs Monate']]}
 };
 type Group=keyof typeof groups;
 export type OverviewPreferences={hidden:string[];order:Record<Group,string[]>;compactEmpty:boolean};

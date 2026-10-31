@@ -2,14 +2,15 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {sourceModule} from './helpers/source-module.js';
 const actions=await sourceModule("export * from './frontend/src/quick-actions.ts'; export * from './frontend/src/record-action-menu.ts'; export {setLanguage} from './frontend/src/i18n.js'; import {addTranslations} from './frontend/src/i18n.js'; import {english} from './frontend/src/i18n-catalog.js'; addTranslations(english);").catch(()=>({}));
-test('return row actions are directly accessible by keyboard without opening a menu',()=>{
+test('return row actions live in one menu whose entries carry visible names and escaped labels',()=>{
  assert.equal(typeof actions.returnQuickActions,'function');
  const markup=String(actions.returnQuickActions({can:()=>true},{id:9,returnNumber:'<RET-9>',serialNumber:'SN-9'})).replace(/<!--.*?-->/g,'');
  for(const hook of ['data-quick-status="9"','data-copy-serial="9"','data-copy-return="9"','data-disposal-return="9"','data-detail="returns"'])assert.ok(markup.includes(hook),hook);
- assert.doesNotMatch(markup,/role="menuitem"|tabindex="-1"|aria-haspopup="menu"|<RET-9>/);
- for(const button of markup.match(/<button\b[^>]*>/g))assert.match(button,/aria-label="[^"]+"/);
+ assert.match(markup,/aria-haspopup="menu"/);assert.equal((markup.match(/role="menuitem"/g)||[]).length,5);
+ assert.doesNotMatch(markup,/<RET-9>/);assert.match(markup,/&lt;RET-9&gt;/);
+ for(const button of markup.match(/<button\b[^>]*>[\s\S]*?<\/button>/g))assert.ok(/aria-label="[^"]+"/.test(button)||/<span>[^<]+<\/span>/.test(button),'every control has an accessible name');
 });
-test('direct disposal actions require both permissions and an open return',()=>{
+test('disposal entries require both permissions and an open return',()=>{
  const row={id:9,returnNumber:'RET-9',serialNumber:'SN-9'};
  for(const permissions of [[],['disposalsCreate'],['disposalsRead']]){
   const markup=String(actions.returnQuickActions({can:key=>permissions.includes(key)},row));
@@ -19,7 +20,7 @@ test('direct disposal actions require both permissions and an open return',()=>{
  assert.doesNotMatch(String(actions.returnQuickActions({can:()=>true},{...row,isClosed:true})),/data-disposal-return/);
  actions.setLanguage('en');try{
   const markup=String(actions.returnQuickActions({can:()=>true},row));
-  assert.match(markup,/aria-label="Copy serial number"/);assert.match(markup,/aria-label="Copy return number"/);
+  assert.match(markup,/Copy serial number/);assert.match(markup,/Copy return number/);
  }finally{actions.setLanguage('de');}
 });
 test('copying a return number keeps its menu label and accessible name when immediately reopened',async t=>{

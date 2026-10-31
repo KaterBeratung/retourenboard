@@ -25,8 +25,8 @@ test('website theme follows the system until the visitor selects a theme',()=>{
 });
 
 test('saved website theme takes precedence over the system and updates browser chrome',()=>{
- const f=fixture({saved:'dark'});assert.equal(f.page.documentElement.dataset.theme,'dark');assert.equal(f.meta.content,'#080b10');
- f.events.click();assert.equal(f.page.documentElement.dataset.theme,'light');assert.equal(f.meta.content,'#edf1f5');
+ const f=fixture({saved:'dark'});assert.equal(f.page.documentElement.dataset.theme,'dark');assert.equal(f.meta.content,'#0a131d');
+ f.events.click();assert.equal(f.page.documentElement.dataset.theme,'light');assert.equal(f.meta.content,'#edf2f5');
 });
 
 test('blocked storage and unsupported saved themes leave the website theme switch usable',()=>{
@@ -36,6 +36,6 @@ test('blocked storage and unsupported saved themes leave the website theme switc
 });
 
 test('legal pages apply saved and system themes even without a visible theme toggle',()=>{
- const saved=fixture({saved:'dark',control:false});assert.equal(saved.page.documentElement.dataset.theme,'dark');assert.equal(saved.meta.content,'#080b10');
+ const saved=fixture({saved:'dark',control:false});assert.equal(saved.page.documentElement.dataset.theme,'dark');assert.equal(saved.meta.content,'#0a131d');
  const system=fixture({control:false});system.query.matches=true;system.events.system();assert.equal(system.page.documentElement.dataset.theme,'dark');
 });

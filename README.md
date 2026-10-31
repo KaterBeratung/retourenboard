@@ -1,11 +1,7 @@
 
-<img width="2048" height="768" alt="retourenboard-banner" src="https://github.com/user-attachments/assets/47bf5c45-4f0d-4e62-aaaf-6fbe5590844b" />
-
-
-
 # retourenboard.
 
-**Ein Ort für alle Rückläufer.** · Projektstand 4.0.72
+**Ein Ort für alle Rückläufer.** · Projektstand 4.0.93
 
 Die vollständigen README-Dateien und ihre Beispielbilder liegen gemeinsam unter [`docs/readme/`](docs/readme/README.md).
 

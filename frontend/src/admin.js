@@ -4,6 +4,7 @@ import {masterLabel} from './inventory-display.js';
 import {switchField} from './switches.js';
 import { MASTER_KINDS } from '../shared/model.js';
 import { h, icon, openDialog, trackFormSave } from './forms.js';
+import { statusTabLayout } from './ui.js';
 import { renderUsers, bindUsers } from './accounts.js';
 import { renderSettings, bindSettings } from './admin-settings.js';
 import {renderRules,bindRules} from './admin-rules.js';
@@ -17,7 +18,6 @@ import {renderDataTools,bindDataTools} from './navigation-tools.js';
 import {openImport,openExport} from './import.js';
 let kind = 'suppliers';
 const requiredLists = ['reasons', 'conditions', 'statuses', 'resolutions'];
-const masterIcons = { suppliers: 'box', manufacturers: 'settings', categories: 'dashboard', reasons: 'info', conditions: 'eye', statuses: 'refresh', resolutions: 'check' };
 export function adminSection(ctx){const [page,query='']=location.hash.slice(1).split('?');const requested=page==='admin'?new URLSearchParams(query).get('section'):page;return requested||['masterdata','rules','csv-profiles','audit','diagnostics','data-tools'].find(section=>ctx.canAdminSection(section))||'masterdata';}
 export function renderAdmin(ctx) {
     const section=adminSection(ctx);
@@ -40,7 +40,7 @@ export function renderAdmin(ctx) {
     const entries = kind === 'users' ? [] : ctx.masterdata[kind] ?? [];
     const header = html`<div class="page-heading"><div><div class="eyebrow">VERWALTUNG</div><h1>Stammdaten<span class="heading-dot">.</span></h1><p>Feste Werte für Produkte und Retouren verwalten.</p></div><div class="heading-actions"><a class="btn secondary" href="/#products">${icon('box')}Produkte</a><a class="btn secondary" href="/#returns">${icon('return')}Retouren</a></div></div>
     <label class="field master-kind-picker"><span>Bereich</span><select data-master-picker aria-label="Verwaltungsbereich auswählen">${Object.entries(MASTER_KINDS).map(([key,label])=>html`<option value="${key}"${kind===key?' selected':''}>${h(t(label))} · ${(ctx.masterdata[key]??[]).filter(item=>item.active).length}</option>`).join('')}</select></label>
-    <div class="admin-tabs" role="group" aria-label="Verwaltungsbereich auswählen">${Object.entries(MASTER_KINDS).map(([key, label]) => html`<button type="button" data-master-kind="${key}" class="${kind === key ? 'selected' : ''}" aria-pressed="${kind === key}"><span class="master-kind-icon" aria-hidden="true">${icon(masterIcons[key])}</span><span class="master-kind-label">${t(label)}</span><span class="master-kind-count">${(ctx.masterdata[key] ?? []).filter(x => x.active).length}</span></button>`).join('')}</div>`;
+    <div class="admin-tabs status-tabs ${statusTabLayout(Object.keys(MASTER_KINDS).length)}" role="group" aria-label="Verwaltungsbereich auswählen">${Object.entries(MASTER_KINDS).map(([key, label]) => html`<button type="button" data-master-kind="${key}" class="${kind === key ? 'selected' : ''}" aria-pressed="${kind === key}">${t(label)}<span class="master-kind-count">${(ctx.masterdata[key] ?? []).filter(x => x.active).length}</span></button>`).join('')}</div>`;
     if (kind === 'users')
         return html`<div class="page-heading"><div><div class="eyebrow">ADMINISTRATION</div><h1>Benutzerkonten<span class="heading-dot">.</span></h1><p>Persönliche Zugänge und Berechtigungen verwalten.</p></div><a class="btn secondary" href="/">Zum Arbeitsbereich</a></div>` + renderUsers();
     return html`${header}

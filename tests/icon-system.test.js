@@ -22,3 +22,33 @@ test('attachment and row-menu controls use shared icons while retaining their ac
  assert.match(files,/data-symbol="paperclip"/);assert.match(files,/data-chat-file-pick/);assert.match(files,/Dateien anhängen/);
  assert.match(menu,/data-symbol="more"/);assert.match(menu,/aria-haspopup="menu"/);assert.match(menu,/aria-expanded="false"/);assert.match(menu,/Gerät &lt;123&gt;/);
 });
+
+test('calendar draws a date grid of dots instead of two face-like dashes',()=>{
+ const markup=String(ui.icon('calendar'));
+ assert.equal((markup.match(/class="icon-calendar-days"/g)||[]).length,2);
+ assert.doesNotMatch(markup,/M8 14\.5h1\.5|M14\.5 14\.5H16/);
+});
+
+test('copy draws only the visible edge of the back sheet so no outlines cross, and keeps its animation hooks',()=>{
+ const markup=String(ui.icon('copy'));
+ assert.match(markup,/<path class="icon-copy-back" d="[^"]+"\/>/);
+ assert.match(markup,/<rect class="icon-copy-front icon-surface"/);
+ assert.equal((markup.match(/<rect\b/g)||[]).length,1,'only the front sheet is a closed shape');
+ for(const name of ['filter','close'])assert.match(String(ui.icon(name)),new RegExp(`data-symbol="${name}"`));
+ assert.match(String(ui.icon('filter')),/a\.75\.75/,'filter corners are rounded like the other symbols');
+});
+
+test('box keeps a calm top face: seam lines only, no tape line across the lid, lighter lid tone',()=>{
+ const markup=String(ui.icon('box'));
+ assert.match(markup,/class="icon-box-seam" pathLength="1" d="m3\.5 8\.25 8\.5 4\.75 8\.5-4\.75M12 13v8\.75"/);
+ assert.doesNotMatch(markup,/M8 5\.75/);
+ assert.equal((markup.match(/icon-facet/g)||[]).length,2);
+});
+
+test('box lid opens: both flaps hinge on their outer corners and swing apart',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const css=await readFile(new URL('../frontend/assets/motion.css',import.meta.url),'utf8');
+ assert.match(css,/@keyframes board-symbol-flap\{/);
+ assert.match(css,/\.icon-box-left\{--symbol-animation:board-symbol-flap;--symbol-angle:-26deg;[^}]*transform-origin:3\.5px 8\.25px\}/);
+ assert.match(css,/\.icon-box-right\{--symbol-animation:board-symbol-flap;--symbol-angle:26deg;[^}]*transform-origin:20\.5px 8\.25px\}/);
+});

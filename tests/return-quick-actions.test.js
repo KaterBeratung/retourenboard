@@ -12,15 +12,6 @@ test('product search and shortcut modules are served only after authentication',
         assert.match(response.headers.get('cache-control'), /private.*no-store/);
     }
 });
-test('return quick actions expose status changes only to permitted accounts', () => {
-    assert.equal(typeof actions.returnQuickActions, 'function');
-    const row = { id: 9, returnNumber: 'RET-009' };
-    assert.match(String(actions.returnQuickActions({ can: () => true }, row)), /data-quick-status="9"/);
-    const readOnly = String(actions.returnQuickActions({ can: () => false }, row));
-    assert.doesNotMatch(readOnly, /data-quick-status/);
-    assert.match(readOnly, /data-copy-return="9"/);
-    assert.match(readOnly, /data-detail="returns"/);
-});
 test('quick action handlers recheck permissions and resolve the current row before a status change', async () => {
     assert.equal(typeof actions.bindQuickActions, 'function');
     const status = { dataset: { quickStatus: '9' } }, copy = { dataset: { copyReturn: '9' } }, create = { dataset: { returnProduct: '3' } };
@@ -72,10 +63,10 @@ test('a product shortcut retains its supplier only while the supplier is active'
     await create.onclick();
     assert.deepEqual(seeds[1], { productId: 3, supplierId: 21 });
 });
-test('serial number shortcut is available to readers and disabled without a serial number', () => {
+test('serial number entry is available to readers and disabled without a serial number', () => {
     const markup = String(actions.returnQuickActions({ can: () => false }, { id: 9, returnNumber: 'RET-009', serialNumber: 'SN-ABC-9' }));
     assert.match(markup, /data-copy-serial="9"/);
-    assert.match(markup, /aria-label="Seriennummer kopieren"/);
+    assert.match(markup, /<span>Seriennummer kopieren<\/span>/);
     assert.doesNotMatch(markup, /data-copy-serial="9"[^>]*disabled/);
     const empty = String(actions.returnQuickActions({ can: () => false }, { id: 10, returnNumber: 'RET-010', serialNumber: '' }));
     assert.match(empty, /data-copy-serial="10"[^>]*disabled/);
@@ -102,5 +93,35 @@ test('serial copy resolves the latest record, copies its serial rather than its 
     current = undefined;
     await serial.onclick();
     assert.deepEqual(copied, ['SN-CURRENT']);
+    assert.equal(toasts.length, 1);
+});
+test('return actions sit behind one menu in the table and on phone cards, with permission rules per entry', () => {
+    assert.equal(typeof actions.returnQuickActions, 'function');
+    const row = { id: 9, returnNumber: 'RET-<009>', serialNumber: 'SN-1' };
+    const full = String(actions.returnQuickActions({ can: () => true }, row));
+    assert.match(full, /data-record-menu-trigger/);
+    assert.match(full, /aria-label="Weitere Aktionen: RET-&lt;009&gt;"/);
+    assert.doesNotMatch(full, /class="icon-btn" data-(quick-status|copy-serial|copy-return|disposal-return|detail)/, 'no loose icon buttons next to the menu');
+    for (const attribute of ['data-quick-status="9"', 'data-copy-serial="9"', 'data-copy-return="9"', 'data-disposal-return="9"', 'data-detail="returns" data-id="9"'])
+        assert.ok(full.includes(attribute), attribute);
+    assert.equal((full.match(/role="menuitem"/g) || []).length, 5);
+    const readOnly = String(actions.returnQuickActions({ can: () => false }, { ...row, serialNumber: '' }));
+    assert.doesNotMatch(readOnly, /data-quick-status|data-disposal-return/);
+    assert.match(readOnly, /data-copy-return="9"/);
+    assert.match(readOnly, /data-copy-serial="9" disabled/);
+    assert.match(readOnly, /data-detail="returns"/);
+    const closed = String(actions.returnQuickActions({ can: key => key !== 'returnsEdit' }, { ...row, isClosed: true }));
+    assert.doesNotMatch(closed, /data-quick-status|data-disposal-return/, 'closed returns need edit rights to reopen and cannot start a disposal');
+});
+test('copying a serial number from a menu item does not swap the menu item icon', async () => {
+    const serial = { dataset: { copySerial: '9' }, getAttribute: name => name === 'role' ? 'menuitem' : null };
+    const root = { querySelectorAll: s => s === '[data-copy-serial]' ? [serial] : [] };
+    let copied = '';
+    globalThis.navigator ??= {};
+    Object.defineProperty(globalThis, 'navigator', { configurable: true, value: { clipboard: { writeText: async value => { copied = value; } } } });
+    const toasts = [];
+    actions.bindQuickActions({ can: () => true, ensureUnlocked: fn => fn(), products: [], toast: message => toasts.push(String(message)) }, root, () => [{ id: 9, serialNumber: 'SN-9' }], { status() { }, create() { } });
+    await serial.onclick();
+    assert.equal(copied, 'SN-9');
     assert.equal(toasts.length, 1);
 });

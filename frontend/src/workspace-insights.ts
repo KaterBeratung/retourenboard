@@ -14,7 +14,8 @@ addTranslations({
  'Abschlusszeiten ohne verlässliches Datum sind nicht enthalten.':'Completions without a reliable date are excluded.',
  'Ältere Abschlüsse ohne belegten Zeitpunkt':'Older completions without a documented time',
  'Anteil aller Retouren':'Share of all returns','Werte als Tabelle':'View data table',
- 'Keine Retouren in diesem Zeitraum.':'No returns in this period.'
+ 'Keine Retouren in diesem Zeitraum.':'No returns in this period.',
+ 'Offene Retouren nach Lieferant':'Open returns by supplier','Anteil aller offenen Retouren':'Share of all open returns','Keine offenen Retouren.':'No open returns.','Ohne Lieferant':'No supplier'
 });
 
 type CalendarOptions={now?:number;timezone?:string};
@@ -101,13 +102,44 @@ function renderReasonChart(ctx:any,data:Analytics){
   return html`<li aria-label="${h(label)}: ${formatNumber(reason.count)} (${percentage})"><div class="reason-label"><span>${h(label)}</span><strong>${formatNumber(reason.count)}<small>${percentage}</small></strong></div><svg class="reason-track" viewBox="0 0 100 7" preserveAspectRatio="none" aria-hidden="true" focusable="false"><rect class="reason-track-fill" width="100" height="7" rx="3.5"/><rect class="reason-bar" width="${share*100}" height="7" rx="3.5"/></svg></li>`;
  }).join('')}</ol>`;
 }
+// Figures for the overview strip. Everything derives from the rows already loaded; nothing is requested again.
+export function overviewFigures(rows:any[],products:any[]=[],options:CalendarOptions={}){
+ const now=options.now??Date.now(),today=workspaceCalendarDay(now,options.timezone),day=86400000,cutoff=now-30*day;
+ const open=rows.filter(row=>!row.isClosed),overdue=open.filter(row=>row.overdue===true);
+ const todayMs=Date.parse(today+'T12:00:00Z');
+ let oldestOverdueDays=0;
+ for(const row of overdue){const due=calendarDate(row.dueDate);if(!due)continue;oldestOverdueDays=Math.max(oldestOverdueDays,Math.round((todayMs-Date.parse(due+'T12:00:00Z'))/day));}
+ const within=(value:unknown)=>{const time=timestamp(value);return time!==null&&time>=cutoff&&time<=now;};
+ const suppliers=new Map<string,{name:string;count:number}>();
+ for(const row of open){
+  const name=typeof row.supplier==='string'?row.supplier.trim():'',key=Number.isSafeInteger(row.supplierId)&&row.supplierId>0?'id:'+row.supplierId:'name:'+name,entry=suppliers.get(key);
+  if(entry)entry.count++;else suppliers.set(key,{name,count:1});
+ }
+ return {
+  open:open.length,overdue:overdue.length,oldestOverdueDays,
+  openValueCents:open.reduce((sum,row)=>sum+(Number(row.quantity)||0)*(Number(row.priceCents)||0),0),
+  closed30:rows.filter(row=>row.isClosed&&within(row.completedAt)).length,
+  created30:rows.filter(row=>within(row.createdAt)).length,
+  activeProducts:products.filter(product=>product.active).length,
+  suppliers:[...suppliers.values()].sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name)).slice(0,5)
+ };
+}
+function renderSupplierChart(figures:ReturnType<typeof overviewFigures>){
+ if(!figures.suppliers.length)return html`<p class="analytics-note">Keine offenen Retouren.</p>`;
+ return html`<p class="analytics-note reason-note">Anteil aller offenen Retouren</p><ol class="reason-ranking">${figures.suppliers.map(entry=>{
+  const label=entry.name||t('Ohne Lieferant'),share=entry.count/figures.open,percentage=formatNumber(share,{style:'percent',maximumFractionDigits:1});
+  return html`<li aria-label="${h(label)}: ${formatNumber(entry.count)} (${percentage})"><div class="reason-label"><span>${h(label)}</span><strong>${formatNumber(entry.count)}<small>${percentage}</small></strong></div><svg class="reason-track" viewBox="0 0 100 7" preserveAspectRatio="none" aria-hidden="true" focusable="false"><rect class="reason-track-fill" width="100" height="7" rx="3.5"/><rect class="reason-bar" width="${share*100}" height="7" rx="3.5"/></svg></li>`;
+ }).join('')}</ol>`;
+}
+
 export function renderWorkspaceAnalytics(ctx:any){
- const data=workspaceAnalytics(ctx.returns??[],options(ctx));
+ const data=workspaceAnalytics(ctx.returns??[],options(ctx)),figures=overviewFigures(ctx.returns??[],ctx.products??[],options(ctx));
  return html`<section class="workspace-analytics" data-overview-section aria-labelledby="workspace-analytics-title">
   <div class="insights-heading"><div><h2 id="workspace-analytics-title">Retouren-Kennzahlen</h2><p>Bearbeitungszeit, Gründe und Entwicklung im Überblick.</p></div></div>
   <div class="analytics-grid" data-overview-group="analytics">
    <section class="panel completion-metric" data-overview-card="completion" data-overview-empty="${data.averageCompletionDays===null}"><div class="analytics-card-heading"><span class="analytics-symbol" aria-hidden="true">${icon('clock')}</span><h3>Durchschnittliche Bearbeitungszeit</h3></div><p class="completion-value">${data.averageCompletionDays===null?'—':formatNumber(data.averageCompletionDays,{maximumFractionDigits:1})}${data.averageCompletionDays!==null?html` <small>Tage</small>`:''}</p><p class="analytics-note completion-count">${data.durationCount?html`${t('Belegte Abschlüsse')}: ${formatNumber(data.durationCount)}`:t('Noch kein belegter Abschluss')}</p><div class="completion-notes"><p class="analytics-note">Abschlusszeiten ohne verlässliches Datum sind nicht enthalten.</p>${data.closedWithoutCompletion?html`<small class="analytics-note">${t('Ältere Abschlüsse ohne belegten Zeitpunkt')}: ${formatNumber(data.closedWithoutCompletion)}</small>`:''}</div></section>
    <section class="panel reason-metric" data-overview-card="reasons" data-overview-empty="${!data.reasons.length}"><h3>Häufigste Retourengründe</h3>${renderReasonChart(ctx,data)}</section>
+   <section class="panel supplier-metric" data-overview-card="suppliers" data-overview-empty="${!figures.suppliers.length}"><h3>Offene Retouren nach Lieferant</h3>${renderSupplierChart(figures)}</section>
    <section class="panel trend-metric" data-overview-card="trend" data-overview-empty="${!data.months.some(month=>month.created||month.completed)}"><div class="trend-heading"><h3>Letzte sechs Monate</h3><div class="trend-legend"><span><i class="created-key" aria-hidden="true"></i>Erfasst</span><span><i class="completed-key" aria-hidden="true"></i>Abgeschlossen</span></div></div>${renderMonthlyChart(data)}</section>
   </div>
  </section>`;

@@ -1,0 +1,46 @@
+# Geänderte Dateien: Kommentare und Kundenstatus
+
+Der Änderungsauftrag betrifft folgende Quellen, Tests und Dokumente. Generierte Dateien unter `dist/` wurden aus den Quellen gebaut.
+
+- `backend/src/server/app.js`
+- `backend/src/server/backup-restore.ts`
+- `backend/src/server/backups.ts`
+- `backend/src/server/collaboration-routes.ts`
+- `backend/src/server/collaboration.ts`
+- `backend/src/server/customer-status-routes.ts`
+- `backend/src/server/customer-status.ts`
+- `backend/src/server/database/communication-schema.ts`
+- `backend/src/server/database/data-transfer.ts`
+- `backend/src/server/database/migrations.ts`
+- `backend/src/server/database/schema.ts`
+- `backend/src/server/database/validate-data.ts`
+- `backend/src/server/server-log.ts`
+- `backend/src/shared/permissions.ts`
+- `deploy/compiled-runtime-files.txt`
+- `deploy/runtime-files.txt`
+- `docs/customer-status.md`
+- `docs/record-communication-2026-10-28-files.md`
+- `docs/superpowers/plans/2026-10-28-record-communication.md`
+- `docs/superpowers/specs/2026-10-28-record-communication-design.md`
+- `frontend/assets/chat.css`
+- `frontend/assets/customer-status.css`
+- `frontend/assets/disposals.css`
+- `frontend/src/comments.ts`
+- `frontend/src/customer-status-public.ts`
+- `frontend/src/customer-status.ts`
+- `frontend/src/disposal-copy.ts`
+- `frontend/src/disposal-forms.ts`
+- `frontend/src/disposals.ts`
+- `frontend/src/forms.ts`
+- `frontend/src/notifications.ts`
+- `frontend/src/record-communication.ts`
+- `tests/comments-polling.test.js`
+- `tests/customer-status-api.test.js`
+- `tests/customer-status-ui.test.js`
+- `tests/disposal-communication.test.js`
+- `tests/disposal-schema.test.js`
+- `tests/postgres-schema.test.js`
+- `tests/quality-forms.test.js`
+- `tests/record-metadata-transfer.test.js`
+- `tests/return-search-stability.test.js`
+- `tests/sso-backup.test.js`

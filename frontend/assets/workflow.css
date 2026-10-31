@@ -55,7 +55,9 @@ body[data-ui="board"] .field :is(input,select,textarea)[aria-invalid="true"]:not
 [data-ui="board"] .field-advisory p{margin:0 0 8px}
 [data-ui="board"] .field-advisory-links{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}
 [data-ui="board"] .field-advisory-links :is(a,button){padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--design-surface);font:inherit;font-size:11px;color:var(--ink);overflow-wrap:anywhere;text-decoration:none;cursor:pointer}
-[data-ui="board"] .field-advisory-links :is(a,button):hover{border-color:var(--design-accent);background-color:var(--design-tint)}
+@media(hover:hover){[data-ui="board"] .field-advisory-links :is(a,button):hover{border-color:var(--design-accent);background-color:var(--design-tint)}}
+/* The sidebar stays dark in the light theme, so its search field hovers with the sidebar tokens, not the page ones (light text on a light hover surface was unreadable). */
+@media(hover:hover){[data-ui="board"] .sidebar .workspace-search-trigger:hover{border-color:var(--line-strong);background-color:var(--surface-hover)}}
 @media(max-width:760px){
 [data-ui="board"] .sidebar-search{display:flex;width:100%;justify-content:flex-start;gap:10px;padding:10px 12px;margin:0 0 16px;min-height:44px}
 [data-ui="board"] .sidebar-search>span{display:inline;font-size:13px}
@@ -63,7 +65,7 @@ body[data-ui="board"] .field :is(input,select,textarea)[aria-invalid="true"]:not
 [data-ui="board"] .workspace-saved-filters{width:100%}
 [data-ui="board"] .table-toolbar>.toolbar-right{width:100%;display:flex;gap:8px}
 [data-ui="board"] .toolbar-right>:is(.filter-label,.select-menu){flex:1;min-width:0}
-[data-ui="board"] .toolbar-right .select-menu-trigger{min-width:0;width:100%;font-size:12px}
+
 [data-ui="board"] .selection-toolbar{padding:12px;gap:8px;align-items:stretch}
 [data-ui="board"] .selection-toolbar>strong{width:100%;min-height:44px;padding-inline-end:54px}
 [data-ui="board"] .selection-toolbar>div{width:100%;align-items:stretch;flex-wrap:nowrap;gap:8px}
@@ -108,6 +110,6 @@ body[data-ui="board"] .field :is(input,select,textarea)[aria-invalid="true"]:not
 
 /* Current work precedes reference details; the existing actions remain reachable. */
 .return-guidance{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:18px 0 6px;padding:18px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(125deg,color-mix(in srgb,var(--accent) 8%,var(--surface)),var(--surface));min-width:0}
-.return-guidance-copy{min-width:0;flex:1}.return-guidance .eyebrow{font-size:10px;margin:0 0 6px}.return-guidance h3{font-size:16px;line-height:1.5;margin:0;overflow-wrap:anywhere}.return-guidance p{color:var(--muted);font-size:12px;line-height:1.65;margin:7px 0 0}.return-guidance-owner{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;margin-top:10px;overflow-wrap:anywhere}.return-guidance-owner .icon{width:15px;height:15px;flex:none}.return-guidance-actions{display:grid;justify-items:center;gap:9px;min-width:0;max-width:100%}.return-guidance-actions .btn{max-width:100%;white-space:normal;text-align:center}.return-guidance-actions .text-link{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;min-height:32px}.return-guidance [hidden]{display:none!important}.return-timeline{scroll-margin-block:16px}
-[data-ui="board"] .timeline-created .timeline-symbol{background:var(--success-bg);color:var(--success)}.timeline-event-body{min-width:0}.timeline-changes{display:grid;gap:7px;margin:10px 0 0;padding:10px 12px;border:1px solid var(--line);border-radius:13px;background:var(--surface-subtle)}.timeline-changes>div{min-width:0}.timeline-changes dt{color:var(--muted);font-size:10px;line-height:1.5}.timeline-changes .timeline-text{margin:2px 0 0}.timeline-event:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:12px}
+.return-guidance-copy{min-width:0;flex:1}.return-guidance .eyebrow{font-size:11px;margin:0 0 6px}.return-guidance h3{font-size:16px;line-height:1.5;margin:0;overflow-wrap:anywhere}.return-guidance p{color:var(--muted);font-size:12px;line-height:1.65;margin:7px 0 0}.return-guidance-owner{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;margin-top:10px;overflow-wrap:anywhere}.return-guidance-owner .icon{width:15px;height:15px;flex:none}.return-guidance-actions{display:grid;justify-items:center;gap:9px;min-width:0;max-width:100%}.return-guidance-actions .btn{max-width:100%;white-space:normal;text-align:center}.return-guidance-actions .text-link{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;min-height:32px}.return-timeline{scroll-margin-block:16px}
+[data-ui="board"] .timeline-created .timeline-symbol{background:var(--success-bg);color:var(--success)}.timeline-event-body{min-width:0}.timeline-changes{display:grid;gap:7px;margin:10px 0 0;padding:10px 12px;border:1px solid var(--line);border-radius:13px;background:var(--surface-subtle)}.timeline-changes>div{min-width:0}.timeline-changes dt{color:var(--muted);font-size:11px;line-height:1.5}.timeline-changes .timeline-text{margin:2px 0 0}.timeline-event:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:12px}
 @media(max-width:600px){.return-guidance{padding:14px;gap:12px;flex-direction:column;align-items:stretch}.return-guidance-actions{grid-template-columns:minmax(0,1fr);justify-items:stretch}.return-guidance-actions .btn{min-height:44px}.return-guidance h3{font-size:15px}.timeline-changes{padding:9px 10px}}

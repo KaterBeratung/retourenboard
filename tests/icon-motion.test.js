@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {sourceModule} from './helpers/source-module.js';
-const {bindIconMotion}=await sourceModule("export * from './frontend/src/icon-motion.ts';");
+const {bindIconMotion,playIconSequence}=await sourceModule("export * from './frontend/src/icon-motion.ts';");
 
 // Node has no DOM or CSSAnimation timeline. Only those browser boundaries are
 // supplied here; delegation, eligibility and animation lifecycle use real code.
@@ -45,4 +45,21 @@ test('animation cancellation cleans up and unrelated color transitions do not ho
 });
 test('rebinding the document does not attach duplicate interactions',()=>{
  const f=fixture(),a=f.icon();bindIconMotion(f.root);f.emit('pointerover');assert.equal(a.value.starts,1);
+});
+
+function cue(motion='normal',effects=[{animationName:'board-symbol-ring'}]){
+ let done;const gate=new Promise(resolve=>{done=resolve;}),attrs={},starts=[];
+ const svg={ownerDocument:{documentElement:{dataset:{motion}}},closest:selector=>selector==='[data-ui="board"]'?{}:null,hasAttribute:name=>name in attrs,
+  setAttribute(name,value){assert.equal(name,'data-icon-motion');attrs[name]=value;starts.push(value);},removeAttribute(name){delete attrs[name];},getAnimations:()=>effects.map(effect=>({...effect,finished:gate}))};
+ return {svg,attrs,starts,finish:()=>done()};
+}
+test('programmatic cue plays the shared sequence once and releases the icon afterwards',async()=>{
+ const f=cue();playIconSequence(f.svg);assert.equal(f.attrs['data-icon-motion'],'active');playIconSequence(f.svg);assert.equal(f.starts.length,1);
+ f.finish();await settle();assert.equal(f.attrs['data-icon-motion'],undefined);
+});
+test('programmatic cue stays silent without normal motion, outside the board and for icons without a sequence',()=>{
+ const reduced=cue('reduce');playIconSequence(reduced.svg);assert.equal(reduced.starts.length,0);
+ const outside=cue();outside.svg.closest=()=>null;playIconSequence(outside.svg);assert.equal(outside.starts.length,0);
+ const plain=cue('normal',[{animationName:'color-transition'}]);playIconSequence(plain.svg);assert.equal(plain.attrs['data-icon-motion'],undefined);
+ assert.doesNotThrow(()=>{playIconSequence(null);playIconSequence(undefined);});
 });
