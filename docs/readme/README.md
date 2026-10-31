@@ -10,7 +10,7 @@ Produkte verwalten. Retouren bearbeiten. Im Team den Überblick behalten.
 
 [English](README_EN.md) · [Installation](#installation) · [Demo starten](#lokal-ausprobieren) · [Dokumentation](#dokumentation) · [Downloads](https://github.com/KaterBeratung/retourenboard/releases/latest)
 
-**Projektstand 4.0.93** · Selbst gehostet · Node.js 24 · PostgreSQL · Deutsch / Englisch
+**Projektstand 4.0.94** · Selbst gehostet · Node.js 24 · PostgreSQL · Deutsch / Englisch
 
 </div>
 

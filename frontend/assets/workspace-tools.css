@@ -11,7 +11,7 @@
 [data-ui="board"] .workspace-search-control:focus-within{border-color:var(--focus)}
 [data-ui="board"] .workspace-search-control input:focus{outline:none}
 [data-ui="board"] .workspace-search-hint{margin:13px 0 10px;min-height:20px;font-size:12px;color:var(--muted);line-height:1.6}
-[data-ui="board"] .workspace-search-results{max-height:min(470px,50dvh);overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;min-width:0}
+[data-ui="board"] .workspace-search-results{max-height:min(470px,50dvh);overflow:auto;overscroll-behavior:contain;min-width:0}
 [data-ui="board"] .workspace-result-group{margin:0 0 13px}
 [data-ui="board"] .workspace-result-group h3{margin:0 0 5px;padding:6px 8px;font-size:11px;font-weight:650;color:var(--muted)}
 [data-ui="board"] .workspace-search-result{display:flex;align-items:center;gap:11px;width:100%;min-height:61px;margin:3px 0;padding:11px 10px;border:1px solid transparent;border-radius:var(--radius-small);background:transparent;color:var(--ink);text-align:left;cursor:pointer}

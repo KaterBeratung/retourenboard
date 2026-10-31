@@ -90,7 +90,7 @@
 @media(hover:hover){[data-ui="board"] .table-preferences :is(summary,button):hover{background-color:var(--menu-hover);border-color:var(--line)}}
 [data-ui="board"] .table-preferences summary>.icon:last-child{width:13px;height:13px;rotate:90deg}
 [data-ui="board"] .table-preferences[open] summary>.icon:last-child{rotate:-90deg}
-[data-ui="board"] .table-preferences-menu{position:absolute;top:calc(100% + 8px);left:0;width:280px;max-width:calc(100vw - 36px);max-height:min(620px,75dvh);overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding:8px;display:grid;gap:10px}
+[data-ui="board"] .table-preferences-menu{position:absolute;top:calc(100% + 8px);left:0;width:280px;max-width:calc(100vw - 36px);max-height:min(620px,75dvh);overflow:auto;overscroll-behavior:contain;padding:8px;display:grid;gap:10px}
 [data-ui="board"] .table-preferences fieldset{min-width:0;margin:0;padding:8px;border:1px solid var(--line);border-radius:var(--field-radius);background:var(--control-surface)}
 [data-ui="board"] .table-preferences legend{font-weight:650;font-size:12px;line-height:1.5;padding:0 6px;margin:0 0 4px;color:var(--muted)}
 [data-ui="board"] :is(.table-preferences-heading,.workspace-saved-heading){display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}

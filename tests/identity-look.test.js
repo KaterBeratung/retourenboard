@@ -167,8 +167,8 @@ test('hovering and pressing never switch on a filter, which would make text flic
     assert.ok(theme.includes('--brand-gradient-hover:linear-gradient('));
 });
 
-test('tables keep their width with or without a scrollbar, and no glass leftovers remain', () => {
-    assert.ok(read('frontend/assets/design.css').includes('.table-scroll{scrollbar-gutter:stable}'));
+test('tables use the full width of their panel without a reserved scrollbar lane, and no glass leftovers remain', () => {
+    assert.ok(read('frontend/assets/design.css').includes('.table-scroll{scrollbar-gutter:auto}'));
     for (const file of ['public/theme.css', 'public/styles.css', 'frontend/assets/design.css', 'frontend/assets/chat.css', 'frontend/assets/scan-intake.css', 'frontend/assets/workspace-tools.css']) {
         assert.doesNotMatch(read(file), /--(?:glass-glint|glass-edge|glass-tint|glass-blur|chrome-backdrop|menu-backdrop)\b/, file);
     }

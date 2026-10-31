@@ -1146,8 +1146,8 @@ table{font-variant-numeric:tabular-nums}
 .kpi{background:radial-gradient(ellipse at top right,color-mix(in srgb,var(--metric-accent) 20%,transparent),transparent 72%),var(--surface);border-color:color-mix(in srgb,var(--metric-accent) 22%,var(--line))}
 .kpi>strong{color:var(--ink)}
 .kpi-link:focus-visible{box-shadow:var(--shadow-hover),0 0 0 1px color-mix(in srgb,var(--metric-accent) 40%,transparent)}@media(hover:hover){.kpi-link:hover{box-shadow:var(--shadow-hover),0 0 0 1px color-mix(in srgb,var(--metric-accent) 40%,transparent)}}
-/* Tables keep the same width whether or not their rows need a scrollbar (switching tabs must not shift the columns). */
-.table-scroll{scrollbar-gutter:stable}
+/* Tables use the full width of their panel: no scrollbar lane is reserved, so rows, dividers and hover surfaces reach the edge (a reserved lane showed as a stripe next to the last column). */
+.table-scroll{scrollbar-gutter:auto}
 /* Card titles are links: an invisible, taller hit area keeps them easy to tap without changing the card layout. */
 @media(max-width:760px),(pointer:coarse){
  .row-link.record-title{position:relative}
