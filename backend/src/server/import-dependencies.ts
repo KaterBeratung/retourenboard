@@ -38,7 +38,7 @@ export async function planImportDependencies(store: any, kind: string, text: str
     const parsed = parseCsv(text, { delimiter: options.delimiter }), masters = await store.listMasterData(), known = new Map<string, Set<string>>();
     for (const [list, items] of Object.entries(masters))
         known.set(list, new Set((items as any[]).map(item => nameKey(item.name))));
-    const products = new Map<string, Product>(), numbers = new Set<string>();
+    const products = new Map<string, Product>(), numbers = new Set<string>(), customStatuses = !!(await store.getRules()).customStatuses;
     for (const row of parsed.rows) {
         const cell = (field: string) => { const index = mapping?.[field]; return Number.isInteger(index) && index >= 0 && index < parsed.headers.length ? row.values[index].trim() : ''; };
         const sku = cell('sku'), number = cell('returnNumber'), existing = await store.findProduct(sku);
@@ -51,7 +51,7 @@ export async function planImportDependencies(store: any, kind: string, text: str
         if (options.createMissingMasterdata)
             for (const [field, list] of Object.entries(refs)) {
                 const name = referenceName(masters, list, cell(field)), key = nameKey(name);
-                if (!name || name.length > 250 || known.get(list)!.has(key))
+                if (!name || name.length > 250 || known.get(list)!.has(key) || list === 'statuses' && !customStatuses)
                     continue;
                 known.get(list)!.add(key);
                 plan.masters.push({ kind: list, name });

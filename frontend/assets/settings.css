@@ -184,7 +184,7 @@ html[data-theme=dark] .unsaved-dialog{background:var(--surface);color:var(--ink)
 .inbox-dialog>.dialog-footer .btn{justify-self:start;white-space:normal}
 .inbox-dialog>.dialog-footer .btn:last-child{justify-self:end}
 .inbox-list{display:grid;gap:8px}
-.inbox-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;padding:12px 16px;border:1px solid var(--line);border-radius:var(--control-radius);background:var(--surface);min-width:0;transition:border-color var(--motion-fast),background-color var(--motion-fast)}
+.inbox-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;padding:12px 16px;cursor:pointer;border:1px solid var(--line);border-radius:var(--control-radius);background:var(--surface);min-width:0;transition:border-color var(--motion-fast),background-color var(--motion-fast)}
 @media(hover:hover){.inbox-item:hover{border-color:var(--line-strong)}}
 .inbox-item-unread{background:var(--control-surface)}
 .inbox-item-heading{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0;margin:0}
@@ -620,19 +620,21 @@ body:not(.auth-screen)>.language-switch-auth{display:none}
 [data-ui="board"] .notice-source{display:none!important}
 [data-ui="board"] .notice-stack{position:fixed;inset:auto;top:max(84px,env(safe-area-inset-top));right:max(20px,env(safe-area-inset-right));display:grid;gap:10px;width:min(380px,calc(100% - 40px));max-width:none;max-height:calc(100dvh - 104px);margin:0;padding:0;border:0;background:transparent;color:var(--ink);overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;pointer-events:none;z-index:100}
 [data-ui="board"] .notice-stack::backdrop{background:transparent;pointer-events:none}
-[data-ui="board"] .notice-card{--notice-accent:var(--success);--notice-background:var(--success-bg);--notice-border:var(--success-line);display:grid;grid-template-columns:24px minmax(0,1fr) auto;align-items:start;gap:12px;min-width:0;padding:14px;border:1px solid var(--notice-border);border-left:3px solid var(--notice-accent);border-radius:24px;background:var(--notice-background);color:var(--ink);box-shadow:0 10px 30px #15291c24;pointer-events:auto;font-size:12px;line-height:1.65}
-[data-ui="board"] .notice-card[data-notice-kind="error"]{--notice-accent:var(--danger);--notice-background:var(--danger-bg);--notice-border:var(--danger-line)}
-[data-ui="board"] .notice-card[data-notice-kind="unsaved"]{--notice-accent:var(--warning);--notice-background:var(--warning-bg);--notice-border:var(--warning-line)}
-[data-ui="board"] .notice-symbol{display:grid;place-items:center;width:24px;height:24px;border-radius:7px;color:var(--notice-accent);background:color-mix(in srgb,var(--notice-accent) 12%,transparent)}
-[data-ui="board"] .notice-symbol .icon{width:15px;height:15px}
+/* Status bars: the same raised navy sheet as the menus, a round tinted symbol and a thin tinted rim; the meaning is carried by the symbol colour. */
+[data-ui="board"] .notice-card{--notice-accent:var(--success);display:grid;grid-template-columns:32px minmax(0,1fr) auto;align-items:center;gap:12px;min-width:0;padding:10px 12px 10px 10px;border:1px solid color-mix(in srgb,var(--notice-accent) 34%,var(--line-strong));border-radius:22px;background:linear-gradient(135deg,color-mix(in srgb,var(--notice-accent) 15%,transparent),transparent 78%),var(--surface-raised);color:var(--ink);box-shadow:var(--shadow-menu);pointer-events:auto;font-size:13px;line-height:1.5}
+[data-ui="board"] .notice-card:has(.notice-action){align-items:start}
+[data-ui="board"] .notice-card[data-notice-kind="error"]{--notice-accent:var(--danger)}
+[data-ui="board"] .notice-card[data-notice-kind="unsaved"]{--notice-accent:var(--warning)}
+[data-ui="board"] .notice-symbol{display:grid;place-items:center;width:32px;height:32px;border-radius:999px;color:var(--notice-accent);background:color-mix(in srgb,var(--notice-accent) 18%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--notice-accent) 28%,transparent)}
+[data-ui="board"] .notice-symbol .icon{width:16px;height:16px}
 [data-ui="board"] .notice-body{min-width:0;overflow-wrap:anywhere}
-[data-ui="board"] .notice-body p{margin:0;color:inherit;font-size:12px;line-height:1.65}
-[data-ui="board"] .notice-close{width:24px;min-width:24px;height:24px;min-height:24px;padding:3px;margin:-2px -2px 0 0;border-radius:6px;color:var(--muted)}
+[data-ui="board"] .notice-body p{margin:0;color:inherit;font-size:13px;font-weight:600;line-height:1.5}
+[data-ui="board"] .notice-close{width:28px;min-width:28px;height:28px;min-height:28px;padding:5px;margin:0;border-radius:999px;border-color:transparent;background:transparent;color:var(--muted)}
 [data-ui="board"] .notice-close .icon{width:14px;height:14px}
 [data-ui="board"] .notice-action{margin-top:10px;min-height:32px;padding:5px 10px;max-width:100%;white-space:normal;overflow-wrap:anywhere}
 @media(max-width:620px){
 [data-ui="board"] .notice-stack{top:max(76px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));width:min(380px,calc(100% - 24px));max-height:calc(100dvh - 96px)}
-[data-ui="board"] .notice-card{padding:12px;gap:10px}
+[data-ui="board"] .notice-card{padding:10px 12px 10px 10px;gap:10px}
 }
 .language-options button[aria-pressed=true]{color:var(--accent)}
 @media(max-width:760px){
@@ -646,3 +648,12 @@ body:not(.auth-screen)>.language-switch-auth{display:none}
 .auth-header h1{font-size:24px}
 .auth-card .dialog-body,.auth-card .dialog-footer{padding:20px}
 }
+/* Status model: the switch for own statuses and the note of the fixed standard. */
+[data-ui="board"] .status-mode-panel{margin-bottom:16px}
+[data-ui="board"] .status-mode-head{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:18px 20px}
+[data-ui="board"] .status-mode-head h2{margin:0;font-size:15px}
+[data-ui="board"] .status-mode-head p{margin:4px 0 0;max-width:64ch;color:var(--muted);font-size:13px;line-height:1.6}
+[data-ui="board"] .status-mode-head .switch-field{flex:none}
+[data-ui="board"] .status-lock{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:12px;font-weight:600}
+[data-ui="board"] .status-lock .icon{width:15px;height:15px}
+@media(max-width:760px){[data-ui="board"] .status-mode-head{flex-direction:column;align-items:flex-start;gap:12px;padding:16px}}

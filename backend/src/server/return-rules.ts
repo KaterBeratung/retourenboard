@@ -1,7 +1,7 @@
 import {InputError} from '../shared/model.js';
 import type {ReturnRules,Clock} from '../shared/types.js';
 import {completionDefaults} from '../shared/return-completion.js';
-export const defaultRules:ReturnRules={requiredFields:[],deadlineDays:14,numberPrefix:'RET',timezone:'Europe/Berlin',...completionDefaults};
+export const defaultRules:ReturnRules={requiredFields:[],deadlineDays:14,numberPrefix:'RET',timezone:'Europe/Berlin',customStatuses:false,...completionDefaults};
 export function checkReturnFields(input:Record<string,unknown>,rules:ReturnRules){
   const labels={serialNumber:'Seriennummer',orderNumber:'Bestellnummer',supplier:'Lieferant',notes:'Notizen'};
   for(const field of rules.requiredFields)if(!String(input[field]??'').trim())throw new InputError(`${labels[field]} ist laut Retourenregeln erforderlich.`);

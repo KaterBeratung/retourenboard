@@ -1,5 +1,6 @@
 import {InputError,MASTER_KINDS,PRODUCT_REFS,RETURN_REFS} from '../shared/model.js';
 const requiredKinds=new Set(['reasons','conditions','statuses','resolutions']);
+export const STANDARD_STATUSES=[{key:'statuses.received',name:'Eingegangen',tone:'received',isDefault:1,isClosed:0},{key:'statuses.working',name:'In Bearbeitung',tone:'working',isDefault:0,isClosed:0},{key:'statuses.completed',name:'Abgeschlossen',tone:'done',isDefault:0,isClosed:1}];
 const nameKey=name=>name.trim().normalize('NFKC').toLocaleLowerCase('de-DE');
 export function createMasterDataRepository(db){
  const normalize=r=>r?{...r,active:!!r.active,isDefault:!!r.isDefault,isClosed:!!r.isClosed}:null;
@@ -34,6 +35,23 @@ export function createMasterDataRepository(db){
   async remove(id){return transaction(async()=>{
    await db.query("SELECT pg_advisory_xact_lock(hashtextextended(current_schema() || ':masterdata',0))");
    const old=await get(id);if(!old)throw new InputError('Stammdateneintrag nicht gefunden.',404);const archived=await used(id);if(archived)await db.query('UPDATE masterdata SET active=0,isDefault=0,updatedAt=$1 WHERE id=$2',[new Date().toISOString(),id]);else await db.query('DELETE FROM masterdata WHERE id=$1',[id]);await ensureDefault(old.kind);return {archived};
+  });},
+  // The standard set of three fixed statuses; every other status is archived (only possible while no return uses it).
+  async useStandardStatuses(){return transaction(async()=>{
+   await db.query("SELECT pg_advisory_xact_lock(hashtextextended(current_schema() || ':masterdata',0))");
+   const rows=(await db.query("SELECT * FROM masterdata WHERE kind='statuses' ORDER BY id")).rows.map(normalize),standard=new Map();
+   for(const spec of STANDARD_STATUSES){const row=rows.find(r=>r.builtinKey===spec.key)??rows.find(r=>nameKey(r.name)===nameKey(spec.name));if(row)standard.set(spec.key,row);}
+   const keep=new Set([...standard.values()].map(r=>r.id)),others=rows.filter(r=>!keep.has(r.id)),blocked=[];
+   for(const row of others){const n=Number((await db.query('SELECT COUNT(*) AS n FROM returns WHERE statusId=$1',[row.id])).rows[0].n);if(n)blocked.push(`${row.name} (${n})`);}
+   if(blocked.length)throw new InputError(`Noch Retouren mit eigenen Status vorhanden: ${blocked.join(', ')}. Ändere sie zuerst auf Eingegangen, In Bearbeitung oder Abgeschlossen.`,409);
+   const now=new Date().toISOString(),canonical=new Set(STANDARD_STATUSES.map(spec=>nameKey(spec.name)));
+   for(const row of others){const name=canonical.has(nameKey(row.name))?`${row.name} (archiviert)`:row.name;await db.query('UPDATE masterdata SET name=$1,nameKey=$2,active=0,isDefault=0,updatedAt=$3 WHERE id=$4',[name,nameKey(name),now,row.id]);}
+   for(const spec of STANDARD_STATUSES){
+    const row=standard.get(spec.key);
+    if(row)await db.query('UPDATE masterdata SET name=$1,nameKey=$2,builtinKey=$3,tone=$4,active=1,isDefault=$5,isClosed=$6,updatedAt=$7 WHERE id=$8',[spec.name,nameKey(spec.name),spec.key,spec.tone,spec.isDefault,spec.isClosed,now,row.id]);
+    else await db.query('INSERT INTO masterdata(kind,name,nameKey,builtinKey,active,isDefault,isClosed,tone,createdAt,updatedAt) VALUES($8,$1,$2,$3,1,$4,$5,$6,$7,$7)',[spec.name,nameKey(spec.name),spec.key,spec.isDefault,spec.isClosed,spec.tone,now,'statuses']);
+   }
+   return list('statuses');
   });},
   async resolve(kind,value,existingId=null,required=false,allowArchived=false){
    checkKind(kind);if(value===undefined&&required)return (await list(kind)).find(x=>x.active&&x.isDefault);if(value===null||value===''||value===undefined){if(required)throw new InputError('Bitte einen Wert auswählen.');return null;}

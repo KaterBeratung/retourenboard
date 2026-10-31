@@ -72,7 +72,17 @@ export function openNotifications(ctx){
         <time class="inbox-time" datetime="${h(n.createdAt)}">${new Date(n.createdAt).toLocaleString(locale(),{dateStyle:'medium',timeStyle:'short'})}</time>
         <div class="inbox-actions"><a class="btn secondary small" href="${h(n.href)}" aria-label="${h(t('Öffnen'))}" title="${h(t('Öffnen'))}">${icon('arrow')}<span class="inbox-action-label">Öffnen</span></a>${!n.readAt?html`<button type="button" class="btn secondary small" data-notification-read="${n.id}" aria-label="${h(t('Als gelesen markieren'))}" title="${h(t('Als gelesen markieren'))}">${icon('check')}<span class="inbox-action-label">Als gelesen markieren</span></button>`:''}</div>
       </article>`).join('')}</div>${inbox.total>25?html`<div class="inbox-pagination"><button class="btn secondary small" id="inbox-prev" ${page===1?'disabled':''}>Zurück</button><span>Seite ${page} von ${Math.ceil(inbox.total/25)}</span><button class="btn secondary small" id="inbox-next" ${page*25>=inbox.total?'disabled':''}>Weiter</button></div>`:''}`:html`<div class="inbox-empty">${icon('bell')}<h3>Noch keine Nachrichten</h3><p>Neue Retouren und Hinweise erscheinen hier.</p></div>`;
-      content.querySelectorAll<HTMLAnchorElement>('.inbox-actions a').forEach(link=>link.onclick=event=>{if(!event.defaultPrevented&&!event.ctrlKey&&!event.metaKey&&!event.shiftKey)dialog.close();});
+      // Opening an item follows its link, marks it as read and closes the inbox; a click anywhere on the item does the same as its "Öffnen" link.
+      content.querySelectorAll<HTMLAnchorElement>('.inbox-actions a').forEach(link=>link.onclick=event=>{
+        if(event.defaultPrevented||event.ctrlKey||event.metaKey||event.shiftKey||event.button!==0)return;
+        const card=link.closest<HTMLElement>('[data-notification]');
+        if(card?.dataset.notification&&card.classList.contains('inbox-item-unread'))void ctx.api('/api/notifications/'+card.dataset.notification+'/read',{method:'POST',body:{}}).then(()=>refreshNotifications(ctx)).catch(()=>{});
+        dialog.close();
+      });
+      content.querySelectorAll<HTMLElement>('.inbox-item').forEach(card=>card.addEventListener('click',event=>{
+        if((event.target as Element).closest('a,button')||String(window.getSelection()??'').length)return;
+        card.querySelector<HTMLAnchorElement>('.inbox-actions a')?.click();
+      }));
       content.querySelectorAll<HTMLButtonElement>('[data-notification-read]').forEach(button=>button.onclick=async()=>{
         button.disabled=true;
         try{const id=button.dataset.notificationRead;await ctx.api('/api/notifications/'+id+'/read',{method:'POST',body:{}});await load();if(active())content.querySelector<HTMLAnchorElement>(`[data-notification="${id}"] a`)?.focus();await refreshNotifications(ctx);}catch(err){ctx.toast(apiError(err.message));if(button.isConnected)button.disabled=false;}

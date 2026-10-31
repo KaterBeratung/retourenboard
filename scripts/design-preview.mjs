@@ -115,7 +115,7 @@ try {
     const products = await Promise.all(definitions.map(async ([name, sku, priceCents, supply, category], index) => app.store.createProduct({ name, sku, priceCents, ean: '40012345000' + String(index + 1).padStart(2, '0'), supplierId: supplier[supply].id, categoryId: categories[category].id, manufacturerId: manufacturer.id, active: true, description: 'Beispielprodukt für die Designvorschau.' })));
     const masters = await app.store.listMasterData();
     for (let index = 0; index < 10; index++) {
-        const status = masters.statuses[index % masters.statuses.length];
+        const openStatuses = masters.statuses.filter(row => row.active), status = openStatuses[index % openStatuses.length];
         const selected=masters.resolutions[index % masters.resolutions.length],resolution=status.isClosed&&selected.builtinKey==='resolutions.pending'?masters.resolutions.find(row=>row.builtinKey==='resolutions.refund'):selected;
         await app.store.createReturn({ replacementSerialNumber:resolution?.builtinKey==='resolutions.exchange'?`DEMO-REPLACE-${index+1}`:'',productId: products[index % products.length].id, supplierId: index === 2 ? null : products[index % products.length].supplierId, serialNumber: `DEMO-SN-${String(index + 1).padStart(4, '0')}`, orderNumber: `BEST-DEMO-${1000 + index}`, receiptDate: `2026-10-${String(6 - index % 5).padStart(2, '0')}`, quantity: 1 + Number(index === 8), statusId: status.id, reasonId: masters.reasons[index % masters.reasons.length].id, conditionId: masters.conditions[index % masters.conditions.length].id, resolutionId: resolution.id, notes: index % 2 ? 'Zubehör vollständig. Ergebnis der Prüfung bitte dokumentieren.' : 'Kundin meldet einen sporadischen Fehler. Funktionsprüfung vorgesehen.' });
     }

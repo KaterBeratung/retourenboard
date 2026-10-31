@@ -21,6 +21,8 @@ function fileOptions(options,f){
  return {...rest,dataDir,databaseConfig:f.config,internalSchema:f.schema};
 }
 export async function createApp(options={},owner=currentTestOwner()){
+ // Existing tests rely on the four built-in statuses; pass {customStatuses:undefined} to get the standard of three fixed statuses.
+ options={customStatuses:true,...options};
  if(options.databaseConfig)return actualApp(options);
  const f=await resource(options.dbPath??':memory:',owner);let app;f.beforeCleanup(async()=>{await app?.close();});
  app=await actualApp(fileOptions(options,f));return app;

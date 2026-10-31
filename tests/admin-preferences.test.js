@@ -10,7 +10,7 @@ test('admin preferences persist and are rejected for unprivileged users', async 
     const { request, setup, login } = await runtimeFixture(t), { auth } = await setup();
     const rules = await request('/api/admin/rules', 'GET', undefined, auth);
     assert.equal(rules.status, 200);
-    assert.deepEqual(await rules.json(), { requiredFields: [], deadlineDays: 14, numberPrefix: 'RET', timezone: 'Europe/Berlin',completionRequiredFields:['resolution'],requireReplacementSerialOnExchange:true,requireCompletedDisposal:true,protectClosedReturns:true,exchangeResolutionIds:[],disposalResolutionIds:[] });
+    assert.deepEqual(await rules.json(), { requiredFields: [], deadlineDays: 14, numberPrefix: 'RET', timezone: 'Europe/Berlin',customStatuses:true,completionRequiredFields:['resolution'],requireReplacementSerialOnExchange:true,requireCompletedDisposal:true,protectClosedReturns:true,exchangeResolutionIds:[],disposalResolutionIds:[] });
     const save = await request('/api/admin/rules', 'PUT', { deadlineDays: 30, numberPrefix: 'RMA' }, auth);
     assert.equal(save.status, 200);
     assert.equal((await (await request('/api/admin/rules', 'GET', undefined, auth)).json()).deadlineDays, 30);

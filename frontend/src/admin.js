@@ -1,4 +1,4 @@
-import {html,locale,setText,t,apiError} from './i18n.js';
+import {html,locale,setText,t,apiError,addTranslations} from './i18n.js';
 import {renderSso,bindSso} from './admin-sso.js';
 import {masterLabel} from './inventory-display.js';
 import {switchField} from './switches.js';
@@ -17,6 +17,7 @@ import {renderNotificationsSettings,bindNotificationsSettings} from './admin-not
 import {renderDataTools,bindDataTools} from './navigation-tools.js';
 import {openImport,openExport} from './import.js';
 let kind = 'suppliers';
+addTranslations({'Status anpassen':'Customise statuses','Eigene Status verwenden':'Use own statuses','Fest':'Fixed','Diese drei Status sind fest und können nicht geändert werden.':'These three statuses are fixed and cannot be changed.','Standard: Eingegangen, In Bearbeitung und Abgeschlossen. Schalte „Eigene Status verwenden“ ein, um Status anzulegen, umzubenennen oder zu archivieren.':'Standard: Received, In progress and Completed. Turn on “Use own statuses” to create, rename or archive statuses.','Du verwendest eigene Status. Zurück zum Standard geht, sobald keine Retoure mehr einen anderen Status hat; alle anderen Status werden dann archiviert.':'You are using your own statuses. You can return to the standard as soon as no return has another status; all other statuses are then archived.'});
 const requiredLists = ['reasons', 'conditions', 'statuses', 'resolutions'];
 export function adminSection(ctx){const [page,query='']=location.hash.slice(1).split('?');const requested=page==='admin'?new URLSearchParams(query).get('section'):page;return requested||['masterdata','rules','csv-profiles','audit','diagnostics','data-tools'].find(section=>ctx.canAdminSection(section))||'masterdata';}
 export function renderAdmin(ctx) {
@@ -37,15 +38,20 @@ export function renderAdmin(ctx) {
         kind = 'users';
     else if (kind === 'users')
         kind = 'suppliers';
-    const entries = kind === 'users' ? [] : ctx.masterdata[kind] ?? [];
+    const custom = ctx.config?.rules?.customStatuses === true, locked = kind === 'statuses' && !custom;
+    const processOrder = ['statuses.received', 'statuses.working', 'statuses.completed'];
+    // The fixed standard is listed in the order of the process, not alphabetically.
+    const entries = kind === 'users' ? [] : (ctx.masterdata[kind] ?? []).filter(item => !locked || item.active).sort((a, b) => locked ? processOrder.indexOf(a.builtinKey) - processOrder.indexOf(b.builtinKey) : 0);
     const header = html`<div class="page-heading"><div><div class="eyebrow">VERWALTUNG</div><h1>Stammdaten<span class="heading-dot">.</span></h1><p>Feste Werte für Produkte und Retouren verwalten.</p></div><div class="heading-actions"><a class="btn secondary" href="/#products">${icon('box')}Produkte</a><a class="btn secondary" href="/#returns">${icon('return')}Retouren</a></div></div>
     <label class="field master-kind-picker"><span>Bereich</span><select data-master-picker aria-label="Verwaltungsbereich auswählen">${Object.entries(MASTER_KINDS).map(([key,label])=>html`<option value="${key}"${kind===key?' selected':''}>${h(t(label))} · ${(ctx.masterdata[key]??[]).filter(item=>item.active).length}</option>`).join('')}</select></label>
     <div class="admin-tabs status-tabs ${statusTabLayout(Object.keys(MASTER_KINDS).length)}" role="group" aria-label="Verwaltungsbereich auswählen">${Object.entries(MASTER_KINDS).map(([key, label]) => html`<button type="button" data-master-kind="${key}" class="${kind === key ? 'selected' : ''}" aria-pressed="${kind === key}">${t(label)}<span class="master-kind-count">${(ctx.masterdata[key] ?? []).filter(x => x.active).length}</span></button>`).join('')}</div>`;
     if (kind === 'users')
         return html`<div class="page-heading"><div><div class="eyebrow">ADMINISTRATION</div><h1>Benutzerkonten<span class="heading-dot">.</span></h1><p>Persönliche Zugänge und Berechtigungen verwalten.</p></div><a class="btn secondary" href="/">Zum Arbeitsbereich</a></div>` + renderUsers();
+    // The standard of three statuses is fixed; the switch hands the lists over to the administrator (and back, when no return uses another status).
+    const statusMode = kind === 'statuses' ? html`<section class="panel status-mode-panel"><div class="status-mode-head"><div><h2>Status anpassen</h2><p>${custom ? t('Du verwendest eigene Status. Zurück zum Standard geht, sobald keine Retoure mehr einen anderen Status hat; alle anderen Status werden dann archiviert.') : t('Standard: Eingegangen, In Bearbeitung und Abgeschlossen. Schalte „Eigene Status verwenden“ ein, um Status anzulegen, umzubenennen oder zu archivieren.')}</p></div>${switchField('customStatuses', t('Eigene Status verwenden'), custom)}</div></section>` : '';
     return html`${header}
-    <section class="panel"><div class="panel-heading"><div><h2>${t(MASTER_KINDS[kind])}</h2><p>Verwendete Werte bleiben beim Entfernen als archivierte Einträge erhalten.</p></div><button class="btn primary" id="master-create">${icon('plus')}Eintrag anlegen</button></div>
-    ${entries.length ? html`<div class="table-scroll"><table class="masterdata-table"><thead><tr><th>Name</th>${kind === 'suppliers' ? html('<th>Lieferantencode</th>') : ''}<th>Status</th>${requiredLists.includes(kind) ? html('<th>Standard</th>') : ''}${kind === 'statuses' ? html('<th>Abschluss</th>') : ''}<th>Notizen</th><th>Aktionen</th></tr></thead><tbody>${entries.map(item => html`<tr><td><strong>${h(masterLabel(item))}</strong></td>${kind === 'suppliers' ? html`<td${item.code?.trim()?'':' data-mobile-empty'}>${h(item.code || '—')}</td>` : ''}<td><span class="status ${item.active ? 'done' : 'archived'}"><span></span>${item.active ? t('Aktiv') : t('Archiviert')}</span></td>${requiredLists.includes(kind) ? html`<td${item.isDefault?'':' data-mobile-empty'}>${item.isDefault ? t('Ja') : '—'}</td>` : ''}${kind === 'statuses' ? html`<td>${item.isClosed ? t('Ja') : t('Nein')}</td>` : ''}<td class="master-notes"${item.notes?.trim()?'':' data-mobile-empty'}>${h(item.notes || '—')}</td><td><div class="row-actions"><button class="icon-btn" data-master-edit="${item.id}" aria-label="${h(masterLabel(item))} bearbeiten">${icon('edit')}</button><button class="icon-btn" data-master-delete="${item.id}" aria-label="${h(masterLabel(item))} entfernen">${icon('trash')}</button></div></td></tr>`).join('')}</tbody></table></div>` : html`<div class="empty-state"><span class="empty-icon">${icon('box')}</span><h3>Noch keine ${t(MASTER_KINDS[kind])} angelegt</h3><p>Lege hier die Werte an, die später zur Auswahl stehen.</p></div>`}</section>
+    ${statusMode}<section class="panel"><div class="panel-heading"><div><h2>${t(MASTER_KINDS[kind])}</h2><p>${locked ? t('Diese drei Status sind fest und können nicht geändert werden.') : t('Verwendete Werte bleiben beim Entfernen als archivierte Einträge erhalten.')}</p></div>${locked ? '' : html`<button class="btn primary" id="master-create">${icon('plus')}Eintrag anlegen</button>`}</div>
+    ${entries.length ? html`<div class="table-scroll"><table class="masterdata-table"><thead><tr><th>Name</th>${kind === 'suppliers' ? html('<th>Lieferantencode</th>') : ''}<th>Status</th>${requiredLists.includes(kind) ? html('<th>Standard</th>') : ''}${kind === 'statuses' ? html('<th>Abschluss</th>') : ''}<th>Notizen</th><th>Aktionen</th></tr></thead><tbody>${entries.map(item => html`<tr><td><strong>${h(masterLabel(item))}</strong></td>${kind === 'suppliers' ? html`<td${item.code?.trim()?'':' data-mobile-empty'}>${h(item.code || '—')}</td>` : ''}<td><span class="status ${item.active ? 'done' : 'archived'}"><span></span>${item.active ? t('Aktiv') : t('Archiviert')}</span></td>${requiredLists.includes(kind) ? html`<td${item.isDefault?'':' data-mobile-empty'}>${item.isDefault ? t('Ja') : '—'}</td>` : ''}${kind === 'statuses' ? html`<td>${item.isClosed ? t('Ja') : t('Nein')}</td>` : ''}<td class="master-notes"${item.notes?.trim()?'':' data-mobile-empty'}>${h(item.notes || '—')}</td><td>${locked ? html`<span class="status-lock">${icon('lock')}${t('Fest')}</span>` : html`<div class="row-actions"><button class="icon-btn" data-master-edit="${item.id}" aria-label="${h(masterLabel(item))} bearbeiten">${icon('edit')}</button><button class="icon-btn" data-master-delete="${item.id}" aria-label="${h(masterLabel(item))} entfernen">${icon('trash')}</button></div>`}</td></tr>`).join('')}</tbody></table></div>` : html`<div class="empty-state"><span class="empty-icon">${icon('box')}</span><h3>Noch keine ${t(MASTER_KINDS[kind])} angelegt</h3><p>Lege hier die Werte an, die später zur Auswahl stehen.</p></div>`}</section>
     <p class="muted admin-help">Ein aktiver Standard füllt neue Retouren vor. Archivierte Werte bleiben in bestehenden Vorgängen sichtbar.</p>`;
 }
 export function bindAdmin(ctx, root) {
@@ -70,6 +76,14 @@ export function bindAdmin(ctx, root) {
         return bindUsers(ctx, root);
     }
     root.querySelector('#master-create')?.addEventListener('click', () => ctx.ensureUnlocked(() => masterForm(ctx)));
+    const statusMode = root.querySelector('[name=customStatuses]');
+    // The switch only shows the saved state; it flips after the server has accepted the change and the page has been reloaded.
+    if (statusMode)
+        statusMode.onchange = () => {
+            const next = statusMode.checked;
+            statusMode.checked = !next;
+            ctx.ensureUnlocked(async () => { try { await ctx.api('/api/admin/rules', { method: 'PUT', body: { customStatuses: next } }); await ctx.reload(); } catch (error) { ctx.toast(apiError(error.message)); } });
+        };
     root.querySelectorAll('[data-master-edit]').forEach(el => el.onclick = () => ctx.ensureUnlocked(() => masterForm(ctx, ctx.masterdata[kind].find(x => x.id === Number(el.dataset.masterEdit)))));
     root.querySelectorAll('[data-master-delete]').forEach(el => el.onclick = () => ctx.ensureUnlocked(() => removeMaster(ctx, ctx.masterdata[kind].find(x => x.id === Number(el.dataset.masterDelete)))));
 }

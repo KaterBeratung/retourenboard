@@ -10,7 +10,9 @@ import {serialKey} from '../shared/serial-number.js';
 import {returnPageQuery} from './return-search.js';
 import {checkRecordRevision,advanceRecordRevision,ensureRecordMetadata} from './database/record-metadata.js';
 export async function createStore({database:db}){
- await migratePostgres(db);const masters=createMasterDataRepository(db);let rules=()=>defaultRules,clock={now:Date.now};
+ await migratePostgres(db);const masters=createMasterDataRepository(db);let rules=()=>({...defaultRules,customStatuses:true}),clock={now:Date.now};
+ // The standard statuses are fixed; own statuses need the setting "customStatuses" in the return rules. A bare store (tests, tools) has no restriction until the application hands over its rules.
+ const statusGuard=async kind=>{if(kind==='statuses'&&!(await rules()).customStatuses)throw new InputError('Die Standard-Status sind fest. Aktiviere „Status anpassen“, um eigene Status zu verwenden.',409);};
  const productQuery='SELECT p.*,v.revision,i.revision AS imageVersion,i.originalName AS imageName FROM products p JOIN product_versions v ON v.productId=p.id LEFT JOIN product_images i ON i.productId=p.id';
  const joinQuery='SELECT r.*,v.revision,v.priceSnapshotCents AS priceCents,v.priceSnapshotSource,v.priceCapturedAt,p.name AS productName,p.sku,p.ean,p.priceCents AS catalogPriceCents,i.revision AS imageVersion,i.originalName AS imageName,COALESCE(u.displayName,r.assignedDisplayName) AS assignedName FROM returns r JOIN products p ON p.id=r.productId JOIN return_versions v ON v.returnId=r.id LEFT JOIN product_images i ON i.productId=p.id LEFT JOIN users u ON u.id=r.assignedUserId AND u.deletedAt IS NULL';
  async function displayRows(rows,refs){
@@ -35,7 +37,7 @@ export async function createStore({database:db}){
   }return result;
  }
  const store={db,masters,setRules:(getRules,newClock={now:Date.now})=>{rules=getRules;clock=newClock;},
-  listMasterData:()=>masters.all(),createMasterData:(kind,input)=>masters.create(kind,input),updateMasterData:(id,input)=>masters.update(id,input),deleteMasterData:id=>masters.remove(id),
+  listMasterData:()=>masters.all(),createMasterData:async(kind,input)=>{await statusGuard(kind);return masters.create(kind,input);},updateMasterData:async(id,input)=>{await statusGuard((await masters.get(id))?.kind);return masters.update(id,input);},deleteMasterData:async id=>{await statusGuard((await masters.get(id))?.kind);return masters.remove(id);},
   async listProducts(){return displayRows((await db.query(productQuery+' ORDER BY p.createdAt DESC,p.id DESC')).rows,PRODUCT_REFS);},
   async getProduct(id){return (await displayRows((await db.query(productQuery+' WHERE p.id=$1',[id])).rows,PRODUCT_REFS))[0]??null;},
   async findProduct(sku){return (await displayRows((await db.query(productQuery+' WHERE p.sku=$1',[sku])).rows,PRODUCT_REFS))[0]??null;},

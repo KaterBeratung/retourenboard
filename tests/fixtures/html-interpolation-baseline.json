@@ -136,6 +136,8 @@
   "admin.js|html|statusTabLayout(Object.keys(MASTER_KINDS).length)": 1,
   "admin.js|html|switchField(\"active\",t(\"Aktiv und auswählbar\"),item.active!==false,{full:true})": 1,
   "admin.js|html|switchField(\"isClosed\",t(\"Retouren mit diesem Status sind abgeschlossen\"),item.isClosed,{full:true})": 1,
+  "admin.js|html|statusMode": 1,
+  "admin.js|html|switchField('customStatuses', t('Eigene Status verwenden'), custom)": 1,
   "admin.js|html|t(MASTER_KINDS[kind])": 2,
   "admin.js|html|t(label)": 1,
   "admin.js|html|value": 1,

@@ -12,7 +12,7 @@ export function createNotifications({ store, preferences, mail, clock }: {
             const c = await preferences.get('notifications');
             if (!['newReturn', 'overdue', 'backupError'].includes(event.type) || !c[event.type])
                 return;
-            const count = event.payload.count ?? 1, title = event.type === 'backupError' ? 'Sicherung fehlgeschlagen' : event.type === 'overdue' ? 'Retoure überfällig' : count > 1 ? 'Retouren importiert' : 'Neue Retoure', message = event.type === 'backupError' ? 'Bitte die Sicherungen im Adminbereich prüfen.' : count > 1 ? `${count} Retouren wurden importiert.` : `${event.payload.returnNumber ?? 'Retoure'} ${event.type === 'overdue' ? 'hat die Bearbeitungsfrist überschritten.' : 'wurde angelegt.'}`, href = event.type === 'backupError' ? '/admin#backups' : '/#returns';
+            const count = event.payload.count ?? 1, title = event.type === 'backupError' ? 'Sicherung fehlgeschlagen' : event.type === 'overdue' ? 'Retoure überfällig' : count > 1 ? 'Retouren importiert' : 'Neue Retoure', message = event.type === 'backupError' ? 'Bitte die Sicherungen im Adminbereich prüfen.' : count > 1 ? `${count} Retouren wurden importiert.` : `${event.payload.returnNumber ?? 'Retoure'} ${event.type === 'overdue' ? 'hat die Bearbeitungsfrist überschritten.' : 'wurde angelegt.'}`, href = event.type === 'backupError' ? '/admin#backups' : count === 1 && Number.isSafeInteger(event.payload.id) && event.payload.id > 0 ? `/#returns?detail=${event.payload.id}` : '/#returns';
             if (c.inApp)
                 for (const user of (await store.db.query("SELECT id FROM users WHERE active=1" + (event.type === 'backupError' ? " AND role='admin'" : ''), [])).rows)
                     await store.db.query("INSERT INTO notifications(eventKey,userId,kind,title,message,href,createdAt) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT DO NOTHING RETURNING id", [event.id, user.id, event.type, title, message, href, new Date(clock.now()).toISOString()]);
@@ -73,6 +73,14 @@ export function createNotifications({ store, preferences, mail, clock }: {
             if (!Number.isInteger(page) || page < 1 || page > 100000 || ![10, 25, 50, 100].includes(pageSize))
                 throw new InputError('Ungültige Nachrichtenseite.');
             const total = Number((await store.db.query("SELECT COUNT(*) AS n FROM notifications WHERE userId=$1", [userId])).rows[0].n), unread = Number((await store.db.query("SELECT COUNT(*) AS n FROM notifications WHERE userId=$1 AND readAt IS NULL", [userId])).rows[0].n), items = (await store.db.query("SELECT * FROM notifications WHERE userId=$1 ORDER BY id DESC LIMIT $2 OFFSET $3", [userId, pageSize, (page - 1) * pageSize])).rows;
+            // Older system notices only link to the list; their message names the return, so the exact record can still be opened.
+            const named = items.filter((item: any) => item.href === '/#returns' && ['newReturn', 'overdue'].includes(item.kind)).map((item: any) => ({ item, number: String(item.message).match(/^(\S+) (?:wurde angelegt|hat die Bearbeitungsfrist überschritten)\.$/)?.[1] })).filter((entry: any) => entry.number);
+            if (named.length) {
+                const ids = new Map<string, number>((await store.db.query("SELECT id,returnNumber FROM returns WHERE returnNumber = ANY($1::text[])", [[...new Set(named.map((entry: any) => entry.number))]])).rows.map((row: any) => [row.returnNumber, Number(row.id)]));
+                for (const { item, number } of named)
+                    if (ids.has(number!))
+                        item.href = `/#returns?detail=${ids.get(number!)}`;
+            }
             return { items, total, unread, page, pageSize };
         },
         async markRead(userId: number, id: number | 'all') {

@@ -64,9 +64,10 @@ import { handleAccountRoute } from './account-routes.js';
 import { handleAdminRoute } from './admin-routes.js';
 import { handleGeneralRoute } from './general-routes.js';
 import { createErrorPages } from './error-page.js';
+import { ensureStatusMode } from './status-mode.js';
 const staticAssets=createStaticAssetReader();
 const { files, publicScripts } = createStaticFileTable();
-export async function createApp({ dbPath, databaseConfig, database, runtimeLease, internalSchema = 'retourenboard', dataDir = resolve(process.env.DATA_DIR || 'data'), maintenance: initialMaintenance = false, onLeaseLost = () => { }, secureCookies = false, publicOrigin = '', port = 3000, host = '127.0.0.1', trustedProxies = [], production = false, now = Date.now, runtime = null, activeNetwork = null, versionFetch = fetch, automaticVersionCheck = false, ssoAllowLoopback = false, ssoFetch = fetch, currencyFetch = fetch, updateService = createUpdateClient(), serverControl = null, serverLog = createServerLog({ now }) }) {
+export async function createApp({ dbPath, databaseConfig, database, runtimeLease, internalSchema = 'retourenboard', dataDir = resolve(process.env.DATA_DIR || 'data'), maintenance: initialMaintenance = false, onLeaseLost = () => { }, secureCookies = false, publicOrigin = '', port = 3000, host = '127.0.0.1', trustedProxies = [], production = false, now = Date.now, runtime = null, activeNetwork = null, versionFetch = fetch, automaticVersionCheck = false, ssoAllowLoopback = false, ssoFetch = fetch, currencyFetch = fetch, updateService = createUpdateClient(), serverControl = null, serverLog = createServerLog({ now }), customStatuses: initialCustomStatuses }) {
     if (dbPath !== undefined)
         throw new Error('Bestehende SQLite-Installationen zuerst nach PostgreSQL migrieren und DATA_DIR/DATABASE_URL konfigurieren.');
     dataDir = resolve(dataDir);
@@ -96,6 +97,7 @@ export async function createApp({ dbPath, databaseConfig, database, runtimeLease
         const preferences = createPreferences(store.db), coordinator = createWriteCoordinator();
         const currency = await createCurrency({ db: store.db, fetcher: currencyFetch, now, coordinator, displayCurrency: async () => (await settings.get()).displayCurrency });
         store.setRules(async () => preferences.get('rules'), { now });
+        await ensureStatusMode({ db: store.db, preferences, masters: store.masters, initial: initialCustomStatuses });
         const csvProfiles = createCsvProfiles(store.db);
         const audit = createAudit(store);
         const ssoAccounts=createSsoStore({store,secrets,now,onRevoke:id=>mfa.invalidate(id),allowLoopback:ssoAllowLoopback&&!production});

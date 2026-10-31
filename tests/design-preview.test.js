@@ -69,7 +69,7 @@ test('the design preview uses disposable seeded data and retains authentication 
     assert.ok(products.length >= 5);
     assert.ok(returns.length >= 8);
     assert.ok(returns.some(row => row.isClosed));
-    assert.ok(returns.some(row => row.statusTone === 'checking'));
+    assert.ok(returns.some(row => row.statusTone === 'working'));
     const input = { name: 'Vorschau-Testprodukt', sku: 'TEST-ONLY' };
     assert.equal((await fetch(base + '/api/products', { method: 'POST', headers, body: JSON.stringify(input) })).status, 403);
     assert.equal((await fetch(base + '/api/products', { method: 'POST', headers: { ...headers, 'X-CSRF-Token': auth.csrfToken }, body: JSON.stringify(input) })).status, 201);

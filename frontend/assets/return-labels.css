@@ -175,6 +175,10 @@ body.return-label-printing:has(.return-label-dialog[data-label-size="62x29"]){pa
 body.return-label-printing:has(.return-label-dialog[data-label-size="auto"]){page:rb-label-auto}
 body.return-label-printing:has(.return-label-dialog[data-label-print-state="blocked"]){page:rb-label-a4}
 body.return-label-printing{display:block!important;overflow:visible!important;background:white!important;margin:0!important;padding:0!important}
+/* The page backdrop (grain, light curves, gradients) sits on the root element or on a fixed layer of the body: neither belongs on the paper. */
+html:has(body.return-label-printing){background:#fff!important;color-scheme:light!important}
+body.return-label-printing::before,body.return-label-printing::after{content:none!important;display:none!important;background:none!important}
+body.return-label-printing .notice-stack{display:none!important}
 body.return-label-printing>:not(.return-label-dialog){display:none!important}
 body.return-label-printing dialog.return-label-dialog{display:block!important;position:static!important;inset:auto!important;width:auto!important;max-width:none!important;height:auto!important;max-height:none!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important;background:#fff!important;color:#111!important}
 .return-label-dialog::backdrop{display:none!important}

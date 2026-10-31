@@ -168,7 +168,13 @@ export async function handleAdminRoute(ctx) {
             return json(await preferences.get(section));
         if (method === 'PUT') {
             const input = await body();
-            return json(await mutate(async () => { await requireAdministration(); return preferences.update(section, input); }));
+            return json(await mutate(async () => {
+                await requireAdministration();
+                // Going back to the standard statuses also archives every other status (refused while a return still uses one).
+                if (section === 'rules' && input?.customStatuses === false && (await preferences.get('rules')).customStatuses)
+                    await store.masters.useStandardStatuses();
+                return preferences.update(section, input);
+            }));
         }
     }
     if (path === '/api/users') {

@@ -61,6 +61,17 @@ test('printing still uses the real paper sizes at 100 % without the screen contr
     assert.ok(print.includes('print-color-adjust:exact'));
 });
 
+test('printing drops the page backdrop, which sits on the root element or on a fixed layer, and the status bars', () => {
+    const print = css.slice(css.indexOf('@media print{'));
+    assert.ok(print.includes('html:has(body.return-label-printing){background:#fff!important;color-scheme:light!important}'));
+    assert.ok(print.includes('body.return-label-printing::before,body.return-label-printing::after{content:none!important;display:none!important;background:none!important}'));
+    assert.ok(print.includes('body.return-label-printing .notice-stack{display:none!important}'));
+    // The backdrop of the application is painted on :root (mouse) or on body::before (touch); both are covered above.
+    const theme = readFileSync(new URL('../public/theme.css', import.meta.url), 'utf8');
+    assert.match(theme, /:root:has\(body\[data-ui="board"\]\)\{background-image:var\(--backdrop-art\)/);
+    assert.match(theme, /body\[data-ui="board"\]::before\{content:"";position:fixed/);
+});
+
 test('the label keeps one canonical logo and no inline styling hooks', () => {
     assert.doesNotMatch(css, /<svg|url\(data:/);
     assert.match(declarations('.return-label-brand'), /width:var\(--logo\);height:var\(--logo\)/);
