@@ -20,6 +20,30 @@ export function revealOnScroll(elements:HTMLElement[],query:MotionQuery,Observer
  return ()=>{showAll();query.removeEventListener('change',changed);};
 }
 
+// The hero scene leans a few pixels toward the pointer. It is decoration only: it needs a fine pointer,
+// follows the effective motion choice and rests again when the pointer leaves or motion is reduced.
+export function bindHeroDepth(page:Document,query:MotionQuery,pointer:{readonly matches:boolean},schedule:(callback:()=>void)=>unknown=callback=>window.requestAnimationFrame(callback)):void{
+ const stage=page.querySelector<HTMLElement>('.hero-stage'),scene=page.querySelector<HTMLElement>('.hero-scene');
+ if(!stage||!scene)return;
+ let queued=false,x=0,y=0;
+ const clamp=(value:number)=>Math.max(-1,Math.min(1,value));
+ const paint=()=>{queued=false;scene.style.setProperty('--depth-x',x.toFixed(3));scene.style.setProperty('--depth-y',y.toFixed(3));};
+ const aim=(nextX:number,nextY:number)=>{x=nextX;y=nextY;if(!queued){queued=true;schedule(paint);}};
+ stage.addEventListener('pointermove',event=>{
+  if(query.matches||!pointer.matches||event.pointerType==='touch')return;
+  const box=stage.getBoundingClientRect();if(!box.width||!box.height)return;
+  aim(clamp((event.clientX-box.left)/box.width*2-1),clamp((event.clientY-box.top)/box.height*2-1));
+ });
+ stage.addEventListener('pointerleave',()=>aim(0,0));
+ query.addEventListener('change',()=>{if(query.matches)aim(0,0);});
+}
+
+// Restarts the CSS animation of one element, for example the typed install command after a tab change.
+export function replayAnimation(element:HTMLElement|null):void{
+ if(!element)return;
+ element.style.animation='none';void element.offsetWidth;element.style.removeProperty('animation');
+}
+
 // The system is the default. The visible switch lets a visitor explicitly
 // enable motion; visibility only pauses decoration, never the content itself.
 export function bindSceneMotion(page:Document,query:MediaQueryList,Observer:typeof IntersectionObserver|undefined,storage:()=>Pick<Storage,'getItem'|'setItem'>=()=>window.localStorage):MotionQuery{

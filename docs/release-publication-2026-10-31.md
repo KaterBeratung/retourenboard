@@ -42,4 +42,18 @@ Quellcode: https://github.com/KaterBeratung/retourenboard/commit/c58603d2c063205
 - Stabile Veröffentlichung v4.0.98, als neueste Version markiert. Neun Uploads wie bei 4.0.97. Größen und SHA256-Prüfsummen aller neun Dateien auf GitHub stimmen mit den lokalen Dateien überein; der stabile Download-Link antwortet mit 200.
 - Linuxarchiv: 65.177.972 Bytes.
 - Docker: Veröffentlichungslauf 41247163370 erfolgreich. `ghcr.io/katerberatung/retourenboard:4.0.98` und `latest` zeigen auf den OCI-Index `sha256:e9bc327aa415eeb2b1d67c3e6a08197cc247767a7ef6cd35398c37572954a82a` mit Linux AMD64 und ARM64.
-- Diese Ergänzung der Veröffentlichungsnotiz liegt nur lokal und geht beim nächsten Veröffentlichungsauftrag mit.
+- Diese Ergänzung ging mit der Veröffentlichung 4.0.102 mit nach GitHub.
+
+## Nachtrag: 4.0.102 (01.11.2026)
+
+Release: https://github.com/KaterBeratung/retourenboard/releases/tag/v4.0.102
+Quellcode: https://github.com/KaterBeratung/retourenboard/commit/bc88d213ac2537f2f4c77cb90ad65b16aec98621
+
+- `main` per Vorwärts-Update von `c58603d` (4.0.98) auf `bc88d21` aktualisiert (ein Commit, 26 Dateien, 280 Einfügungen, 72 Löschungen); keine Historie überschrieben. Das annotierte Tag `v4.0.102` zeigt auf diesen Commit. Der Stand umfasst 4.0.99 bis 4.0.102: geordnete Abfragen innerhalb von Datenbanktransaktionen, gekürzte Hinweistexte der Suchfelder am Handy, eine einzelne immer sichtbare angeheftete Nachricht im Chat und einheitliche Abstände der Oberfläche. Vorgehen, Ausschlüsse und Schlüsselsuche wie bei 4.0.97 (keine Treffer).
+- Vollständiger Testlauf: 1.572 Tests, 1.569 bestanden, null Fehler, drei umgebungsbedingte Auslassungen unter Windows.
+- Stabile Veröffentlichung v4.0.102, als neueste Version markiert. Neun Uploads wie bei 4.0.97. Größen und SHA256-Prüfsummen aller neun Dateien auf GitHub stimmen mit den lokalen Dateien überein; der stabile Download-Link antwortet mit 200.
+- Linuxarchiv: 65.180.813 Bytes, SHA256 `625915dfd33483630d18a708fc403db702c6dac3f189929b68ca8433a795ae3c`.
+- Docker: Veröffentlichungslauf 41319750464 erfolgreich. `ghcr.io/katerberatung/retourenboard:4.0.102` und `latest` zeigen auf den OCI-Index `sha256:e2cb83e46191cc630de447465f2bdaa40ed6c4008ec4a8e995c3814b90181f9b` mit Linux AMD64 und ARM64.
+- Zwischenstände 4.0.99, 4.0.100 und 4.0.101 wurden nicht einzeln veröffentlicht; 4.0.100 (aufklappbare Anheftungsliste) wurde in 4.0.101 ersetzt.
+- `D:\retourenboard` steht weiterhin auf 4.0.72; der Stand wurde nicht dorthin übertragen.
+- Diese Ergänzung ging mit der Veröffentlichung 4.0.103 mit nach GitHub.

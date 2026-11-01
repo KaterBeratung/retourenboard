@@ -1,7 +1,7 @@
 /* One visual system for the standalone product website: the look "Nachtgrün" of the application (navy surfaces, the luminous green of the app icon, rim-light backdrop, firm rounded shapes). */
 :root{
  color-scheme:light;--bg:#edf2f5;--panel:#fff;--subtle:#f3f6f8;--raised:#fff;--line:#d8e1e8;--edge:#ffffffb3;
- --text:#0f1c2a;--muted:#4b5d6e;--green:#17772f;--accent-hover:#115f25;--on-accent:#fff;--tint:#e2f5e6;
+ --text:#0f1c2a;--muted:#4b5d6e;--green:#17772f;--shine:color-mix(in srgb,var(--brand) 70%,#fff);--accent-hover:#115f25;--on-accent:#fff;--tint:#e2f5e6;
  --brand:#65d56c;--brand-ink:#06231a;--brand-gradient:linear-gradient(150deg,#c3fba4,#65d56c 48%,#25904a);--brand-gradient-hover:linear-gradient(150deg,#d3ffbb,#76e07d 48%,#2ba253);
  --blue:#1f5f98;--blue-tint:#e6f0fa;--orange:#8a5a08;--orange-tint:#fdf1d6;--violet:#6554a8;--violet-tint:#efedf8;--progress:#a8531b;--progress-tint:#fcebdc;
  --glass:#ffffffe0;--glint:#ffffffe0;--sheet:linear-gradient(150deg,#ffffffed,#f3f6f8f0);--control:linear-gradient(165deg,#ffffffeb,#ffffff8c);
@@ -15,7 +15,7 @@
 }
 :root[data-theme=dark]{
  color-scheme:dark;--bg:#0a131d;--panel:#101e2c;--subtle:#15263a;--raised:#1a2f45;--line:#ffffff17;--edge:#ffffff29;
- --text:#f3f8f6;--muted:#a8b9c9;--green:#6edb74;--accent-hover:#8aea8e;--on-accent:#05230f;--tint:#123a33;
+ --text:#f3f8f6;--muted:#a8b9c9;--green:#6edb74;--shine:#eaffe8;--accent-hover:#8aea8e;--on-accent:#05230f;--tint:#123a33;
  --blue:#8cc2f5;--blue-tint:#15304a;--orange:#f2c36d;--orange-tint:#392e17;--violet:#c3b6f2;--violet-tint:#2a2742;--progress:#f3ad73;--progress-tint:#3a2a1b;
  --glass:#101e2cd9;--glint:#ffffff0d;--sheet:linear-gradient(150deg,#15263aed,#101e2cf5);--control:linear-gradient(165deg,#ffffff10,#ffffff03);
  --shadow:inset 0 1px 0 var(--glint),0 2px 6px #00000026,0 10px 28px #0000001f;--shadow-float:inset 0 1px 0 var(--glint),0 22px 56px #00000059,0 4px 12px #0000002e;
@@ -23,7 +23,7 @@
 }
 @media(prefers-color-scheme:dark){:root:not([data-theme]){
  color-scheme:dark;--bg:#0a131d;--panel:#101e2c;--subtle:#15263a;--raised:#1a2f45;--line:#ffffff17;--edge:#ffffff29;
- --text:#f3f8f6;--muted:#a8b9c9;--green:#6edb74;--accent-hover:#8aea8e;--on-accent:#05230f;--tint:#123a33;
+ --text:#f3f8f6;--muted:#a8b9c9;--green:#6edb74;--shine:#eaffe8;--accent-hover:#8aea8e;--on-accent:#05230f;--tint:#123a33;
  --blue:#8cc2f5;--blue-tint:#15304a;--orange:#f2c36d;--orange-tint:#392e17;--violet:#c3b6f2;--violet-tint:#2a2742;--progress:#f3ad73;--progress-tint:#3a2a1b;
  --glass:#101e2cd9;--glint:#ffffff0d;--sheet:linear-gradient(150deg,#15263aed,#101e2cf5);--control:linear-gradient(165deg,#ffffff10,#ffffff03);
  --shadow:inset 0 1px 0 var(--glint),0 2px 6px #00000026,0 10px 28px #0000001f;--shadow-float:inset 0 1px 0 var(--glint),0 22px 56px #00000059,0 4px 12px #0000002e;
@@ -124,9 +124,9 @@ html[data-site-motion=normal] .product-preview[data-reveal-state=visible] .board
 html[data-site-motion=normal] :is(.button,.header-actions>button,.header-support,.menu-toggle,.preview-device-controls>button,.preview-tabs>button,.install-tabs>button,.workflow-steps>button,.motion-toggle,.footer-support,.header nav>a):not(:disabled):not([aria-disabled="true"])::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;opacity:0;translate:-110% 0;background:linear-gradient(110deg,transparent 30%,color-mix(in srgb,var(--green) 20%,transparent) 48%,transparent 66%)}
 html[data-site-motion=normal] .button.primary::after{background:linear-gradient(110deg,transparent 30%,#ffffff2e 48%,transparent 66%)}
 html[data-site-motion=normal] :is(.button,.header-actions>button,.header-support,.menu-toggle,.preview-device-controls>button,.preview-tabs>button,.install-tabs>button,.workflow-steps>button,.motion-toggle,.footer-support,.header nav>a):not(:disabled):not([aria-disabled="true"]):focus-visible::after{animation:surface-sheen 550ms var(--ease)}
-html[data-site-motion=normal] .feature[data-reveal-state=visible]>:is(.feature-top,h3,p){animation:detail-arrive 550ms var(--ease) both}
-html[data-site-motion=normal] .feature[data-reveal-state=visible]>h3{animation-delay:70ms}
-html[data-site-motion=normal] .feature[data-reveal-state=visible]>p{animation-delay:140ms}
+html[data-site-motion=normal] .feature[data-reveal-state=visible]>:is(.feature-top,h3,p){animation:detail-arrive 550ms var(--ease) var(--stagger,0ms) both}
+html[data-site-motion=normal] .feature[data-reveal-state=visible]>h3{animation-delay:calc(var(--stagger,0ms) + 70ms)}
+html[data-site-motion=normal] .feature[data-reveal-state=visible]>p{animation-delay:calc(var(--stagger,0ms) + 140ms)}
 html[data-site-motion=normal] .workflow-track>i::after{transition:transform 500ms var(--ease)}
 html[data-site-motion=normal] .file-document{transition:translate 450ms var(--ease),rotate 450ms var(--ease)}
 @media(hover:hover) and (pointer:fine){
@@ -139,6 +139,139 @@ html[data-site-motion=normal] .file-document{transition:translate 450ms var(--ea
  html[data-site-motion=normal] .feature:hover .document-front{rotate:9deg;translate:0 -4px}
  html[data-site-motion=normal] .feature:hover .chat-bubble{animation:message-pop 500ms var(--ease);transform-origin:bottom left}
 }
+/* Choreography: sections arrive in sequence, feature scenes play once and the hero follows the pointer. Everything sits under normal motion, so reduced motion keeps the finished page. */
+@keyframes chip-pop{from{opacity:0;scale:.82}60%{opacity:1;scale:1.05}to{opacity:1;scale:1}}
+@keyframes soft-ring{from{box-shadow:0 0 0 0 color-mix(in srgb,var(--green) 40%,transparent)}to{box-shadow:0 0 0 12px transparent}}
+@keyframes wipe-in{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0)}}
+@keyframes check-draw{from{stroke-dasharray:24;stroke-dashoffset:24}to{stroke-dasharray:24;stroke-dashoffset:0}}
+@keyframes check-loop{0%,5%{stroke-dasharray:24;stroke-dashoffset:0}12%,40%{stroke-dasharray:24;stroke-dashoffset:24}55%,100%{stroke-dasharray:24;stroke-dashoffset:0}}
+@keyframes fan-out{from{opacity:0;rotate:0deg;translate:0 0}}
+@keyframes slide-in{from{opacity:0;translate:-14px 0}to{opacity:1;translate:0 0}}
+@keyframes line-grow{from{scale:0 1}to{scale:1 1}}
+@keyframes led-blink{50%{opacity:.2}}
+@keyframes packet-run{0%{opacity:0;left:0}15%,80%{opacity:1}100%{opacity:0;left:calc(100% - 5px)}}
+@keyframes live-ping{from{box-shadow:0 0 0 0 color-mix(in srgb,var(--green) 45%,transparent)}70%,to{box-shadow:0 0 0 8px transparent}}
+@keyframes text-shine{from{background-position:100% 0}to{background-position:0 0}}
+@keyframes progress-grow{from{scale:0 1}to{scale:1 1}}
+/* Reading progress as a thin line at the top edge, driven by the scroll position where the browser supports it. */
+@supports(animation-timeline:scroll()){html[data-site-motion=normal]::after{content:"";position:fixed;inset:0 0 auto;height:3px;z-index:60;background:var(--brand-gradient);pointer-events:none;transform-origin:0 50%;scale:0 1;animation:progress-grow linear both;animation-timeline:scroll(root block)}}
+@media print{html[data-site-motion=normal]::after{display:none}}
+/* Hero: the scene leans toward the pointer (set by script), the live dot pings and the scanned check redraws with every scan pass. */
+html[data-site-motion=normal] .hero-scene{--depth-x:0;--depth-y:0}
+html[data-site-motion=normal] :is(.hero-illustration,.scene-pill,.studio-halo){transition:transform 420ms var(--ease)}
+html[data-site-motion=normal] .hero-illustration{transform:translate3d(calc(var(--depth-x) * -12px),calc(var(--depth-y) * -9px),0)}
+html[data-site-motion=normal] .scene-pill{transform:translate3d(calc(var(--depth-x) * -26px),calc(var(--depth-y) * -18px),0)}
+html[data-site-motion=normal] .studio-halo{transform:translate3d(calc(var(--depth-x) * 16px),calc(var(--depth-y) * 12px),0)}
+html[data-site-motion=normal] .hero-badge .live-dot{animation:live-ping 2.6s ease-out 1.4s infinite;animation-play-state:paused}
+html[data-site-motion=normal] .scene-pill-scan>.site-icon:last-child path{animation:check-loop 5.5s ease-in-out 1.5s infinite;animation-play-state:paused}
+html[data-scene-motion=play] :is(.hero-badge .live-dot,.scene-pill-scan>.site-icon:last-child path){animation-play-state:running}
+@supports(background-clip:text){html[data-site-motion=normal] .hero h1>span{background-image:linear-gradient(100deg,var(--green) 0 42%,var(--shine) 50%,var(--green) 58% 100%);background-size:260% 100%;background-position:100% 0;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:text-shine 1.7s ease-in-out 1.1s both}}
+@media print,(forced-colors:active){html[data-site-motion=normal] .hero h1>span{background:none;color:var(--green);-webkit-text-fill-color:currentColor;animation:none}}
+/* Section intros: the muted second line and the lead paragraph follow the headline. */
+html[data-site-motion=normal] [data-reveal-state=visible] h2>span{animation:detail-arrive 650ms var(--ease) 160ms backwards}
+html[data-site-motion=normal] .section-intro[data-reveal-state=visible]>p:not(.eyebrow):not(.section-kicker){animation:detail-arrive 600ms var(--ease) 260ms backwards}
+html[data-site-motion=normal] .section-intro[data-reveal-state=visible] .download-actions{animation:detail-arrive 600ms var(--ease) 360ms backwards}
+/* Benefit strip and product preview. */
+html[data-site-motion=normal] .benefit-strip .container>span:nth-child(2){--d:90ms}
+html[data-site-motion=normal] .benefit-strip .container>span:nth-child(3){--d:180ms}
+html[data-site-motion=normal] .benefit-strip .container>span:nth-child(4){--d:270ms}
+html[data-site-motion=normal] .benefit-strip[data-reveal-state=visible] .container>span{animation:detail-arrive 560ms var(--ease) var(--d,0ms) backwards}
+html[data-site-motion=normal] .benefit-strip[data-reveal-state=visible] b{animation:chip-pop 520ms var(--ease) calc(var(--d,0ms) + 160ms) backwards}
+html[data-site-motion=normal] .preview-tabs>button:nth-child(1){--d:520ms}
+html[data-site-motion=normal] .preview-tabs>button:nth-child(2){--d:600ms}
+html[data-site-motion=normal] .preview-tabs>button:nth-child(3){--d:680ms}
+html[data-site-motion=normal] .product-preview[data-reveal-state=visible] .preview-tabs>button{animation:chip-pop 500ms var(--ease) var(--d,0ms) backwards}
+/* Workflow demo: steps and track arrive one by one, every step swaps in its own message, chips and check. */
+html[data-site-motion=normal] .workflow-steps>:nth-child(1){--d:120ms}
+html[data-site-motion=normal] .workflow-steps>:nth-child(2){--d:220ms}
+html[data-site-motion=normal] .workflow-steps>:nth-child(3){--d:320ms}
+html[data-site-motion=normal] .workflow-steps>:nth-child(4){--d:440ms}
+html[data-site-motion=normal] .workflow-track>:nth-child(1){--d:420ms}
+html[data-site-motion=normal] .workflow-track>:nth-child(3){--d:560ms}
+html[data-site-motion=normal] .workflow-track>:nth-child(5){--d:700ms}
+html[data-site-motion=normal] .workflow-files>span:nth-child(1){--d:300ms}
+html[data-site-motion=normal] .workflow-files>span:nth-child(2){--d:390ms}
+html[data-site-motion=normal] .workflow-layout[data-reveal-state=visible] .workflow-steps>:is(button,.workflow-hint){animation:detail-arrive 600ms var(--ease) var(--d,0ms) backwards}
+html[data-site-motion=normal] .workflow-layout[data-reveal-state=visible] .workflow-track>span{animation:chip-pop 520ms var(--ease) var(--d,0ms) backwards}
+html[data-site-motion=normal] .workflow-layout[data-reveal-state=visible] [data-workflow-panel]:not([hidden]) .workflow-message{animation:detail-arrive 480ms var(--ease) 60ms backwards}
+html[data-site-motion=normal] .workflow-layout[data-reveal-state=visible] [data-workflow-panel]:not([hidden]) :is(.message-glyph,.avatar){animation:chip-pop 520ms var(--ease) 200ms backwards}
+html[data-site-motion=normal] .workflow-layout[data-reveal-state=visible] [data-workflow-panel]:not([hidden]) .workflow-files>span{animation:chip-pop 440ms var(--ease) var(--d,300ms) backwards}
+html[data-site-motion=normal] .workflow-layout[data-reveal-state=visible] [data-workflow-panel="2"]:not([hidden]) .message-glyph{animation:chip-pop 520ms var(--ease) 200ms backwards,soft-ring 900ms ease-out 640ms backwards}
+/* Feature cards: grid neighbours arrive one after the other and each card plays its own small scene once. */
+html[data-site-motion=normal] .features>.feature:nth-child(odd):not(.feature-lead){--stagger:110ms}
+html[data-site-motion=normal] .features>.feature[data-reveal-state=visible]{animation-delay:var(--stagger,0ms)}
+html[data-site-motion=normal] .feature[data-reveal-state=visible] .feature-icon{animation:chip-pop 560ms var(--ease) calc(var(--stagger,0ms) + 160ms) backwards}
+html[data-site-motion=normal] .feature .flow>:nth-child(1){--d:360ms}
+html[data-site-motion=normal] .feature .flow>:nth-child(2){--d:480ms}
+html[data-site-motion=normal] .feature .flow>:nth-child(3){--d:600ms}
+html[data-site-motion=normal] .feature .flow>:nth-child(4){--d:720ms}
+html[data-site-motion=normal] .feature .flow>:nth-child(5){--d:840ms}
+html[data-site-motion=normal] .feature .avatar-stack .avatar:nth-child(1){--d:300ms}
+html[data-site-motion=normal] .feature .avatar-stack .avatar:nth-child(2){--d:390ms}
+html[data-site-motion=normal] .feature .avatar-stack .avatar:nth-child(3){--d:480ms}
+html[data-site-motion=normal] .feature .chat-bubble>strong{--d:560ms}
+html[data-site-motion=normal] .feature .chat-bubble>p{--d:660ms}
+html[data-site-motion=normal] .feature .access-list>div:nth-child(1){--d:320ms}
+html[data-site-motion=normal] .feature .access-list>div:nth-child(2){--d:420ms}
+html[data-site-motion=normal] .feature .access-list>div:nth-child(3){--d:520ms}
+html[data-site-motion=normal] .feature .admin-tools>span:nth-child(1){--d:320ms}
+html[data-site-motion=normal] .feature .admin-tools>span:nth-child(2){--d:400ms}
+html[data-site-motion=normal] .feature .admin-tools>span:nth-child(3){--d:480ms}
+html[data-site-motion=normal] .feature .admin-tools>span:nth-child(4){--d:560ms}
+html[data-site-motion=normal] .feature .file-chips>span:nth-child(1){--d:700ms}
+html[data-site-motion=normal] .feature .file-chips>span:nth-child(2){--d:780ms}
+html[data-site-motion=normal] .feature .file-chips>span:nth-child(3){--d:860ms}
+html[data-site-motion=normal] .feature .product-card{--d:260ms}
+html[data-site-motion=normal] .feature .device-art{--d:380ms}
+html[data-site-motion=normal] .feature .scan-result{--d:1200ms}
+html[data-site-motion=normal] .feature .disposal-symbol{--d:320ms}
+html[data-site-motion=normal] .feature .disposal-illustration>div{--d:420ms}
+html[data-site-motion=normal] .feature[data-reveal-state=visible] :is(.flow>span:not([aria-hidden]),.avatar-stack .avatar,.admin-tools>span,.file-chips>span,.scan-result,.disposal-symbol,.device-art){animation:chip-pop 520ms var(--ease) calc(var(--stagger,0ms) + var(--d,300ms)) backwards}
+html[data-site-motion=normal] .feature[data-reveal-state=visible] :is(.flow>span[aria-hidden],.product-card,.access-list>div,.chat-bubble>:is(strong,p),.disposal-illustration>div){animation:detail-arrive 560ms var(--ease) calc(var(--stagger,0ms) + var(--d,300ms)) backwards}
+html[data-site-motion=normal] .feature[data-reveal-state=visible] .flow>span:nth-child(5){animation:chip-pop 520ms var(--ease) calc(var(--stagger,0ms) + 840ms) backwards,soft-ring 900ms ease-out calc(var(--stagger,0ms) + 1300ms) backwards}
+html[data-site-motion=normal] .feature[data-reveal-state=visible] .barcode{animation:wipe-in 700ms var(--ease) calc(var(--stagger,0ms) + 620ms) backwards}
+html[data-site-motion=normal] .feature[data-reveal-state=visible] .document-back{animation:fan-out 700ms var(--ease) calc(var(--stagger,0ms) + 300ms) backwards}
+html[data-site-motion=normal] .feature[data-reveal-state=visible] .document-front{animation:fan-out 700ms var(--ease) calc(var(--stagger,0ms) + 420ms) backwards}
+html[data-site-motion=normal] .feature[data-reveal-state=visible] .scan-result .site-icon path{animation:check-draw 480ms var(--ease) calc(var(--stagger,0ms) + 1350ms) backwards}
+html[data-site-motion=normal] .feature[data-reveal-state=visible] .disposal-illustration>.site-icon path{animation:check-draw 480ms var(--ease) calc(var(--stagger,0ms) + 1000ms) backwards}
+/* Own server: list items tick in, the two servers blink, the line grows and a packet travels to the board. */
+html[data-site-motion=normal] .check-list li:nth-child(1){--d:260ms}
+html[data-site-motion=normal] .check-list li:nth-child(2){--d:340ms}
+html[data-site-motion=normal] .check-list li:nth-child(3){--d:420ms}
+html[data-site-motion=normal] .check-list li:nth-child(4){--d:500ms}
+html[data-site-motion=normal] .check-list li:nth-child(5){--d:580ms}
+html[data-site-motion=normal] .server-stack>div:nth-child(1){--d:360ms}
+html[data-site-motion=normal] .server-stack>div:nth-child(2){--d:480ms}
+html[data-site-motion=normal] .server-connection{position:relative}
+html[data-site-motion=normal] .server-connection::after{content:"";position:absolute;top:-2px;left:0;width:5px;height:5px;border-radius:50%;background:var(--green);opacity:0}
+html[data-site-motion=normal] .ownership-grid[data-reveal-state=visible] .check-list li{animation:detail-arrive 560ms var(--ease) var(--d,0ms) backwards}
+html[data-site-motion=normal] .ownership-grid[data-reveal-state=visible] .check-list li::before{animation:chip-pop 480ms var(--ease) calc(var(--d,0ms) + 140ms) backwards}
+html[data-site-motion=normal] .ownership-grid[data-reveal-state=visible] .server-stack>div{animation:slide-in 560ms var(--ease) var(--d,0ms) backwards}
+html[data-site-motion=normal] .ownership-grid[data-reveal-state=visible] .server-led{animation:led-blink 800ms ease-in-out calc(var(--d,0ms) + 500ms) 3}
+html[data-site-motion=normal] .ownership-grid[data-reveal-state=visible] .server-connection{transform-origin:0 50%;animation:line-grow 560ms var(--ease) 700ms backwards}
+html[data-site-motion=normal] .ownership-grid[data-reveal-state=visible] .server-connection::after{animation:packet-run 1100ms ease-in-out 1.3s 3}
+html[data-site-motion=normal] .ownership-grid[data-reveal-state=visible] .server-board{animation:chip-pop 560ms var(--ease) 1s backwards}
+/* Installation: steps arrive in order, the terminal types the command and the copy button confirms. */
+html[data-site-motion=normal] .steps>li:nth-child(1){--d:80ms}
+html[data-site-motion=normal] .steps>li:nth-child(2){--d:200ms}
+html[data-site-motion=normal] .steps>li:nth-child(3){--d:320ms}
+html[data-site-motion=normal] .steps[data-reveal-state=visible]>li{animation:detail-arrive 600ms var(--ease) var(--d,0ms) backwards}
+html[data-site-motion=normal] .steps[data-reveal-state=visible]>li>span{animation:chip-pop 520ms var(--ease) calc(var(--d,0ms) + 180ms) backwards}
+html[data-site-motion=normal] .terminal[data-reveal-state=visible] .terminal-dot{animation:live-ping 1.4s ease-out 600ms 2 backwards}
+html[data-site-motion=normal] .terminal[data-reveal-state=visible] #install-command{animation:wipe-in 1s steps(30,end) 500ms backwards}
+html[data-site-motion=normal] #copy-command[data-copied]{animation:soft-ring 800ms ease-out}
+html[data-site-motion=normal] #copy-command[data-copied] .site-icon{animation:chip-pop 520ms var(--ease)}
+/* Questions and closing call to action. */
+html[data-site-motion=normal] .faq details:nth-child(1){--d:140ms}
+html[data-site-motion=normal] .faq details:nth-child(2){--d:210ms}
+html[data-site-motion=normal] .faq details:nth-child(3){--d:280ms}
+html[data-site-motion=normal] .faq details:nth-child(4){--d:350ms}
+html[data-site-motion=normal] .faq details:nth-child(5){--d:420ms}
+html[data-site-motion=normal] .faq-section[data-reveal-state=visible] .faq details{animation:detail-arrive 560ms var(--ease) var(--d,0ms) backwards}
+html[data-site-motion=normal] .closing .eyebrow{--d:80ms}
+html[data-site-motion=normal] .closing h2{--d:180ms}
+html[data-site-motion=normal] .closing .button{--d:320ms}
+html[data-site-motion=normal] .closing[data-reveal-state=visible] :is(.eyebrow,h2,.button){animation:detail-arrive 620ms var(--ease) var(--d,0ms) backwards}
 html[data-site-motion=reduce],html[data-site-motion=reduce] *,html[data-site-motion=reduce] *::before,html[data-site-motion=reduce] *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 html[data-site-motion=reduce] [data-reveal-state=pending]{opacity:1;translate:0}
 @media(prefers-reduced-motion:reduce){html:not([data-site-motion=normal]),html:not([data-site-motion=normal]) *,html:not([data-site-motion=normal]) *::before,html:not([data-site-motion=normal]) *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}html:not([data-site-motion=normal]) [data-reveal-state=pending]{opacity:1;translate:0}}

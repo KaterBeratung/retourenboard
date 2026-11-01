@@ -2,7 +2,7 @@ import {bindMobileMenu} from './navigation.js';
 import {bindThemeToggle} from './theme.js';
 export {bindThemeToggle} from './theme.js';
 export {bindMobileMenu} from './navigation.js';
-import {revealOnScroll,bindSceneMotion} from './motion.js';
+import {revealOnScroll,bindSceneMotion,bindHeroDepth,replayAnimation} from './motion.js';
 import {createLanguageController} from './i18n.js';
 import {createReleaseDownload,type DownloadKind} from './downloads.js';
 import {createPreferencePrivacy,bindPrivacyBanner,privacyStorageKey} from './privacy.js';
@@ -10,12 +10,13 @@ import {bindPreviewDevice} from './preview-device.js';
 export {bindPreviewDevice} from './preview-device.js';
 export {createPreferencePrivacy,bindPrivacyBanner} from './privacy.js';
 export {selectReleaseDownload,resolveLatestDownload,createReleaseDownload} from './downloads.js';
-export {revealOnScroll,bindSceneMotion} from './motion.js';
+export {revealOnScroll,bindSceneMotion,bindHeroDepth,replayAnimation} from './motion.js';
 export {createLanguageController,translateText,englishText} from './i18n.js';
 const privacy=createPreferencePrivacy(()=>window.localStorage);
 const language=createLanguageController(document,()=>privacy.storage);
 bindThemeToggle(document,window.matchMedia('(prefers-color-scheme: dark)'),()=>privacy.storage);
 const motion=bindSceneMotion(document,window.matchMedia('(prefers-reduced-motion: reduce)'),window.IntersectionObserver,()=>privacy.storage);
+bindHeroDepth(document,motion,window.matchMedia('(hover: hover) and (pointer: fine)'));
 bindPrivacyBanner(document,privacy);
 window.addEventListener?.('storage',event=>{if(event.key===privacyStorageKey||event.key===null)privacy.sync();});
 const downloadLinks=[...document.querySelectorAll<HTMLAnchorElement>('[data-release-download]')];
@@ -62,11 +63,12 @@ bindTabs('[data-install]', button => {
  generation++; const install = button.dataset.install === 'install';
  installMode=install;copyMessage='';
  if (command) command.textContent = install ? 'sudo bash retourenboard-install.sh' : 'bash retourenboard-install.sh --test';
+ replayAnimation(command);
  document.getElementById('command-panel')?.setAttribute('aria-labelledby', button.id);renderLocalizedState();
 });
 copy?.addEventListener('click', async () => {
  const text = command?.textContent; if (!text || !status) return; const current = generation; copy.disabled = true;
- try { if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable'); await navigator.clipboard.writeText(text); if (current === generation) {copyMessage='Befehl kopiert.';renderLocalizedState();} }
+ try { if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable'); await navigator.clipboard.writeText(text); if (current === generation) {copyMessage='Befehl kopiert.';renderLocalizedState();copy.dataset.copied='true';window.setTimeout(()=>{delete copy.dataset.copied;},900);} }
  catch { if (current === generation) {copyMessage='Bitte den Befehl oben markieren und kopieren.';renderLocalizedState();} }
  finally { copy.disabled = false; }
 });
