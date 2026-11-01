@@ -57,3 +57,32 @@ test('unsafe PostgreSQL bigint results fail rather than lose precision',async t=
  await assert.rejects(db.query("SELECT '9007199254740993'::bigint AS value"),/Zahlenbereich|integer|precision/i);
  assert.equal((await db.query('SELECT 2 AS value')).rows[0].value,2);
 });
+
+test('queries started at once inside one transaction run one after the other on its connection',async t=>{
+ const {postgresFixture}=await import('./helpers/postgres.js');
+ const {database:db}=await postgresFixture(t);const warnings=[];
+ const watch=warning=>{if(warning.name==='DeprecationWarning')warnings.push(warning.message);};process.on('warning',watch);t.after(()=>process.off('warning',watch));
+ await db.query('CREATE TABLE lane_probe(id SERIAL PRIMARY KEY, value INTEGER NOT NULL)');
+ const finished=[];
+ const rows=await db.transaction(async()=>{
+  const results=await Promise.all([1,2,3,4,5].map(async n=>{const result=await db.query('INSERT INTO lane_probe(value) VALUES($1) RETURNING id',[n]);finished.push(n);return result.rows[0].id;}));
+  // A failing statement in the middle rejects only its own caller; the queue keeps its order for the statements behind it.
+  const mixed=await Promise.allSettled([db.query('SELECT 1 AS one'),db.query('SELECT * FROM table_that_does_not_exist'),db.query('SELECT 2 AS two')]);
+  assert.equal(mixed[0].status,'fulfilled');assert.equal(mixed[1].status,'rejected');
+  return results;
+ }).catch(error=>error);
+ assert.deepEqual(finished,[1,2,3,4,5],'statements finish in the order they were started');
+ assert.deepEqual(rows,[1,2,3,4,5]);
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.deepEqual(warnings.filter(message=>/client\.query\(\)/.test(message)),[],'the driver is never asked for a second statement while one is running');
+});
+
+test('a transaction commits all of its concurrent statements together and rolls them back together',async t=>{
+ const {postgresFixture}=await import('./helpers/postgres.js');
+ const {database:db}=await postgresFixture(t);
+ await db.query('CREATE TABLE lane_commit(value INTEGER NOT NULL)');
+ await db.transaction(async()=>{await Promise.all([1,2,3].map(n=>db.query('INSERT INTO lane_commit VALUES($1)',[n])));});
+ assert.equal((await db.query('SELECT COUNT(*) AS n FROM lane_commit')).rows[0].n,3);
+ await assert.rejects(db.transaction(async()=>{await Promise.all([4,5,6].map(n=>db.query('INSERT INTO lane_commit VALUES($1)',[n])));throw Error('abort');}),/abort/);
+ assert.equal((await db.query('SELECT COUNT(*) AS n FROM lane_commit')).rows[0].n,3);
+});

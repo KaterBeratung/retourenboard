@@ -94,3 +94,39 @@ test('search cursors and pin inputs are validated, and pinned messages can be un
     assert.equal(unpinned.pinned, false);
     assert.deepEqual((await f.c.pins(await f.person(2), channel.id)).items, []);
 });
+test('a conversation has one pinned message: pinning another replaces it and unpinning leaves none', async (t) => {
+    const f = await fixture(t), channel = await f.group(), first = await f.send(channel.id, 'Erste Regel'), second = await f.send(channel.id, 'Zweite Regel');
+    await f.route(`/api/chat/messages/${first.id}/pin`, 'PUT', 2, {}, { pinned: true });
+    const saved = await f.route(`/api/chat/messages/${second.id}/pin`, 'PUT', 2, {}, { pinned: true });
+    assert.equal(saved.pinned, true);
+    assert.deepEqual((await f.route(`/api/chat/channels/${channel.id}/pins`, 'GET', 2)).items.map(row => row.id), [second.id]);
+    assert.deepEqual((await f.c.getChannel(await f.person(2), channel.id)).pins.map(row => row.id), [second.id]);
+    assert.deepEqual((await f.c.messages(await f.person(2), channel.id)).items.filter(row => row.pinned).map(row => row.id), [second.id], 'The earlier message is no longer pinned');
+    await f.route(`/api/chat/messages/${second.id}/pin`, 'PUT', 2, {}, { pinned: true });
+    assert.deepEqual((await f.c.pins(await f.person(2), channel.id)).items.map(row => row.id), [second.id], 'Pinning the same message again changes nothing');
+    await f.route(`/api/chat/messages/${second.id}/pin`, 'PUT', 2, {}, { pinned: false });
+    assert.deepEqual((await f.c.pins(await f.person(2), channel.id)).items, []);
+    assert.equal((await f.c.messages(await f.person(2), channel.id)).items.some(row => row.pinned), false);
+});
+test('replacing the pin in one conversation leaves the pinned message of another untouched', async (t) => {
+    const f = await fixture(t), one = await f.group(), two = await f.group(), a = await f.send(one.id, 'Eins A'), b = await f.send(one.id, 'Eins B'), other = await f.send(two.id, 'Zwei A');
+    for (const message of [a, other, b])
+        await f.route(`/api/chat/messages/${message.id}/pin`, 'PUT', 2, {}, { pinned: true });
+    assert.deepEqual((await f.c.pins(await f.person(2), one.id)).items.map(row => row.id), [b.id]);
+    assert.deepEqual((await f.c.pins(await f.person(2), two.id)).items.map(row => row.id), [other.id]);
+});
+test('conversations from earlier versions with several pins keep only their newest pin', async (t) => {
+    const f = await fixture(t), one = await f.group(), two = await f.group(), many = [];
+    for (const text of ['Alt', 'Mittel', 'Neu'])
+        many.push(await f.send(one.id, text));
+    const lone = await f.send(two.id, 'Einzige');
+    for (const [message, stamp] of [[many[1], '2026-10-13T11:00:00Z'], [many[2], '2026-10-13T12:00:00Z'], [many[0], '2026-10-13T10:00:00Z'], [lone, '2026-10-13T09:00:00Z']])
+        await f.store.db.query("INSERT INTO chat_message_pins(messageId,pinnedById,pinnedAt) VALUES($1,$2,$3)", [message.id, 2, stamp]);
+    assert.deepEqual((await f.c.pins(await f.person(2), one.id)).items.map(row => row.id), [many[2].id], 'Reads show the newest pin only');
+    await f.reconnect();
+    assert.equal(Number((await f.store.db.query("SELECT COUNT(*) AS n FROM chat_message_pins")).rows[0].n), 2, 'One pin per conversation remains');
+    assert.deepEqual((await f.c.messages(await f.person(2), one.id)).items.filter(row => row.pinned).map(row => row.id), [many[2].id]);
+    assert.deepEqual((await f.c.pins(await f.person(2), two.id)).items.map(row => row.id), [lone.id]);
+    await f.reconnect();
+    assert.equal(Number((await f.store.db.query("SELECT COUNT(*) AS n FROM chat_message_pins")).rows[0].n), 2, 'Cleaning up again is a no-op');
+});

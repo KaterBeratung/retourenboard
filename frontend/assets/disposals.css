@@ -1,4 +1,4 @@
-[data-ui="board"] .disposal-guide{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 24px;color:var(--muted);font-size:12px}
+[data-ui="board"] .disposal-guide{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 var(--space-section);color:var(--muted);font-size:12px}
 [data-ui="board"] .disposal-guide>span{display:inline-flex;align-items:center;gap:8px}
 .disposal-guide .icon{width:16px;height:16px}
 .disposal-guide>span>.icon{color:var(--design-accent)}

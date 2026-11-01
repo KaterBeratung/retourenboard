@@ -3,7 +3,7 @@ import {h,icon} from './ui.js';
 import {markForm} from './unsaved.js';
 import {renderChatAttachments} from './chat-files.js';
 
-addTranslations({'Angeheftet':'Pinned','Nachricht anheften':'Pin message','Anheftung lösen':'Unpin message','Du darfst diese Nachricht nicht anheften.':'You cannot pin this message.','Ungültige Anheftung.':'Invalid pin setting.','Pro Unterhaltung können höchstens 50 Nachrichten angeheftet werden.':'You can pin up to 50 messages per conversation.'});
+addTranslations({'Angeheftet':'Pinned','Nachricht anheften':'Pin message','Anheftung lösen':'Unpin message','Du darfst diese Nachricht nicht anheften.':'You cannot pin this message.','Ungültige Anheftung.':'Invalid pin setting.'});
 
 // New entries use an ascending cursor; refresh loaded entries too so older
 // edits and deletion markers remain accurate without replacing the composer.

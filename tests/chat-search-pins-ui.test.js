@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {sourceModule} from './helpers/source-module.js';
 
 const {bindChat,renderMessage,setLanguage}=await sourceModule(`
@@ -17,8 +18,8 @@ function fixture(t){
     if(selector==='[data-edit-message]'&&f.editButton&&this.innerHTML.includes('data-edit-message'))return [f.editButton];
     if(selector!=='[data-pin-message]')return [];this.pinButtons??=new Map();return [...this.innerHTML.matchAll(/data-pin-message="(\d+)"/g)].map(match=>{const n=match[1];if(!this.pinButtons.has(n))this.pinButtons.set(n,node({dataset:{pinMessage:n}}));return this.pinButtons.get(n);});
   },focus(){this.focused=true;},scrollIntoView(){this.scrolled=true;},addEventListener(name,handler){this[name]=handler;},...extra};let markup=element.innerHTML;Object.defineProperty(element,'innerHTML',{get(){return markup;},set(value){markup=value;this.writes++;},configurable:true});return element;};
-  const jumpCard=node(),toggle=node(),panel=node({hidden:true}),input=node(),form=node(),results=node(),status=node(),more=node(),clear=node(),submit=node(),pins=node(),pinList=node(),pinSummary=node(),older=node(),draft=node({value:'Mein ungesendeter Entwurf'});
-  const selectors={'[data-chat-search-toggle]':toggle,'#chat-message-search-panel':panel,'#chat-message-search-form':form,'#chat-message-search-input':input,'[data-chat-search-results]':results,'[data-chat-search-status]':status,'[data-chat-search-more]':more,'[data-chat-search-clear]':clear,'[data-chat-search-submit]':submit,'[data-chat-pins]':pins,'[data-chat-pins-list]':pinList,'[data-chat-pins-summary]':pinSummary,'#chat-older':older,'.message-composer':draft};
+  const jumpCard=node(),toggle=node(),panel=node({hidden:true}),input=node(),form=node(),results=node(),status=node(),more=node(),clear=node(),submit=node(),pins=node(),pinList=node(),older=node(),draft=node({value:'Mein ungesendeter Entwurf'});
+  const selectors={'[data-chat-search-toggle]':toggle,'#chat-message-search-panel':panel,'#chat-message-search-form':form,'#chat-message-search-input':input,'[data-chat-search-results]':results,'[data-chat-search-status]':status,'[data-chat-search-more]':more,'[data-chat-search-clear]':clear,'[data-chat-search-submit]':submit,'[data-chat-pins]':pins,'[data-chat-pins-list]':pinList,'#chat-older':older,'.message-composer':draft};
   form.querySelector=selector=>selectors[selector]??null;
   const plain=markup=>markup.replace(/<!--[\s\S]*?-->|<[^>]*>/g,'');
   const pane=node();let mounts=0;
@@ -35,7 +36,7 @@ function fixture(t){
     assert.ok(match[2].startsWith('/messages'),path);return {items:histories.get(n),hasMore:false,total:histories.get(n).length};
   }};
   globalThis.document={visibilityState:'visible',querySelector:()=>null,createElement:()=>node(),activeElement:null};globalThis.location={hash:'#channel-1'};globalThis.DOMParser=class{parseFromString(markup){return {body:{textContent:plain(markup)}};}};globalThis.setTimeout=callback=>{timers.push(callback);return {unref(){}};};
-  const f={ctx,pane,jumpCard,toggle,panel,input,form,results,status,more,clear,submit,pins,pinList,pinSummary,draft,requests,histories,channelOverrides,intercept:()=>undefined,get mounts(){return mounts;},poll:async()=>{await timers.shift()();},makeEditor(){
+  const f={ctx,pane,jumpCard,toggle,panel,input,form,results,status,more,clear,submit,pins,pinList,draft,requests,histories,channelOverrides,intercept:()=>undefined,get mounts(){return mounts;},poll:async()=>{await timers.shift()();},makeEditor(){
     const textarea=node(),menu=node(),editForm=node({dataset:{unsavedNotice:'hidden'},closest:()=>null}),cancel=node(),picker=node(),save=node(),error=node();
     editForm.querySelector=selector=>selector==='textarea'?textarea:selector==='[type=submit]'?save:selector==='.mention-menu'?menu:selector==='[data-mention-picker]'?picker:error;
     f.editCard=node({classList:{add(){f.editing=true;},remove(){f.editing=false;}},querySelector:selector=>selector==='form'?editForm:cancel});f.editButton=node({dataset:{editMessage:'100'},closest:()=>f.editCard});
@@ -161,4 +162,40 @@ test('a search-result jump reveals the original history before scrolling to its 
  assert.equal(f.panel.hidden,true);assert.equal(f.results.hidden,true);
  assert.equal(f.jumpCard.scrolled,true);assert.equal(f.jumpCard.focused,true);
  assert.equal(f.pane.log,log);assert.equal(f.mounts,mounts);assert.equal(f.draft.value,'Mein ungesendeter Entwurf');
+});
+
+test('a conversation shows its single pinned message at all times, not inside a list that has to be expanded',async t=>{
+  const f=fixture(t);await turn();const original=message(100,'Aktuell');
+  assert.match(f.pane.innerHTML,/<section class="chat-pins" data-chat-pins aria-label="Angeheftete Nachricht"[^>]* hidden>/);
+  assert.doesNotMatch(f.pane.innerHTML,/<details class="chat-pins"|<summary/);
+  f.intercept=(path,options)=>path==='/api/chat/messages/100/pin'&&options.body.pinned?{...original,pinned:true}:path==='/api/chat/channels/1/pins'?{items:[{...original,pinned:true}]}:undefined;
+  await f.pane.log.querySelectorAll('[data-pin-message]')[0].onclick();
+  assert.equal(f.pins.hidden,false);assert.match(f.pinList.innerHTML,/class="chat-pin-label">(?:<!--[^>]*-->)?Angeheftet</);assert.match(f.pinList.innerHTML,/Aktuell/);assert.match(f.pinList.innerHTML,/Anheftung lösen/);
+  await f.poll();assert.equal(f.pins.hidden,false,'a refresh keeps the pinned message in view');
+});
+
+test('opening a conversation that already has a pinned message shows it at once',async t=>{
+  const f=fixture(t);f.channelOverrides.set(1,{pins:[{...message(100,'Aktuell'),pinned:true}]});await turn();
+  assert.equal(f.pins.hidden,false);assert.match(f.pinList.innerHTML,/Aktuell/);
+});
+
+test('pinning another message replaces the shown pin and releases the earlier one in the history',async t=>{
+  const first=message(100,'Aktuell',{canPin:true}),second=message(101,'Zweite Nachricht',{canPin:true}),f=fixture(t);f.histories.set(1,[first,second]);await turn();
+  let pinned=null;const sync=()=>f.histories.set(1,[first,second].map(row=>({...row,pinned:row.id===pinned?.id})));
+  f.intercept=(path,options)=>{const pin=path.match(/^\/api\/chat\/messages\/(\d+)\/pin$/);if(pin){const row=Number(pin[1])===100?first:second;pinned=options.body.pinned?{...row,pinned:true}:null;sync();return {...row,pinned:options.body.pinned};}if(path==='/api/chat/channels/1/pins')return {items:pinned?[pinned]:[]};};
+  const flagged=()=>(f.pane.log.innerHTML.match(/aria-pressed="true"/g)||[]).length;
+  await f.pane.log.querySelectorAll('[data-pin-message]')[0].onclick();assert.match(f.pinList.innerHTML,/Aktuell/);assert.equal(flagged(),1);
+  await f.pane.log.querySelectorAll('[data-pin-message]')[1].onclick();
+  assert.match(f.pinList.innerHTML,/Zweite Nachricht/);assert.doesNotMatch(f.pinList.innerHTML,/Aktuell/,'only the newest pin is shown');
+  assert.equal(flagged(),1,'the earlier message no longer carries the pinned mark');
+  await f.pane.log.querySelectorAll('[data-pin-message]')[1].onclick();
+  assert.equal(f.pins.hidden,true,'unpinning leaves the conversation without a pin');assert.equal(flagged(),0);
+});
+
+test('the pinned banner stays compact so it cannot push the conversation out of view',()=>{
+  const css=readFileSync(new URL('../frontend/assets/chat.css',import.meta.url),'utf8');
+  assert.match(css,/\.chat-pin-text\{[^}]*-webkit-line-clamp:3/);
+  // Phones show two lines, in the narrow-screen block next to the other pin rules.
+  assert.match(css,/@media\(max-width:760px\)\{[^@]*\.chat-pin-item\{gap:8px\}\n\.chat-pin-text\{-webkit-line-clamp:2;line-clamp:2\}/);
+  assert.doesNotMatch(css,/\.chat-pins-list\{max-height/);
 });

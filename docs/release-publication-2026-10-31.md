@@ -31,3 +31,15 @@ Quellcode: https://github.com/KaterBeratung/retourenboard/commit/ff987f6338bf21e
 - Docker: Veröffentlichungslauf 41240129321 erfolgreich. `ghcr.io/katerberatung/retourenboard:4.0.97` und `latest` zeigen auf den OCI-Index `sha256:5fc86ec2cfc42357fa46c6fd7f83fb878257497951c71ae0f53006004f150f91` mit Linux AMD64 und ARM64.
 - Zwischenstand 4.0.94 (31.10.2026): Release v4.0.94 und Docker-Lauf 41233200609 erfolgreich, `main` bei `bcab8a8`.
 - `D:\retourenboard` steht weiterhin auf 4.0.72; der Stand wurde nicht dorthin übertragen.
+
+## Nachtrag: 4.0.98 (31.10.2026)
+
+Release: https://github.com/KaterBeratung/retourenboard/releases/tag/v4.0.98
+Quellcode: https://github.com/KaterBeratung/retourenboard/commit/c58603d2c063205340704de8a3f158cd3bd1dcc1
+
+- `main` per Vorwärts-Update von `ff987f6` auf `c58603d` aktualisiert (ein Commit, 12 Dateien, 87 Einfügungen, 8 Löschungen); keine Historie überschrieben. Das annotierte Tag `v4.0.98` zeigt auf diesen Commit. Inhalt: Etikettendruck ohne zusätzliche leere Seite, Sprach- und Farbschema-Schalter der Anmeldeseite am Handy auf einer Höhe. Vorgehen, Ausschlüsse und Schlüsselsuche wie bei 4.0.97 (keine Treffer).
+- Vollständiger Testlauf: 1.558 Tests, 1.555 bestanden, null Fehler, drei umgebungsbedingte Auslassungen unter Windows.
+- Stabile Veröffentlichung v4.0.98, als neueste Version markiert. Neun Uploads wie bei 4.0.97. Größen und SHA256-Prüfsummen aller neun Dateien auf GitHub stimmen mit den lokalen Dateien überein; der stabile Download-Link antwortet mit 200.
+- Linuxarchiv: 65.177.972 Bytes.
+- Docker: Veröffentlichungslauf 41247163370 erfolgreich. `ghcr.io/katerberatung/retourenboard:4.0.98` und `latest` zeigen auf den OCI-Index `sha256:e9bc327aa415eeb2b1d67c3e6a08197cc247767a7ef6cd35398c37572954a82a` mit Linux AMD64 und ARM64.
+- Diese Ergänzung der Veröffentlichungsnotiz liegt nur lokal und geht beim nächsten Veröffentlichungsauftrag mit.

@@ -4,7 +4,7 @@
 [data-ui="board"] :is(.page-heading p,.panel-heading p){max-width:65ch}
 /* Shared list composition: title/actions, view tools, then one status/search surface. */
 [data-ui="board"] .record-workspace{container:records / inline-size;min-width:0}
-[data-ui="board"] .record-workspace>.page-heading{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:20px;margin-bottom:24px}
+[data-ui="board"] .record-workspace>.page-heading{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:20px;margin-bottom:var(--space-section)}
 [data-ui="board"] .record-workspace>.page-heading>div{min-width:0}
 [data-ui="board"] .record-workspace>.page-heading .heading-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:nowrap;width:auto;gap:8px;margin:0;padding:0}
 [data-ui="board"] .record-workspace>.page-heading .heading-actions>.btn{flex:none;min-height:var(--control-height);padding:var(--control-padding-block) var(--control-padding-inline);font-size:var(--control-font-size);white-space:nowrap}
@@ -62,7 +62,6 @@
 [data-ui="board"] .record-workspace .status-tabs>button{min-height:var(--control-height);font-size:11px}
 [data-ui="board"] .record-workspace>.workspace-view-tools{gap:8px}
 [data-ui="board"] .record-workspace>.workspace-view-tools>div{width:auto}
-[data-ui="board"] .record-workspace .table-toolbar{padding:14px}
 }
 @container records (max-width:360px){
 [data-ui="board"] .record-workspace>.workspace-view-tools :is([data-scan-search],[data-disposal-search-scan]){flex:none;width:var(--control-height);padding:0;justify-content:center;font-size:0}
@@ -160,7 +159,7 @@ dialog:has(.form-section-tabs){height:calc(100dvh - 48px)}
 @media(max-width:760px){dialog:has(.form-section-tabs){height:calc(100dvh - 24px)}}
 @media(max-width:600px){.form-section-tabs{margin-bottom:16px}.dialog-body>.form-section-tabs{padding:8px 12px}.form-section-panel.form-section>legend{font-size:13px}.form-section-panel .form-grid{gap:14px}}
 /* Admin master-data categories use the same segmented tabs as the return statuses. */
-[data-ui="board"] .admin-tabs.status-tabs{margin:0 0 20px;border:1px solid var(--line);border-radius:var(--panel-radius)}
+[data-ui="board"] .admin-tabs.status-tabs{margin:0 0 var(--space-section);border:1px solid var(--line);border-radius:var(--panel-radius)}
 @media(min-width:1500px){
 [data-ui="board"] .admin-tabs.status-tabs{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}
 [data-ui="board"] .admin-tabs.status-tabs>button:first-child{grid-column:auto}

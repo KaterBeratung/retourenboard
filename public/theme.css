@@ -80,8 +80,10 @@ body.auth-screen>.theme-switch-auth{display:inline-flex}
 .theme-switch-dashboard{min-width:40px}
 body.auth-screen>.auth-page{padding-top:88px;padding-bottom:40px}
 input::placeholder,textarea::placeholder{color:var(--muted);opacity:.8}
+/* A search hint that is wider than a narrow field ends in an ellipsis instead of being cut off in the middle of a word. */
+input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]){text-overflow:ellipsis}
 input:-webkit-autofill{-webkit-text-fill-color:var(--ink);box-shadow:0 0 0 1000px var(--surface-input) inset}
-@media(max-width:760px){:root{--icon-button-size:44px;--control-height:44px;--input-font-size:16px;--dialog-padding:20px;--space-panel:16px;--text-title:26px;--text-metric:32px}.theme-switch-auth{top:16px;right:16px}body.auth-screen>.auth-page{padding-top:80px;padding-bottom:32px}}
+@media(max-width:760px){:root{--icon-button-size:44px;--control-height:44px;--input-font-size:16px;--dialog-padding:20px;--space-panel:16px;--space-section:20px;--text-title:26px;--text-metric:32px}.theme-switch-auth{top:16px;right:16px}body.auth-screen>.auth-page{padding-top:80px;padding-bottom:32px}}
 
 /* Brand backdrop: a grained night-green mesh with flowing rim-light lines (generated artwork, light and dark).
    Layers, top to bottom: film grain tile, hairline ribbons, mesh glows, base gradient. The login page adds two stronger glows. */

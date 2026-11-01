@@ -160,13 +160,13 @@ html:not([data-motion="normal"]) *{scroll-behavior:auto!important;animation:none
 .admin-locked h2{margin:16px 0 10px}
 .admin-locked p{color:var(--ink)}
 .admin-locked .btn{margin-top:18px}
-.admin-help{font-size:12px;margin-top:18px}
+.admin-help{font-size:12px;margin-top:16px}
 .row-actions{display:flex;gap:6px}
 .master-notes{max-width:260px;white-space:pre-wrap;overflow-wrap:anywhere}
 
 @media(max-width:1100px){
 .admin-tabs{display:none}
-.field.master-kind-picker{display:grid;gap:6px;margin:0 0 18px;max-width:100%;min-width:0}
+.field.master-kind-picker{display:grid;gap:6px;margin:0 0 var(--space-section);max-width:100%;min-width:0}
 .master-kind-picker>select{width:100%;min-width:0}
 }
 .attachments{border-top:1px solid var(--line);margin-top:26px;padding-top:24px}

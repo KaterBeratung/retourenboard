@@ -153,7 +153,7 @@ test('every page title block has the same label above the title, so titles do no
     assert.match(read('frontend/src/disposals.ts'), /<span class="eyebrow">/, 'disposals keeps its span, which the shared rule makes a block');
     const design = read('frontend/assets/design.css');
     assert.ok(design.includes('.page-heading .eyebrow{display:block;'));
-    assert.ok(read('frontend/assets/workspace-refinements.css').includes('.record-workspace>.page-heading{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:20px;margin-bottom:24px}'));
+    assert.ok(read('frontend/assets/workspace-refinements.css').includes('.record-workspace>.page-heading{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:20px;margin-bottom:var(--space-section)}'));
     assert.doesNotMatch(read('frontend/assets/scan-intake.css'), /\.scan-intake \.page-heading h1\{[^}]*font-size/, 'the scan page uses the shared title size');
 });
 

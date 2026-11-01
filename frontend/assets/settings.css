@@ -114,7 +114,7 @@
 .session-row{align-items:flex-start;flex-direction:column}
 }
 html[data-motion=reduce] *,html[data-motion=reduce] *::before,html[data-motion=reduce] *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
-.pagination{display:flex;align-items:center;justify-content:center;gap:16px;padding:16px;flex-wrap:wrap}
+.pagination{display:flex;align-items:center;justify-content:center;gap:16px;padding:16px var(--space-panel);flex-wrap:wrap}
 
 @media(max-width:600px){
 .pagination{gap:8px}

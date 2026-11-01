@@ -42,6 +42,8 @@ export async function createCollaboration({ store, users, preferences, now = Dat
 }) {
     const db = store.db;
     await db.query("INSERT INTO chat_channels(kind,visibility,name,directKey,createdAt) VALUES('public','public','Teamchat','public:team',$1) ON CONFLICT(directKey) DO NOTHING", [new Date(now()).toISOString()]);
+    // Earlier versions allowed up to 50 pinned messages per conversation. Only the newest one stays pinned; the statement is idempotent.
+    await db.query("DELETE FROM chat_message_pins p USING chat_messages m WHERE m.id=p.messageId AND EXISTS(SELECT 1 FROM chat_message_pins q JOIN chat_messages qm ON qm.id=q.messageId WHERE qm.channelId=m.channelId AND (q.pinnedAt>p.pinnedAt OR (q.pinnedAt=p.pinnedAt AND q.messageId>p.messageId)))");
     const chatFiles = createChatAttachments({ store, dataDir, limits });
     // SQLite's built-in LIKE only folds ASCII. Normalize Unicode as well so
     // German and English searches use the same literal, case-insensitive match.
@@ -263,7 +265,7 @@ export async function createCollaboration({ store, users, preferences, now = Dat
             const found = (await db.query(`SELECT * FROM chat_messages WHERE channelId=$1 AND deleted=0 AND strpos(lower(normalize(text,NFKC)),lower(normalize($2::text,NFKC)))>0${before !== null ? ' AND id<$3' : ''} ORDER BY id DESC LIMIT 51`, [c.id, value, ...(before !== null ? [before] : [])])).rows, page = found.slice(0, 50);
             return { items: await Promise.all(page.map(async (row: any) => messageView(user, row, c.visibility === 'public' && hasPermission(user, 'chatModerate'), 'chatSend'))), hasMore: found.length > 50, nextBefore: found.length > 50 ? page.at(-1).id : null };
         },
-        async pins(user: User, channelId: number) { const c = await channel(user, channelId), rows = (await db.query("SELECT m.* FROM chat_messages m JOIN chat_message_pins p ON p.messageId=m.id WHERE m.channelId=$1 AND m.deleted=0 ORDER BY p.pinnedAt DESC,m.id DESC LIMIT 50", [c.id])).rows; return { items: await Promise.all(rows.map(async (row: any) => messageView(user, row, c.visibility === 'public' && hasPermission(user, 'chatModerate'), 'chatSend'))) }; },
+        async pins(user: User, channelId: number) { const c = await channel(user, channelId), rows = (await db.query("SELECT m.* FROM chat_messages m JOIN chat_message_pins p ON p.messageId=m.id WHERE m.channelId=$1 AND m.deleted=0 ORDER BY p.pinnedAt DESC,m.id DESC LIMIT 1", [c.id])).rows; return { items: await Promise.all(rows.map(async (row: any) => messageView(user, row, c.visibility === 'public' && hasPermission(user, 'chatModerate'), 'chatSend'))) }; },
         async pinMessage(user: User, messageId: number, input: any) {
             return store.transaction(async () => {
                 const row = (await db.query("SELECT * FROM chat_messages WHERE id=$1", [id(messageId)])).rows[0];
@@ -277,9 +279,9 @@ export async function createCollaboration({ store, users, preferences, now = Dat
                 if (!input || typeof input.pinned !== 'boolean')
                     throw new InputError('Ungültige Anheftung.');
                 if (input.pinned) {
-                    const existing = (await db.query("SELECT 1 FROM chat_message_pins WHERE messageId=$1", [row.id])).rows[0];
-                    if (!existing && Number((await db.query("SELECT COUNT(*) AS n FROM chat_message_pins p JOIN chat_messages m ON m.id=p.messageId WHERE m.channelId=$1 AND m.deleted=0", [c.id])).rows[0].n) >= 50)
-                        throw new InputError('Pro Unterhaltung können höchstens 50 Nachrichten angeheftet werden.');
+                    // One pinned message per conversation: a new pin replaces the previous one. The channel row lock keeps two simultaneous pins from both surviving.
+                    await db.query("SELECT id FROM chat_channels WHERE id=$1 FOR UPDATE", [c.id]);
+                    await db.query("DELETE FROM chat_message_pins WHERE messageId<>$1 AND messageId IN (SELECT id FROM chat_messages WHERE channelId=$2)", [row.id, c.id]);
                     await db.query("INSERT INTO chat_message_pins(messageId,pinnedById,pinnedAt) VALUES($1,$2,$3) ON CONFLICT DO NOTHING", [row.id, user.id, at()]);
                 }
                 else

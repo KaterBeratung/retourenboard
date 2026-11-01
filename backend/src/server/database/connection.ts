@@ -3,7 +3,11 @@ import {Pool,types,type PoolClient} from '../../vendor/postgres.js';
 import type {DatabaseConfig,Hook,QueryResult,SqlDatabase,SqlValue} from './types.js';
 import {normalizeDatabaseRow} from './row-contract.js';
 
-type Scope={client:PoolClient;commit:Hook[];rollback:Hook[];closed:boolean};
+// One transaction owns one connection, and a connection runs one statement at a time. Code that starts several queries at once (Promise.all) is queued here in call order,
+// so the driver never receives a second statement while one is still running (deprecated in pg 8, an error from pg 9).
+type Lane={tail:Promise<unknown>};
+type Scope={client:PoolClient;lane:Lane;commit:Hook[];rollback:Hook[];closed:boolean};
+function inLane<T>(lane:Lane,run:()=>Promise<T>):Promise<T>{const result=lane.tail.then(run);lane.tail=result.then(()=>undefined,()=>undefined);return result;}
 export function assertInternalSchema(schema:string):string{
  if(schema!=='retourenboard'&&!/^rb_(?:stage|test)_[a-f0-9]{32}$/.test(schema))throw new Error('Ungültiges Anwendungsschema.');
  return schema;
@@ -31,7 +35,7 @@ export async function openDatabase(config:DatabaseConfig,internalSchema='retoure
    // The guard takes a row lock on this transaction's client and holds it through COMMIT.
    const guard=authorization.getStore();
    if(guard&&!/^\s*(?:SELECT|SAVEPOINT|RELEASE|ROLLBACK|SET|DECLARE|FETCH|CLOSE)\b/i.test(sql))await(guard.pending??=guard.check());
-   try{const result=await(current?.client??pool).query(sql,[...values]);
+   try{const result=await(current?inLane(current.lane,()=>current.client.query(sql,[...values])):pool.query(sql,[...values]));
     if(Array.isArray(result))throw new Error('Mehrere SQL-Anweisungen mit Rückgabewerten sind nicht erlaubt.');
     return {rows:result.rows.map(row=>normalizeDatabaseRow<Row>(row)),rowCount:result.rowCount??0};
    }catch(error){throw publicError(error);}
@@ -42,20 +46,21 @@ export async function openDatabase(config:DatabaseConfig,internalSchema='retoure
    const parent=scope.getStore();if(parent?.closed)throw new Error('Transaktion wurde bereits beendet.');
    if(parent){
     const guard=authorization.getStore(),previousAuthorization=guard?.pending;
-    const name='rb_sp_'+(++savepoint),nested:Scope={client:parent.client,commit:[],rollback:[],closed:false};
+    const name='rb_sp_'+(++savepoint),nested:Scope={client:parent.client,lane:parent.lane,commit:[],rollback:[],closed:false};
     await db.query('SAVEPOINT '+name);
     try{const result=await scope.run(nested,job);await db.query('RELEASE SAVEPOINT '+name);nested.closed=true;parent.commit.push(...nested.commit);parent.rollback.push(...nested.rollback);return result;}
     catch(error){nested.closed=true;await db.query('ROLLBACK TO SAVEPOINT '+name);if(guard)guard.pending=previousAuthorization;await db.query('RELEASE SAVEPOINT '+name);await hooks(nested.rollback,true);throw error;}
    }
    let client:PoolClient;try{client=await pool.connect();}catch(error){throw publicError(error);}
-   const current:Scope={client,commit:[],rollback:[],closed:false};let begun=false,committing=false,bad=false;
+   const current:Scope={client,lane:{tail:Promise.resolve()},commit:[],rollback:[],closed:false};let begun=false,committing=false,bad=false;
+   const statement=(sql:string)=>inLane(current.lane,()=>client.query(sql));
    try{
-    await client.query('BEGIN');begun=true;
-    const result=await scope.run(current,job);committing=true;await client.query('COMMIT');current.closed=true;
+    await statement('BEGIN');begun=true;
+    const result=await scope.run(current,job);committing=true;await statement('COMMIT');current.closed=true;
     await hooks(current.commit);return result;
    }catch(error){
     current.closed=true;
-    if(begun)try{await client.query('ROLLBACK');if(!committing)await hooks(current.rollback,true);}catch{bad=true;}
+    if(begun)try{await statement('ROLLBACK');if(!committing)await hooks(current.rollback,true);}catch{bad=true;}
     if(committing)bad=true;
     throw error;
    }finally{current.closed=true;client.release(bad);}
